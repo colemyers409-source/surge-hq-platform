@@ -1131,6 +1131,23 @@ async function createInvite() {
   document.getElementById('inv-result-level').textContent = level;
   document.getElementById('inv-result').style.display = 'block';
   btn.disabled = false; btn.textContent = 'Generate Another →';
+
+  // Auto-text the recruit their invite code
+  if (phone) {
+    try {
+      await fetch('/.netlify/functions/twilio-send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recruitName: name,
+          recruitPhone: phone,
+          inviteCode: code,
+          agentName: agentConfig.name
+        })
+      });
+    } catch(e) { console.log('SMS not sent - Twilio not configured yet'); }
+  }
+
   loadInvites();
 }
 

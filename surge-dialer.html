@@ -559,15 +559,33 @@ function selectLead(idx) {
   renderLeads();
 }
 
-function startCall() {
+async function startCall() {
+  const phone = document.getElementById('info-phone').textContent;
+  if (!phone || phone === '—') { alert('Select a lead first.'); return; }
   calling = true; callSeconds = 0;
   document.getElementById('call-btn').style.display = 'none';
   document.getElementById('hang-btn').style.display = '';
-  document.getElementById('call-status').textContent = 'RINGING';
+  document.getElementById('call-status').textContent = 'DIALING';
   document.getElementById('call-status').className = 'call-status-label status-ringing';
-  setTimeout(() => { if (!calling) return; document.getElementById('call-status').textContent = 'LIVE'; document.getElementById('call-status').className = 'call-status-label status-live'; }, 2000);
+  try {
+    const res = await fetch('/.netlify/functions/twilio-voice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: phone.replace(/\D/g,'').replace(/^(\d{10})$/,'1$1').replace(/^(\d+)$/,'+$1') })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    activeSid = data.callSid;
+    setTimeout(() => { if (!calling) return; document.getElementById('call-status').textContent = 'LIVE'; document.getElementById('call-status').className = 'call-status-label status-live'; }, 3000);
+  } catch(e) {
+    // Fallback to browser mode if Twilio not set up yet
+    document.getElementById('call-status').textContent = 'BROWSER MODE';
+    document.getElementById('call-status').className = 'call-status-label status-ringing';
+  }
   callInterval = setInterval(() => { callSeconds++; const m=Math.floor(callSeconds/60),s=callSeconds%60; document.getElementById('call-timer').textContent=m+':'+s.toString().padStart(2,'0'); }, 1000);
 }
+
+let activeSid = null;
 
 function hangUp() {
   calling = false; clearInterval(callInterval);
