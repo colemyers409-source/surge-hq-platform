@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surge Dialer</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #A89850; --gold-l: #C4B06A; --gold-dim: rgba(168,152,80,0.1);
+  --gold-b: rgba(168,152,80,0.22); --bg: #050505; --bg2: #0a0a0a; --bg3: #111;
+  --text: #f4f4f4; --muted: rgba(244,244,244,0.45); --faint: rgba(244,244,244,0.2);
+  --border: rgba(255,255,255,0.06); --border-s: rgba(255,255,255,0.1);
+  --green: #27ae60; --red: #e74c3c; --orange: #e67e22;
+}
+html, body { height: 100%; }
+body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); display: flex; }
+.sidebar { width: 220px; min-height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem 0; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; }
+.sidebar-logo { padding: 0 1.5rem 1.5rem; border-bottom: 1px solid var(--border); }
+.logo-main { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300; font-style: italic; color: var(--gold); }
+.logo-sub { font-size: 0.5rem; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+.sidebar-section { padding: 1.2rem 0; border-bottom: 1px solid var(--border); }
+.sidebar-section-label { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); padding: 0 1.5rem; margin-bottom: 0.6rem; }
+.nav-item { display: flex; align-items: center; gap: 0.65rem; padding: 0.55rem 1.5rem; font-size: 0.72rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.2s; border-left: 2px solid transparent; }
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+.nav-item.active { color: var(--gold); border-left-color: var(--gold); background: var(--gold-dim); }
+.nav-item svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; }
+.sidebar-bottom { margin-top: auto; padding: 1.5rem; border-top: 1px solid var(--border); }
+.agent-info { display: flex; align-items: center; gap: 0.75rem; }
+.agent-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); border: 1px solid var(--gold-b); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--gold); }
+.agent-name { font-size: 0.72rem; font-weight: 600; }
+.agent-status { font-size: 0.6rem; color: var(--green); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+.topbar { height: 56px; background: rgba(5,5,5,0.97); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 40; }
+.topbar-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.crm-status { display: flex; align-items: center; gap: 0.5rem; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em; padding: 0.35rem 0.9rem; border-radius: 2px; cursor: pointer; }
+.crm-disconnected { background: rgba(231,76,60,0.12); color: var(--red); border: 1px solid rgba(231,76,60,0.25); }
+.crm-connected { background: rgba(39,174,96,0.12); color: var(--green); border: 1px solid rgba(39,174,96,0.25); }
+.page { display: none; flex: 1; flex-direction: column; }
+.page.active { display: flex; }
+.dashboard-wrap { padding: 2rem; flex: 1; }
+.welcome-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; margin-bottom: 0.25rem; }
+.welcome-title em { font-style: italic; color: var(--gold); }
+.welcome-sub { font-size: 0.72rem; color: var(--muted); font-weight: 300; margin-bottom: 2rem; }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; }
+.stat-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+.stat-num { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 600; }
+.stat-num.gold { color: var(--gold); }
+.stat-num.green { color: var(--green); }
+.quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.quick-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; cursor: pointer; transition: all 0.2s; }
+.quick-card:hover { border-color: var(--gold-b); background: var(--gold-dim); }
+.quick-card-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--gold-dim); border: 1px solid var(--gold-b); display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; }
+.quick-card-icon svg { width: 16px; height: 16px; stroke: var(--gold); fill: none; stroke-width: 1.8; }
+.quick-card-title { font-size: 0.72rem; font-weight: 600; margin-bottom: 0.2rem; }
+.quick-card-sub { font-size: 0.62rem; color: var(--muted); font-weight: 300; }
+.recent-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+.section-title { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.recording-item { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid var(--border); }
+.recording-item:last-child { border-bottom: none; }
+.rec-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+.rec-info { flex: 1; }
+.rec-name { font-size: 0.78rem; font-weight: 600; margin-bottom: 0.15rem; }
+.rec-sub { font-size: 0.62rem; color: var(--muted); }
+.rec-duration { font-size: 0.65rem; color: var(--muted); }
+.play-btn { width: 28px; height: 28px; border-radius: 50%; background: var(--gold-dim); border: 1px solid var(--gold-b); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.play-btn svg { width: 10px; height: 10px; fill: var(--gold); }
+/* DIALER */
+.dialer-wrap { display: grid; grid-template-columns: 1fr 380px; flex: 1; }
+.lead-panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+.lead-panel-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.lead-panel-title { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.upload-btn { background: var(--gold); color: #000; border: none; padding: 0.4rem 0.9rem; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; }
+.lead-list { flex: 1; overflow-y: auto; }
+.lead-item { display: flex; align-items: center; gap: 0.9rem; padding: 0.9rem 1.5rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.lead-item:hover { background: var(--bg3); }
+.lead-item.active-lead { background: var(--gold-dim); border-left: 2px solid var(--gold); }
+.lead-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+.lead-info { flex: 1; }
+.lead-name { font-size: 0.78rem; font-weight: 600; margin-bottom: 0.15rem; }
+.lead-detail { font-size: 0.62rem; color: var(--muted); }
+.lead-badge { font-size: 0.5rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.12rem 0.4rem; border-radius: 2px; }
+.badge-new { background: rgba(39,174,96,0.12); color: var(--green); border: 1px solid rgba(39,174,96,0.25); }
+.badge-cb { background: rgba(230,126,34,0.12); color: var(--orange); border: 1px solid rgba(230,126,34,0.25); }
+.badge-ni { background: rgba(231,76,60,0.12); color: var(--red); border: 1px solid rgba(231,76,60,0.25); }
+/* CALL PANEL */
+.call-panel { background: var(--bg2); display: flex; flex-direction: column; }
+.call-header { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+.call-header-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+.call-lead-name { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; }
+.call-lead-name em { font-style: italic; color: var(--gold); }
+.call-lead-detail { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+.call-status-bar { padding: 0.75rem 1.5rem; background: var(--bg3); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.call-timer { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; color: var(--gold); letter-spacing: 0.05em; }
+.call-status-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.status-ringing { color: var(--orange); }
+.status-live { color: var(--green); }
+.status-idle { color: var(--muted); }
+.call-info-grid { padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; border-bottom: 1px solid var(--border); }
+.info-label { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.25rem; }
+.info-val { font-size: 0.8rem; color: var(--text); font-weight: 500; }
+.notes-section { padding: 1.5rem; border-bottom: 1px solid var(--border); flex: 1; }
+.notes-label { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.5rem; }
+.notes-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 3px; color: var(--text); font-family: 'Montserrat', sans-serif; font-size: 0.75rem; padding: 0.8rem; outline: none; resize: none; height: 100px; transition: border-color 0.2s; }
+.notes-input:focus { border-color: var(--gold-b); }
+.disp-section { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+.disp-label { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin-bottom: 0.8rem; }
+.disp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.disp-btn { padding: 0.6rem; border: 1px solid; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+.disp-ni { background: rgba(231,76,60,0.08); color: var(--red); border-color: rgba(231,76,60,0.25); }
+.disp-cb { background: rgba(230,126,34,0.08); color: var(--orange); border-color: rgba(230,126,34,0.25); }
+.disp-sold { background: rgba(39,174,96,0.08); color: var(--green); border-color: rgba(39,174,96,0.25); }
+.disp-na { background: rgba(168,152,80,0.08); color: var(--gold); border-color: var(--gold-b); }
+.disp-vm { background: rgba(100,150,255,0.08); color: #7aadce; border-color: rgba(100,150,255,0.2); }
+.disp-wb { background: rgba(200,150,200,0.08); color: #c896c8; border-color: rgba(200,150,200,0.2); }
+.call-controls { padding: 1.5rem; display: flex; gap: 0.75rem; align-items: center; }
+.call-btn { flex: 1; padding: 0.9rem; border: none; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+.btn-call { background: var(--green); color: #fff; }
+.btn-hangup { background: var(--red); color: #fff; }
+.btn-next { background: var(--gold); color: #000; }
+.btn-skip { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+/* SUBSCRIPTION */
+.sub-wrap { padding: 3rem; max-width: 800px; }
+.sub-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; margin-bottom: 0.3rem; }
+.sub-title em { font-style: italic; color: var(--gold); }
+.sub-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 2.5rem; font-weight: 300; }
+.plan-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 2rem; margin-bottom: 1rem; position: relative; }
+.plan-card.active-plan { border-color: var(--gold-b); }
+.plan-badge { position: absolute; top: -10px; left: 1.5rem; background: var(--gold); color: #000; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 2px; }
+.plan-name { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem; }
+.plan-price { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; font-weight: 600; margin-bottom: 0.25rem; }
+.plan-price span { font-size: 0.9rem; font-weight: 300; color: var(--muted); }
+.plan-feature { font-size: 0.72rem; color: var(--muted); padding: 0.3rem 0; display: flex; align-items: center; gap: 0.5rem; }
+.plan-feature::before { content: '✓'; color: var(--gold); font-weight: 700; }
+.plan-btn { background: var(--gold); color: #000; border: none; padding: 0.8rem 2rem; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; margin-top: 0.5rem; }
+/* AUTH */
+.auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 300; display: flex; align-items: center; justify-content: center; }
+.auth-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 2.5rem; width: 400px; }
+.auth-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; margin-bottom: 0.3rem; text-align: center; }
+.auth-title em { font-style: italic; color: var(--gold); }
+.auth-sub { font-size: 0.72rem; color: var(--muted); text-align: center; margin-bottom: 2rem; }
+.form-group { margin-bottom: 1rem; }
+.form-label { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 0.4rem; }
+.form-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border-s); padding: 0.65rem 0; font-family: 'Montserrat', sans-serif; font-size: 0.85rem; color: var(--text); outline: none; transition: border-color 0.2s; }
+.form-input:focus { border-bottom-color: var(--gold); }
+.form-input::placeholder { color: var(--faint); }
+.auth-btn { width: 100%; padding: 0.9rem; background: var(--gold); color: #000; border: none; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; margin-top: 0.5rem; }
+.panel-tab { flex:1; padding:0.5rem 0.4rem; background:var(--bg3); border:none; color:var(--muted); font-family:'Montserrat',sans-serif; font-size:0.58rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; transition:all 0.15s; }
+.panel-tab.active { background:var(--gold); color:#000; }
+.panel-tab:hover:not(.active) { color:var(--text); }
+.list-card { background:var(--bg3); border:1px solid var(--border); border-radius:3px; padding:0.9rem 1rem; transition:border-color 0.2s; }
+.list-card.active-list { border-color:var(--gold-b); background:var(--gold-dim); }
+.list-card-name { font-size:0.75rem; font-weight:600; margin-bottom:0.2rem; }
+.list-card-meta { font-size:0.62rem; color:var(--muted); margin-bottom:0.6rem; }
+.list-card-actions { display:flex; gap:0.4rem; }
+.list-action-btn { padding:0.25rem 0.6rem; border-radius:2px; font-family:'Montserrat',sans-serif; font-size:0.58rem; font-weight:700; cursor:pointer; background:var(--bg2); border:1px solid var(--border); color:var(--muted); transition:all 0.15s; }
+.list-action-btn:hover { color:var(--gold); border-color:var(--gold-b); }
+.list-action-btn.red { color:var(--red); }
+.list-action-btn.red:hover { border-color:var(--red); background:rgba(231,76,60,0.08); }
+
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 2rem; width: 480px; }
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; margin-bottom: 0.3rem; }
+.modal-title em { font-style: italic; color: var(--gold); }
+.modal-sub { font-size: 0.72rem; color: var(--muted); margin-bottom: 1.5rem; }
+.drop-zone { border: 2px dashed var(--border); border-radius: 4px; padding: 2.5rem; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 1.2rem; }
+.drop-zone:hover { border-color: var(--gold-b); background: var(--gold-dim); }
+.drop-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.drop-text { font-size: 0.75rem; color: var(--muted); }
+.drop-text strong { color: var(--gold); }
+.modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+.modal-cancel { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.6rem 1.2rem; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; font-weight: 600; cursor: pointer; }
+.modal-confirm { background: var(--gold); color: #000; border: none; padding: 0.6rem 1.2rem; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-box">
+    <div style="text-align:center;margin-bottom:2rem">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;font-style:italic;color:var(--gold)">Surge</div>
+      <div style="font-size:0.5rem;font-weight:700;letter-spacing:0.28em;color:var(--muted);text-transform:uppercase">Dialer</div>
+    </div>
+    <div class="auth-title">Agent <em>Login</em></div>
+    <div class="auth-sub">Sign in with your Surge agent credentials</div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="agent@example.com" id="login-email"></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="••••••••" id="login-pass"></div>
+    <button class="auth-btn" onclick="doLogin()">Sign In →</button>
+    <div style="text-align:center;margin-top:1.2rem;font-size:0.7rem;color:var(--muted)">
+      Agency Code: <input type="text" placeholder="SURGE2025" style="background:transparent;border:none;border-bottom:1px solid var(--border-s);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:0.8rem;text-align:center;width:140px;outline:none;padding:0.3rem;">
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-main">Surge</div>
+    <div class="logo-sub">Dialer</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Hub</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('subscription',this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Subscription
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Dialer</div>
+    <div class="nav-item" onclick="showPage('dialer',this)">
+      <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>Start Dialing
+    </div>
+    <div class="nav-item" onclick="showPage('recordings',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>Recordings
+    </div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Surge</div>
+    <div class="nav-item" onclick="window.open('https://leads.surgelifegroup.com','_blank')">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>Marketplace
+    </div>
+    <div class="nav-item" onclick="window.open('https://agent.surgelifegroup.com','_blank')">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Agent Space
+    </div>
+    <div class="nav-item" onclick="window.open('https://hq.surgelifegroup.com','_blank')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Surge HQ
+    </div>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="agent-info" onclick="toggleDialerProfileMenu()" style="cursor:pointer">
+      <div class="agent-avatar" id="dialer-avatar">AG</div>
+      <div style="flex:1">
+        <div class="agent-name" id="dialer-agent-name">Agent</div>
+        <div class="agent-status"><span class="status-dot"></span> Online</div>
+      </div>
+      <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0"><polyline points="18 15 12 9 6 15"/></svg>
+    </div>
+    <div id="dialer-profile-menu" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:4px;margin-top:0.5rem;overflow:hidden">
+      <div onclick="signOutDialer()" style="padding:0.7rem 1rem;font-size:0.72rem;color:var(--red);cursor:pointer;display:flex;align-items:center;gap:0.5rem" onmouseover="this.style.background='rgba(231,76,60,0.08)'" onmouseout="this.style.background='transparent'">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Surge Dialer — Agent Portal</div>
+    <div class="crm-status crm-disconnected" id="crm-btn" onclick="toggleCRM()">● CRM NOT CONNECTED — CONNECT NOW</div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="dashboard-wrap">
+      <div class="welcome-title">Welcome back, <em id="dash-welcome-name">Agent</em></div>
+      <div class="welcome-sub">Today is another chance to outwork the competition. Let's go.</div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Total Calls</div><div class="stat-num">0</div></div>
+        <div class="stat-card"><div class="stat-label">Talk Time</div><div class="stat-num gold">0:00</div></div>
+        <div class="stat-card"><div class="stat-label">Sales</div><div class="stat-num green">0</div></div>
+        <div class="stat-card"><div class="stat-label">Contact Rate</div><div class="stat-num">—</div></div>
+      </div>
+      <div class="quick-grid">
+        <div class="quick-card" onclick="showPage('dialer',null)">
+          <div class="quick-card-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>
+          <div class="quick-card-title">Start Dialing</div>
+          <div class="quick-card-sub">Jump into your call list</div>
+        </div>
+        <div class="quick-card" onclick="showPage('recordings',null)">
+          <div class="quick-card-icon"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+          <div class="quick-card-title">Call Recordings</div>
+          <div class="quick-card-sub">Listen back & coach</div>
+        </div>
+        <div class="quick-card" onclick="window.open('https://leads.surgelifegroup.com','_blank')">
+          <div class="quick-card-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></div>
+          <div class="quick-card-title">Buy Leads</div>
+          <div class="quick-card-sub">Fresh leads marketplace</div>
+        </div>
+        <div class="quick-card" onclick="window.open('https://agent.surgelifegroup.com','_blank')">
+          <div class="quick-card-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+          <div class="quick-card-title">Agent Space</div>
+          <div class="quick-card-sub">Your book of business</div>
+        </div>
+      </div>
+      <div class="recent-section">
+        <div class="section-header"><div class="section-title">Recent Recordings — Last 7 Days</div></div>
+        <div style="text-align:center;padding:2rem;color:var(--muted);font-size:0.75rem">No recordings yet. Start dialing to track your calls.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIALER PAGE -->
+  <div class="page" id="page-dialer">
+    <div class="dialer-wrap">
+      <div class="lead-panel">
+        <div class="lead-panel-header">
+          <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:2px;overflow:hidden">
+            <button class="panel-tab active" id="tab-leads" onclick="switchPanel('leads')">Leads</button>
+            <button class="panel-tab" id="tab-lists" onclick="switchPanel('lists')">Manage Lists</button>
+            <button class="panel-tab" id="tab-recs" onclick="switchPanel('recs')">Recordings</button>
+          </div>
+          <button class="upload-btn" onclick="document.getElementById('upload-modal').classList.add('open')">↑ Upload</button>
+        </div>
+
+        <!-- LEADS TAB -->
+        <div id="panel-leads" style="flex:1;overflow-y:auto">
+          <div style="padding:0.6rem 1.5rem;font-size:0.55rem;color:var(--muted);letter-spacing:0.1em;border-bottom:1px solid var(--border)"><span id="lead-count">8</span> CONTACTS LOADED</div>
+          <div class="lead-list" id="lead-list"></div>
+        </div>
+
+        <!-- MANAGE LISTS TAB -->
+        <div id="panel-lists" style="display:none;flex:1;overflow-y:auto;padding:1.5rem">
+          <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem">Your Call Lists</div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem" id="lists-container">
+            <div style="text-align:center;padding:2rem;color:var(--muted);font-size:0.75rem">No lists yet. Upload a CSV to get started.</div>
+          </div>
+          <button class="upload-btn" style="width:100%;margin-top:1rem;padding:0.7rem" onclick="document.getElementById('upload-modal').classList.add('open')">↑ Upload New List</button>
+        </div>
+
+        <!-- RECORDINGS TAB -->
+        <div id="panel-recs" style="display:none;flex:1;overflow-y:auto">
+          <div style="padding:0.6rem 1.5rem;font-size:0.55rem;color:var(--muted);letter-spacing:0.1em;border-bottom:1px solid var(--border)">0 RECORDINGS</div>
+          <div style="text-align:center;padding:2rem;color:var(--muted);font-size:0.75rem">No recordings yet. Start dialing to track your calls.</div>
+        </div>
+
+      </div>
+      <div class="call-panel">
+        <div class="call-header">
+          <div class="call-header-label">Now Calling</div>
+          <div class="call-lead-name" id="call-name">Select a <em>Lead</em></div>
+          <div class="call-lead-detail" id="call-detail">Choose a contact from the list to begin</div>
+        </div>
+        <div class="call-status-bar">
+          <div class="call-timer" id="call-timer">0:00</div>
+          <div class="call-status-label status-idle" id="call-status">IDLE</div>
+        </div>
+        <div class="call-info-grid">
+          <div><div class="info-label">Phone</div><div class="info-val" id="info-phone">—</div></div>
+          <div><div class="info-label">State</div><div class="info-val" id="info-state">—</div></div>
+          <div><div class="info-label">Age</div><div class="info-val" id="info-age">—</div></div>
+          <div><div class="info-label">Type</div><div class="info-val" id="info-type">—</div></div>
+        </div>
+        <div class="notes-section">
+          <div class="notes-label">Call Notes</div>
+          <textarea class="notes-input" placeholder="Enter notes about this call..."></textarea>
+        </div>
+        <div class="disp-section">
+          <div class="disp-label">Disposition</div>
+          <div class="disp-grid">
+            <button class="disp-btn disp-ni" onclick="setDisp('ni')">Not Interested</button>
+            <button class="disp-btn disp-cb" onclick="setDisp('cb')">Callback</button>
+            <button class="disp-btn disp-sold" onclick="setDisp('sold')">Sold ✓</button>
+            <button class="disp-btn disp-na" onclick="setDisp('na')">No Answer</button>
+            <button class="disp-btn disp-vm" onclick="setDisp('vm')">Voicemail</button>
+            <button class="disp-btn disp-wb" onclick="setDisp('wb')">Wrong #</button>
+          </div>
+        </div>
+        <div class="call-controls">
+          <button class="call-btn btn-call" id="call-btn" onclick="startCall()">📞 Call</button>
+          <button class="call-btn btn-hangup" id="hang-btn" onclick="hangUp()" style="display:none">⬇ Hang Up</button>
+          <button class="call-btn btn-next" onclick="nextLead()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECORDINGS -->
+  <div class="page" id="page-recordings">
+    <div style="padding:2rem;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;margin-bottom:0.3rem">Call <em style="font-style:italic;color:var(--gold)">Recordings</em></div>
+      <div style="font-size:0.72rem;color:var(--muted);margin-bottom:2rem;">Listen back, review, and coach your team.</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;">
+        <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);font-size:0.6rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);">All Recordings</div>
+        <div style="text-align:center;padding:3rem;color:var(--muted);font-size:0.75rem">No recordings yet. Recordings will appear here once you start making calls.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBSCRIPTION -->
+  <div class="page" id="page-subscription">
+    <div class="sub-wrap">
+      <div class="sub-title">Your <em>Subscription</em></div>
+      <div class="sub-sub">Manage your Surge Dialer plan. Upgrade anytime.</div>
+      <div class="plan-card active-plan">
+        <div class="plan-badge">Current Plan</div>
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$99 <span>/ month</span></div>
+        <div style="margin:1rem 0">
+          <div class="plan-feature">Power dialer — 1 line</div>
+          <div class="plan-feature">Upload up to 500 leads</div>
+          <div class="plan-feature">Call recordings — 30 days</div>
+          <div class="plan-feature">Basic analytics</div>
+        </div>
+        <button class="plan-btn" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border)">Current Plan</button>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$149 <span>/ month</span></div>
+        <div style="margin:1rem 0">
+          <div class="plan-feature">Power dialer — 3 lines</div>
+          <div class="plan-feature">Unlimited lead uploads</div>
+          <div class="plan-feature">Call recordings — 90 days</div>
+          <div class="plan-feature">Advanced analytics & coaching</div>
+          <div class="plan-feature">Voicemail drop</div>
+        </div>
+        <button class="plan-btn">Upgrade to Pro →</button>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">Elite</div>
+        <div class="plan-price">$249 <span>/ month</span></div>
+        <div style="margin:1rem 0">
+          <div class="plan-feature">Predictive dialer — 10 lines</div>
+          <div class="plan-feature">Unlimited everything</div>
+          <div class="plan-feature">Lifetime recordings</div>
+          <div class="plan-feature">AI call scoring & coaching</div>
+          <div class="plan-feature">Downline management</div>
+          <div class="plan-feature">Priority support</div>
+        </div>
+        <button class="plan-btn">Upgrade to Elite →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal-overlay" id="upload-modal">
+  <div class="modal">
+    <div class="modal-title">Upload <em>Leads</em></div>
+    <div class="modal-sub">Upload a CSV file of your leads to start dialing.</div>
+    <div class="drop-zone" onclick="document.getElementById('csv-input').click()">
+      <div class="drop-icon">📁</div>
+      <div class="drop-text"><strong>Click to upload</strong> or drag and drop your CSV here</div>
+      <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="handleCSV(this)">
+    </div>
+    <div style="font-size:0.65rem;color:var(--muted);margin-bottom:1rem;">Required columns: First Name, Last Name, Phone, State, Age, Type</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="document.getElementById('upload-modal').classList.remove('open')">Cancel</button>
+      <button class="modal-confirm">Upload Leads</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://szdzbycppkavfwuzlljh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6ZHpieWNwcGthdmZ3dXpsbGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODIxNzgsImV4cCI6MjA5NTE1ODE3OH0.Jw21eHChMDHlskSs2PegmBXLYNIQkjl8GByOIApadhA';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const btn = document.querySelector('.auth-btn');
+  if (!email || !pass) { showLoginError('Please enter your email and password.'); return; }
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { btn.disabled = false; btn.textContent = 'Sign In →'; showLoginError(error.message); return; }
+  const { data: profile } = await sb.from('profiles').select('approved,first_name,last_name').eq('id', data.user.id).single();
+  if (profile && profile.approved === false) { btn.disabled = false; btn.textContent = 'Sign In →'; showLoginError('Your account is pending admin approval.'); return; }
+  document.getElementById('auth-overlay').style.display = 'none';
+  const name = profile ? `${profile.first_name||''} ${profile.last_name||''}`.trim() : email.split('@')[0];
+  const firstName = profile?.first_name || name.split(' ')[0];
+  document.querySelector('.agent-name').textContent = name;
+  document.querySelector('.agent-avatar').textContent = name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+  const welcomeEl = document.getElementById('dash-welcome-name');
+  if (welcomeEl) welcomeEl.textContent = firstName;
+}
+
+function showLoginError(msg) {
+  let el = document.getElementById('login-error');
+  if (!el) { el = document.createElement('div'); el.id='login-error'; el.style.cssText='color:#e74c3c;font-size:0.68rem;margin-top:0.8rem;text-align:center;'; document.querySelector('.auth-btn').after(el); }
+  el.textContent = msg;
+}
+
+async function checkDialerSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    const { data: profile } = await sb.from('profiles').select('approved,first_name,last_name').eq('id', session.user.id).single();
+    if (profile?.approved !== false) {
+      document.getElementById('auth-overlay').style.display = 'none';
+      const name = `${profile?.first_name||''} ${profile?.last_name||''}`.trim() || session.user.email.split('@')[0];
+      const firstName = profile?.first_name || name.split(' ')[0];
+      document.querySelector('.agent-name').textContent = name;
+      document.querySelector('.agent-avatar').textContent = name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+      const welcomeEl = document.getElementById('dash-welcome-name');
+      if (welcomeEl) welcomeEl.textContent = firstName;
+      const avatarEl = document.getElementById('dialer-avatar');
+      if (avatarEl) avatarEl.textContent = name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+    }
+  }
+}
+
+const sampleLeads = [];
+let currentLeadIdx = 0, callInterval = null, callSeconds = 0, calling = false;
+
+function toggleDialerProfileMenu() {
+  const menu = document.getElementById('dialer-profile-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+async function signOutDialer() {
+  if (sb) await sb.auth.signOut();
+  window.location.href = 'https://hq.surgelifegroup.com';
+}
+
+function switchPanel(tab) {
+  ['leads','lists','recs'].forEach(t => {
+    document.getElementById('panel-'+t).style.display = t===tab ? 'flex' : 'none';
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+  });
+  if (tab==='leads') document.getElementById('panel-leads').style.display='block';
+}
+function deleteList(btn) {
+  if (confirm('Delete this list?')) btn.closest('.list-card').remove();
+}
+
+
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function toggleCRM() {
+  const btn = document.getElementById('crm-btn');
+  const connected = btn.classList.contains('crm-connected');
+  btn.classList.toggle('crm-disconnected', connected);
+  btn.classList.toggle('crm-connected', !connected);
+  btn.textContent = connected ? '● CRM NOT CONNECTED — CONNECT NOW' : '● CRM CONNECTED';
+}
+
+function renderLeads() {
+  document.getElementById('lead-list').innerHTML = sampleLeads.map((l, i) => `
+    <div class="lead-item ${i===currentLeadIdx?'active-lead':''}" onclick="selectLead(${i})">
+      <div class="lead-avatar">${l.name.split(' ').map(x=>x[0]).join('')}</div>
+      <div class="lead-info"><div class="lead-name">${l.name}</div><div class="lead-detail">${l.phone} · ${l.state}</div></div>
+      <span class="lead-badge ${l.disp==='new'?'badge-new':l.disp==='cb'?'badge-cb':'badge-ni'}">${l.disp==='new'?'New':l.disp==='cb'?'CB':'N/I'}</span>
+    </div>`).join('');
+}
+
+function selectLead(idx) {
+  currentLeadIdx = idx;
+  const l = sampleLeads[idx];
+  document.getElementById('call-name').innerHTML = l.name.split(' ')[0] + ' <em>' + l.name.split(' ')[1] + '</em>';
+  document.getElementById('call-detail').textContent = l.phone + ' · ' + l.state;
+  document.getElementById('info-phone').textContent = l.phone;
+  document.getElementById('info-state').textContent = l.state;
+  document.getElementById('info-age').textContent = l.age;
+  document.getElementById('info-type').textContent = l.type;
+  renderLeads();
+}
+
+function startCall() {
+  calling = true; callSeconds = 0;
+  document.getElementById('call-btn').style.display = 'none';
+  document.getElementById('hang-btn').style.display = '';
+  document.getElementById('call-status').textContent = 'RINGING';
+  document.getElementById('call-status').className = 'call-status-label status-ringing';
+  setTimeout(() => { if (!calling) return; document.getElementById('call-status').textContent = 'LIVE'; document.getElementById('call-status').className = 'call-status-label status-live'; }, 2000);
+  callInterval = setInterval(() => { callSeconds++; const m=Math.floor(callSeconds/60),s=callSeconds%60; document.getElementById('call-timer').textContent=m+':'+s.toString().padStart(2,'0'); }, 1000);
+}
+
+function hangUp() {
+  calling = false; clearInterval(callInterval);
+  document.getElementById('call-btn').style.display = '';
+  document.getElementById('hang-btn').style.display = 'none';
+  document.getElementById('call-status').textContent = 'IDLE';
+  document.getElementById('call-status').className = 'call-status-label status-idle';
+}
+
+function setDisp(disp) {
+  if (currentLeadIdx < sampleLeads.length) {
+    sampleLeads[currentLeadIdx].disp = disp;
+    renderLeads(); hangUp();
+    if (currentLeadIdx < sampleLeads.length - 1) setTimeout(() => { currentLeadIdx++; selectLead(currentLeadIdx); }, 300);
+  }
+}
+
+function nextLead() { if (currentLeadIdx < sampleLeads.length - 1) { currentLeadIdx++; selectLead(currentLeadIdx); } }
+function handleCSV(input) { document.getElementById('upload-modal').classList.remove('open'); alert('CSV uploaded! ' + input.files[0].name); }
+
+renderLeads(); selectLead(0); checkDialerSession();
+</script>
+</body>
+</html>
