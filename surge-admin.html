@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surge Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #A89850; --gold-l: #C4B06A; --gold-dim: rgba(168,152,80,0.08); --gold-b: rgba(168,152,80,0.22);
+  --bg: #050505; --bg2: #0a0a0a; --bg3: #111; --text: #f4f4f4; --muted: rgba(244,244,244,0.45);
+  --border: rgba(255,255,255,0.06); --green: #27ae60; --red: #e74c3c; --orange: #e67e22; --blue: #3498db;
+}
+html, body { height: 100%; font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); }
+
+/* AUTH */
+.auth-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; }
+.auth-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 2.5rem; width: 380px; text-align: center; }
+.auth-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-style: italic; color: var(--gold); margin-bottom: 0.2rem; }
+.auth-sub { font-size: 0.55rem; letter-spacing: 0.3em; color: var(--muted); text-transform: uppercase; margin-bottom: 2rem; }
+.auth-title { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 300; margin-bottom: 1.5rem; }
+.auth-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 0.75rem 1rem; border-radius: 3px; font-family: 'Montserrat', sans-serif; font-size: 0.75rem; margin-bottom: 0.75rem; outline: none; }
+.auth-btn { width: 100%; background: var(--gold); color: #000; border: none; padding: 0.75rem; border-radius: 3px; font-family: 'Montserrat', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; margin-top: 0.5rem; }
+.auth-error { color: var(--red); font-size: 0.68rem; margin-top: 0.5rem; }
+.auth-denied { color: var(--red); font-size: 0.75rem; margin-top: 1rem; }
+
+/* LAYOUT */
+.shell { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 220px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+.sidebar-top { padding: 1.5rem 1.2rem 1rem; border-bottom: 1px solid var(--border); }
+.sidebar-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; color: var(--gold); }
+.sidebar-sub { font-size: 0.45rem; letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase; margin-top: 1px; }
+.sidebar-badge { display: inline-block; background: var(--red); color: #fff; font-size: 0.45rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 10px; margin-left: 0.4rem; vertical-align: middle; }
+.nav-section { font-size: 0.45rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); padding: 1rem 1.2rem 0.4rem; }
+.nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.2rem; font-size: 0.65rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
+.nav-item:hover { color: var(--text); background: var(--bg3); }
+.nav-item.active { color: var(--gold); background: var(--gold-dim); border-left-color: var(--gold); }
+.nav-item svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+.sidebar-spacer { flex: 1; }
+.sidebar-bottom { padding: 1rem 1.2rem; border-top: 1px solid var(--border); }
+.admin-info { display: flex; align-items: center; gap: 0.6rem; cursor: pointer; }
+.admin-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+.admin-name { font-size: 0.68rem; font-weight: 600; }
+.admin-role { font-size: 0.55rem; color: var(--red); }
+.signout-btn { width: 100%; margin-top: 0.6rem; background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.4rem; border-radius: 3px; font-family: 'Montserrat', sans-serif; font-size: 0.58rem; cursor: pointer; }
+.signout-btn:hover { color: var(--red); border-color: var(--red); }
+
+/* MAIN */
+.main { flex: 1; overflow-y: auto; background: var(--bg); }
+.topbar { padding: 1rem 2rem; border-bottom: 1px solid var(--border); background: var(--bg2); display: flex; align-items: center; justify-content: space-between; }
+.topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; }
+.topbar-title em { font-style: italic; color: var(--gold); }
+
+/* PAGE */
+.page { display: none; padding: 2rem; }
+.page.active { display: block; }
+.page-header { margin-bottom: 2rem; }
+.page-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; }
+.page-title em { font-style: italic; color: var(--gold); }
+.page-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.3rem; }
+
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.kpi-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem 1.5rem; }
+.kpi-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+.kpi-num { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 300; }
+.kpi-sub { font-size: 0.6rem; color: var(--muted); margin-top: 0.2rem; }
+
+/* TABLE */
+.table-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 2rem; }
+.table-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.table-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+.table-actions { display: flex; gap: 0.5rem; align-items: center; }
+.tbl-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--muted); padding: 0.3rem 0.8rem; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.58rem; font-weight: 600; cursor: pointer; }
+.tbl-btn:hover { color: var(--gold); border-color: var(--gold-b); }
+.tbl-search { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 0.3rem 0.8rem; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.62rem; outline: none; width: 200px; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 0.7rem 1.5rem; text-align: left; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+td { padding: 0.8rem 1.5rem; font-size: 0.7rem; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* BADGES */
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 2px; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.badge-active { background: rgba(39,174,96,0.12); color: var(--green); }
+.badge-pending { background: rgba(230,126,34,0.12); color: var(--orange); }
+.badge-blocked { background: rgba(231,76,60,0.12); color: var(--red); }
+
+/* ACTION BUTTONS */
+.action-btn { border: none; border-radius: 2px; padding: 0.25rem 0.6rem; font-family: 'Montserrat', sans-serif; font-size: 0.55rem; font-weight: 700; cursor: pointer; margin-right: 0.3rem; letter-spacing: 0.05em; text-transform: uppercase; }
+.btn-approve { background: rgba(39,174,96,0.15); color: var(--green); border: 1px solid rgba(39,174,96,0.3); }
+.btn-approve:hover { background: rgba(39,174,96,0.25); }
+.btn-approve:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-block { background: rgba(231,76,60,0.1); color: var(--red); border: 1px solid rgba(231,76,60,0.25); }
+.btn-block:hover { background: rgba(231,76,60,0.2); }
+.btn-level { background: var(--bg3); color: var(--gold); border: 1px solid var(--gold-b); }
+.btn-level:hover { background: var(--gold-dim); }
+.btn-unblock { background: rgba(52,152,219,0.12); color: var(--blue); border: 1px solid rgba(52,152,219,0.25); }
+
+/* LEVEL SELECT */
+.level-select { background: var(--bg3); border: 1px solid var(--border); color: var(--gold); padding: 0.2rem 0.4rem; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.6rem; font-weight: 700; cursor: pointer; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--green); padding: 0.8rem 1.2rem; border-radius: 4px; font-size: 0.72rem; z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s; max-width: 320px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { border-left-color: var(--red); }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 500; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 2rem; width: 420px; }
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; margin-bottom: 0.3rem; }
+.modal-title em { font-style: italic; color: var(--gold); }
+.modal-sub { font-size: 0.68rem; color: var(--muted); margin-bottom: 1.5rem; }
+.modal-field { margin-bottom: 1rem; }
+.modal-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; display: block; }
+.modal-select { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 0.6rem 0.8rem; border-radius: 3px; font-family: 'Montserrat', sans-serif; font-size: 0.72rem; }
+.modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+.modal-cancel { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 0.5rem 1.2rem; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; cursor: pointer; }
+.modal-confirm { background: var(--gold); color: #000; border: none; padding: 0.5rem 1.5rem; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.65rem; font-weight: 700; cursor: pointer; }
+.modal-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+.spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(0,0,0,0.3); border-top-color: #000; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 0.4rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">Surge</div>
+    <div class="auth-sub">Admin Panel</div>
+    <div class="auth-title">Admin <em style="font-style:italic;color:var(--gold)">Login</em></div>
+    <input class="auth-input" type="email" id="auth-email" placeholder="admin@surgelifegroup.com">
+    <input class="auth-input" type="password" id="auth-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    <button class="auth-btn" onclick="doAdminLogin()">Sign In →</button>
+    <div class="auth-error" id="auth-error"></div>
+    <div id="auth-denied" style="display:none" class="auth-denied">⛔ Admin access only. Contact Cole Myers.</div>
+  </div>
+</div>
+
+<!-- APPROVE MODAL -->
+<div class="modal-overlay" id="approve-modal">
+  <div class="modal">
+    <div class="modal-title">Approve <em>Agent</em></div>
+    <div class="modal-sub">Set their commission level and auto-provision a Twilio number.</div>
+    <div class="modal-field">
+      <label class="modal-label">Agent</label>
+      <div id="modal-agent-name" style="font-size:0.8rem;font-weight:600;color:var(--gold)"></div>
+      <div id="modal-agent-email" style="font-size:0.65rem;color:var(--muted);margin-top:2px"></div>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Commission Level</label>
+      <select class="modal-select" id="modal-level">
+        <option value="A">A — Apprentice</option>
+        <option value="GA" selected>GA — General Agent</option>
+        <option value="SA">SA — Supervising Agent</option>
+        <option value="SM">SM — Sales Manager</option>
+        <option value="SD">SD — Sales Director</option>
+        <option value="JP">JP — Jr Partner</option>
+        <option value="SP">SP — Senior Partner</option>
+        <option value="EP">EP — Executive Partner</option>
+        <option value="RD">RD — Regional Director</option>
+        <option value="ND">ND — National Director</option>
+        <option value="VP">VP — Vice President</option>
+        <option value="P">P — President</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Phone Area Code (for Twilio number)</label>
+      <input class="modal-select" type="text" id="modal-area" placeholder="e.g. 479" maxlength="3" value="479">
+    </div>
+    <div class="modal-field" style="background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:3px;padding:0.8rem">
+      <div style="font-size:0.6rem;color:var(--gold);font-weight:700;margin-bottom:0.3rem">📱 Auto-Provision Number</div>
+      <div style="font-size:0.62rem;color:var(--muted)">A dedicated Twilio phone number will be purchased and assigned to this agent. They'll use it for all dialer calls.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-confirm" id="modal-confirm-btn" onclick="confirmApprove()">Approve &amp; Provision →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SHELL -->
+<div class="shell" id="shell" style="display:none">
+  <div class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">Surge</div>
+      <div class="sidebar-sub">Admin Panel</div>
+    </div>
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-section">Agents</div>
+    <div class="nav-item" onclick="showPage('pending',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Pending Approval <span class="sidebar-badge" id="pending-badge">0</span>
+    </div>
+    <div class="nav-item" onclick="showPage('agents',this)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      All Agents
+    </div>
+    <div class="nav-section">Platform</div>
+    <div class="nav-item" onclick="window.open('https://hq.surgelifegroup.com','_blank')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      Surge HQ
+    </div>
+    <div class="nav-item" onclick="window.open('https://agent.surgelifegroup.com','_blank')">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      Agent Space
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-bottom">
+      <div class="admin-info">
+        <div class="admin-avatar" id="admin-avatar">CM</div>
+        <div>
+          <div class="admin-name" id="admin-name">Admin</div>
+          <div class="admin-role">System Administrator</div>
+        </div>
+      </div>
+      <button class="signout-btn" onclick="signOut()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">Surge <em>Admin</em></div>
+      <div style="font-size:0.6rem;color:var(--muted)" id="last-refresh"></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div style="padding:2rem">
+        <div class="page-header">
+          <div class="page-title">Agency <em>Overview</em></div>
+          <div class="page-sub">Real-time stats from Supabase.</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Total Agents</div>
+            <div class="kpi-num" id="kpi-total" style="color:var(--gold)">—</div>
+            <div class="kpi-sub">Registered accounts</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Active</div>
+            <div class="kpi-num" id="kpi-active" style="color:var(--green)">—</div>
+            <div class="kpi-sub">Approved &amp; dialing</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Pending</div>
+            <div class="kpi-num" id="kpi-pending" style="color:var(--orange)">—</div>
+            <div class="kpi-sub">Awaiting approval</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Blocked</div>
+            <div class="kpi-num" id="kpi-blocked" style="color:var(--red)">—</div>
+            <div class="kpi-sub">Access revoked</div>
+          </div>
+        </div>
+
+        <!-- Recent signups -->
+        <div class="table-section">
+          <div class="table-header">
+            <div class="table-title">Recent Signups</div>
+            <button class="tbl-btn" onclick="loadAll()">Refresh</button>
+          </div>
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Level</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody id="recent-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING -->
+    <div class="page" id="page-pending">
+      <div style="padding:2rem">
+        <div class="page-header">
+          <div class="page-title">Pending <em>Approval</em></div>
+          <div class="page-sub">Agents waiting for you to approve their account and provision a number.</div>
+        </div>
+        <div class="table-section">
+          <div class="table-header">
+            <div class="table-title">Pending Agents</div>
+            <button class="tbl-btn" onclick="loadAll()">Refresh</button>
+          </div>
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Invite Code</th><th>Signed Up</th><th>Actions</th></tr></thead>
+            <tbody id="pending-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALL AGENTS -->
+    <div class="page" id="page-agents">
+      <div style="padding:2rem">
+        <div class="page-header">
+          <div class="page-title">All <em>Agents</em></div>
+          <div class="page-sub">Manage commission levels, block/unblock, and view numbers.</div>
+        </div>
+        <div class="table-section">
+          <div class="table-header">
+            <div class="table-title">Agent Roster</div>
+            <div class="table-actions">
+              <input class="tbl-search" type="text" placeholder="Search agents..." oninput="filterAgents(this.value)">
+              <button class="tbl-btn" onclick="loadAll()">Refresh</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Level</th><th>Twilio #</th><th>Status</th><th>Upline</th><th>Actions</th></tr></thead>
+            <tbody id="agents-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPA_URL = 'https://szdzbycppkavfwuzlljh.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6ZHpieWNwcGthdmZ3dXpsbGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODIxNzgsImV4cCI6MjA5NTE1ODE3OH0.Jw21eHChMDHlskSs2PegmBXLYNIQkjl8GByOIApadhA';
+const ADMIN_EMAIL = 'colemyers409@gmail.com';
+const LEVELS = ['A','GA','SA','SM','SD','JP','SP','EP','RD','ND','VP','P'];
+const LEVEL_NAMES = {A:'Apprentice',GA:'General Agent',SA:'Supervising Agent',SM:'Sales Manager',SD:'Sales Director',JP:'Jr Partner',SP:'Senior Partner',EP:'Executive Partner',RD:'Regional Director',ND:'National Director',VP:'Vice President',P:'President'};
+
+let sb, allAgents = [], pendingAgentId = null;
+
+// ===== AUTH =====
+async function doAdminLogin() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  const err = document.getElementById('auth-error');
+  err.textContent = '';
+  if (!email || !pass) { err.textContent = 'Enter email and password.'; return; }
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { err.textContent = error.message; return; }
+  if (data.user.email !== ADMIN_EMAIL) {
+    await sb.auth.signOut();
+    document.getElementById('auth-denied').style.display = 'block';
+    return;
+  }
+  onAdminLoggedIn(data.user);
+}
+
+function onAdminLoggedIn(user) {
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('shell').style.display = 'flex';
+  const name = user.email.split('@')[0];
+  document.getElementById('admin-name').textContent = 'Cole Myers';
+  document.getElementById('admin-avatar').textContent = 'CM';
+  document.getElementById('last-refresh').textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
+  loadAll();
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  window.location.href = 'https://hq.surgelifegroup.com';
+}
+
+// ===== DATA =====
+async function loadAll() {
+  const { data } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+  if (!data) return;
+  allAgents = data;
+  renderDashboard(data);
+  renderPending(data);
+  renderAgents(data);
+  document.getElementById('last-refresh').textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
+}
+
+function renderDashboard(agents) {
+  const total = agents.length;
+  const active = agents.filter(a => a.status === 'active' && a.approved).length;
+  const pending = agents.filter(a => !a.approved && !a.blocked).length;
+  const blocked = agents.filter(a => a.blocked).length;
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-active').textContent = active;
+  document.getElementById('kpi-pending').textContent = pending;
+  document.getElementById('kpi-blocked').textContent = blocked;
+  document.getElementById('pending-badge').textContent = pending;
+
+  const recent = agents.slice(0, 8);
+  document.getElementById('recent-tbody').innerHTML = recent.map(a => agentRow(a, true)).join('') || emptyRow(6);
+}
+
+function renderPending(agents) {
+  const pending = agents.filter(a => !a.approved && !a.blocked);
+  document.getElementById('pending-tbody').innerHTML = pending.map(a => `<tr>
+    <td><strong>${a.first_name||''} ${a.last_name||''}</strong></td>
+    <td style="color:var(--muted)">${a.email}</td>
+    <td style="color:var(--muted)">${a.phone||'—'}</td>
+    <td><span style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1.1rem">${a.invite_code||'SURGE2026'}</span></td>
+    <td style="color:var(--muted)">${new Date(a.created_at).toLocaleDateString()}</td>
+    <td>
+      <button class="action-btn btn-approve" onclick="openApproveModal('${a.id}','${a.first_name||''} ${a.last_name||''}','${a.email}')">✓ Approve</button>
+      <button class="action-btn btn-block" onclick="blockAgent('${a.id}')">Block</button>
+    </td>
+  </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem">🎉 No pending agents! All caught up.</td></tr>`;
+}
+
+function renderAgents(agents) {
+  document.getElementById('agents-tbody').innerHTML = agents.map(a => agentRow(a, false)).join('') || emptyRow(7);
+}
+
+function agentRow(a, short) {
+  const name = `${a.first_name||''} ${a.last_name||''}`.trim() || '—';
+  const status = a.blocked ? 'blocked' : (a.approved ? 'active' : 'pending');
+  const statusLabel = a.blocked ? 'Blocked' : (a.approved ? 'Active' : 'Pending');
+  const actions = a.blocked
+    ? `<button class="action-btn btn-unblock" onclick="unblockAgent('${a.id}')">Unblock</button>`
+    : a.approved
+      ? `<select class="level-select" onchange="updateLevel('${a.id}',this.value)">${LEVELS.map(l=>`<option value="${l}"${l===a.commission_level?' selected':''}>${l}</option>`).join('')}</select>
+         <button class="action-btn btn-block" onclick="blockAgent('${a.id}')" style="margin-left:0.3rem">Block</button>`
+      : `<button class="action-btn btn-approve" onclick="openApproveModal('${a.id}','${name}','${a.email}')">✓ Approve</button>
+         <button class="action-btn btn-block" onclick="blockAgent('${a.id}')">Block</button>`;
+
+  if (short) return `<tr>
+    <td><strong>${name}</strong></td>
+    <td style="color:var(--muted);font-size:0.62rem">${a.email}</td>
+    <td><span style="color:var(--gold);font-weight:700">${a.commission_level||'—'}</span></td>
+    <td><span class="badge badge-${status}">${statusLabel}</span></td>
+    <td style="color:var(--muted)">${new Date(a.created_at).toLocaleDateString()}</td>
+    <td>${actions}</td>
+  </tr>`;
+
+  return `<tr>
+    <td><strong>${name}</strong></td>
+    <td style="color:var(--muted);font-size:0.62rem">${a.email}</td>
+    <td><span style="color:var(--gold);font-weight:700">${a.commission_level||'—'}</span></td>
+    <td style="color:var(--muted);font-size:0.62rem">${a.twilio_number||'<span style="color:rgba(244,244,244,0.2)">Not provisioned</span>'}</td>
+    <td><span class="badge badge-${status}">${statusLabel}</span></td>
+    <td style="color:var(--muted);font-size:0.62rem">${a.upline_id ? a.upline_id.slice(0,8)+'...' : '—'}</td>
+    <td>${actions}</td>
+  </tr>`;
+}
+
+function emptyRow(cols) {
+  return `<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem">No agents found.</td></tr>`;
+}
+
+function filterAgents(q) {
+  const filtered = allAgents.filter(a => {
+    const name = `${a.first_name||''} ${a.last_name||''} ${a.email}`.toLowerCase();
+    return name.includes(q.toLowerCase());
+  });
+  document.getElementById('agents-tbody').innerHTML = filtered.map(a => agentRow(a, false)).join('') || emptyRow(7);
+}
+
+// ===== ACTIONS =====
+function openApproveModal(id, name, email) {
+  pendingAgentId = id;
+  document.getElementById('modal-agent-name').textContent = name;
+  document.getElementById('modal-agent-email').textContent = email;
+  document.getElementById('modal-confirm-btn').disabled = false;
+  document.getElementById('modal-confirm-btn').innerHTML = 'Approve &amp; Provision →';
+  document.getElementById('approve-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('approve-modal').classList.remove('open');
+  pendingAgentId = null;
+}
+
+async function confirmApprove() {
+  if (!pendingAgentId) return;
+  const level = document.getElementById('modal-level').value;
+  const areaCode = document.getElementById('modal-area').value || '479';
+  const btn = document.getElementById('modal-confirm-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Provisioning...';
+
+  try {
+    // Update level first
+    await sb.from('profiles').update({ commission_level: level }).eq('id', pendingAgentId);
+
+    // Call provision function
+    const res = await fetch('/.netlify/functions/provision-agent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agentId: pendingAgentId, areaCode })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showToast(`✅ Agent approved! Number provisioned: ${data.number}`);
+    } else {
+      // Fallback: approve without number if Twilio fails
+      await sb.from('profiles').update({ approved: true, status: 'active', commission_level: level }).eq('id', pendingAgentId);
+      showToast(`⚠️ Approved (no number provisioned: ${data.error})`, true);
+    }
+  } catch(e) {
+    // Fallback: just approve
+    await sb.from('profiles').update({ approved: true, status: 'active', commission_level: level }).eq('id', pendingAgentId);
+    showToast('✅ Agent approved! (Add Twilio number manually)', false);
+  }
+
+  closeModal();
+  await loadAll();
+}
+
+async function updateLevel(id, level) {
+  await sb.from('profiles').update({ commission_level: level }).eq('id', id);
+  showToast(`✅ Commission level updated to ${level}`);
+}
+
+async function blockAgent(id) {
+  if (!confirm('Block this agent? They will lose access immediately.')) return;
+  await sb.from('profiles').update({ blocked: true, status: 'blocked' }).eq('id', id);
+  showToast('Agent blocked.', true);
+  loadAll();
+}
+
+async function unblockAgent(id) {
+  await sb.from('profiles').update({ blocked: false, status: 'active' }).eq('id', id);
+  showToast('✅ Agent unblocked.');
+  loadAll();
+}
+
+// ===== UI =====
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+// ===== INIT =====
+async function init() {
+  sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && session.user.email === ADMIN_EMAIL) {
+    onAdminLoggedIn(session.user);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
