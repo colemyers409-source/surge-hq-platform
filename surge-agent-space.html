@@ -1060,7 +1060,7 @@ const SUPA_URL = 'https://szdzbycppkavfwuzlljh.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6ZHpieWNwcGthdmZ3dXpsbGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODIxNzgsImV4cCI6MjA5NTE1ODE3OH0.Jw21eHChMDHlskSs2PegmBXLYNIQkjl8GByOIApadhA';
 let sb = null;
 let currentUserId = null;
-
+let agentConfig = { name: 'Agent', level: 'GA', levelFull: 'General Agent' };
 async function initSupabase() {
   if (!window.supabase) return;
   sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
