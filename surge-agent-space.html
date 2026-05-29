@@ -13,7 +13,7 @@
   --gold-b: rgba(168,152,80,0.22); --bg: #050505; --bg2: #0a0a0a; --bg3: #111;
   --text: #f4f4f4; --muted: rgba(244,244,244,0.45); --faint: rgba(244,244,244,0.18);
   --border: rgba(255,255,255,0.06); --border-s: rgba(255,255,255,0.1);
-  --green: #27ae60; --red: #e74c3c; --orange: #e67e22; --blue: #3498db;
+  --green: #27ae60; --red: #e74c3c; --orange: #e67e22; --blue: #e8e8e8;
 }
 html, body { height: 100%; }
 body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); display: flex; }
@@ -304,10 +304,10 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 
   <div class="sidebar-bottom">
     <div class="agent-info" onclick="toggleProfileMenu()" style="cursor:pointer;position:relative">
-      <div class="agent-avatar" id="sb-avatar">KW</div>
+      <div class="agent-avatar" id="sb-avatar">--</div>
       <div style="flex:1">
-        <div class="agent-name" id="sb-name">Loading...</div>
-        <div class="agent-role" id="sb-level">Loading...</div>
+        <div class="agent-name" id="sb-name">My Account</div>
+        <div class="agent-role" id="sb-level">Agent</div>
       </div>
       <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0"><polyline points="18 15 12 9 6 15"/></svg>
     </div>
@@ -333,7 +333,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   <div class="page active" id="page-dashboard">
     <div class="dash-wrap">
       <div class="page-header">
-        <div class="page-title">Good morning, <em id="dash-first-name">Kylan</em></div>
+        <div class="page-title">Good morning, <em id="dash-first-name">Agent</em></div>
         <div class="page-sub">Here's your book of business at a glance.</div>
       </div>
       <div class="kpi-grid">
@@ -960,7 +960,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
         <div class="page-title">Insurance <em>Toolkit</em></div>
         <div class="page-sub">Access quoting tools, underwriting guides, and resources.</div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem">
+      <div style="display:grid;grid-template-columns:repeat(1,1fr);gap:1rem;margin-bottom:2rem;max-width:400px">
         <a href="https://www.insurancetoolkits.com" target="_blank" class="platform-card" style="text-decoration:none;display:block">
           <div style="font-size:2rem;margin-bottom:0.8rem">🛠️</div>
           <div class="card-tag">Primary Tool</div>
@@ -968,7 +968,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
           <div style="font-size:0.72rem;color:var(--muted)">Quoting, underwriting guides, and sales resources.</div>
           <div style="margin-top:0.8rem;font-size:0.65rem;color:var(--gold);font-weight:700">OPEN →</div>
         </a>
-        <a href="https://www.foresters.com/en-us/financial-representatives" target="_blank" class="platform-card" style="text-decoration:none;display:block">
+        <a href="https://www.foresters.com/en-us/financial-representatives" target="_blank" class="platform-card" style="text-decoration:none;display:block;display:none">
           <div style="font-size:2rem;margin-bottom:0.8rem">📋</div>
           <div class="card-tag">Underwriting</div>
           <div class="card-title" style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;margin-bottom:0.4rem">Foresters <em style="font-style:italic;color:var(--gold)">Portal</em></div>
@@ -1064,36 +1064,43 @@ let agentConfig = { name: 'Agent', level: 'GA', levelFull: 'General Agent' };
 async function initSupabase() {
   if (!window.supabase) return;
   sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUserId = session.user.id;
-    const { data: profile } = await sb.from('profiles').select('first_name,last_name,commission_level').eq('id', session.user.id).single();
-    if (profile) {
-      const firstName = profile.first_name || '';
-      const lastName = profile.last_name || '';
-      const fullName = `${firstName} ${lastName}`.trim() || session.user.email.split('@')[0];
-      const level = profile.commission_level || 'GA';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentUserId = session.user.id;
+      // Use email as fallback name immediately
+      const emailName = session.user.email.split('@')[0];
+      document.getElementById('sb-name').textContent = emailName;
+      document.getElementById('sb-avatar').textContent = emailName.slice(0,2).toUpperCase();
+      document.getElementById('dash-first-name').textContent = emailName;
+      const { data: profile } = await sb.from('profiles').select('first_name,last_name,commission_level').eq('id', session.user.id).single();
+      const firstName = profile?.first_name || '';
+      const lastName = profile?.last_name || '';
+      const fullName = (firstName + ' ' + lastName).trim() || emailName;
+      const level = profile?.commission_level || 'GA';
       const levelNames = { A:'Apprentice',GA:'General Agent',SA:'Supervising Agent',SM:'Sales Manager',SD:'Sales Director',JP:'Jr Partner',SP:'Senior Partner',EP:'Executive Partner',RD:'Regional Director',ND:'National Director',VP:'Vice President',P:'President' };
       const levelFull = levelNames[level] || level;
-      // Update agentConfig
       agentConfig.name = fullName;
       agentConfig.level = level;
       agentConfig.levelFull = levelFull;
-      // Update UI
-      const initials = fullName.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+      const initials = fullName.split(' ').map(x=>x[0]).filter(Boolean).join('').slice(0,2).toUpperCase();
       document.getElementById('sb-avatar').textContent = initials;
       document.getElementById('sb-name').textContent = fullName;
       document.getElementById('sb-level').textContent = level + ' — ' + levelFull;
       document.getElementById('top-level-badge').textContent = level;
       document.getElementById('dash-first-name').textContent = firstName || fullName;
-      // Update calc levels
       const calcLevel = document.getElementById('calc-level');
       if (calcLevel) calcLevel.value = level;
       const expLevel = document.getElementById('exp-level');
       if (expLevel) expLevel.value = level;
       const expBadge = document.getElementById('exp-level-badge');
       if (expBadge) expBadge.textContent = level + ' — ' + levelFull;
+    } else {
+      document.getElementById('sb-name').textContent = 'Not signed in';
+      document.getElementById('sb-level').textContent = 'Please log in';
     }
+  } catch(e) {
+    console.error('Supabase init error:', e);
   }
 }
 
