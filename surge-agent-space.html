@@ -1051,7 +1051,17 @@ async function initSupabase() {
   if (!window.supabase) return;
   sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
   try {
-    // Try to restore session from tokens saved by HQ login
+    // Check URL params first (passed from HQ login)
+    const params = new URLSearchParams(window.location.search);
+    const urlAccess = params.get('at');
+    const urlRefresh = params.get('rt');
+    if (urlAccess && urlRefresh) {
+      localStorage.setItem('surge_access_token', urlAccess);
+      localStorage.setItem('surge_refresh_token', urlRefresh);
+      // Clean URL without reloading
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    // Try localStorage tokens
     const accessToken = localStorage.getItem('surge_access_token');
     const refreshToken = localStorage.getItem('surge_refresh_token');
     if (accessToken && refreshToken) {
@@ -1060,10 +1070,8 @@ async function initSupabase() {
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
       currentUserId = session.user.id;
-      // Save updated tokens in case they refreshed
       localStorage.setItem('surge_access_token', session.access_token);
       localStorage.setItem('surge_refresh_token', session.refresh_token);
-      // Use email as fallback name immediately
       const emailName = session.user.email.split('@')[0];
       document.getElementById('sb-name').textContent = emailName;
       document.getElementById('sb-avatar').textContent = emailName.slice(0,2).toUpperCase();

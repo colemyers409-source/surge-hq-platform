@@ -170,13 +170,13 @@ footer { position: relative; z-index: 1; border-top: 1px solid var(--border); pa
     <button class="btn-outline" id="hero-login-btn">Agent Login</button>
   </div>
   <div class="hero-actions" id="hero-actions-user" style="display:none">
-    <a class="btn-primary" href="https://agent.surgelifegroup.com" target="_blank">My Agent Space →</a>
+    <a class="btn-primary" href="#" onclick="goToAgentSpace();return false;">My Agent Space →</a>
     <a class="btn-outline" href="https://leads.surgelifegroup.com" target="_blank">Marketplace</a>
   </div>
   <div class="platform-links">
     <a class="platform-link-pill" href="https://leads.surgelifegroup.com" target="_blank">🛒 Marketplace</a>
     <a class="platform-link-pill" href="https://dialer.surgelifegroup.com" target="_blank">📞 Surge Dialer</a>
-    <a class="platform-link-pill" href="https://agent.surgelifegroup.com" target="_blank">🏠 Agent Space</a>
+    <a class="platform-link-pill" href="#" onclick="goToAgentSpace();return false;">🏠 Agent Space</a>
 
   </div>
 </div>
@@ -409,6 +409,16 @@ function storeSession(session) {
   if (session) {
     localStorage.setItem('surge_access_token', session.access_token);
     localStorage.setItem('surge_refresh_token', session.refresh_token);
+  }
+}
+
+function goToAgentSpace() {
+  const access = localStorage.getItem('surge_access_token');
+  const refresh = localStorage.getItem('surge_refresh_token');
+  if (access && refresh) {
+    window.open('https://agent.surgelifegroup.com?at=' + encodeURIComponent(access) + '&rt=' + encodeURIComponent(refresh), '_blank');
+  } else {
+    window.open('https://agent.surgelifegroup.com', '_blank');
   }
 }
 
