@@ -12,7 +12,7 @@ exports.handler = async (event) => {
     if (!numbers.length) return { statusCode: 500, headers, body: JSON.stringify({ error: 'No numbers available' }) };
     const purchased = await client.incomingPhoneNumbers.create({ phoneNumber: numbers[0].phoneNumber, friendlyName: 'Surge Agent ' + agentId });
     const sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-    await sb.from('profiles').update({ twilio_number: purchased.phoneNumber, twilio_sid: purchased.sid, approved: true, status: 'active' }).eq('id', agentId);
+    await sb.from('profiles').update({ twilio_number: purchased.phoneNumber, twilio_sid: purchased.sid, approved: true, status: 'active', subscription_active: true }).eq('id', agentId);
     return { statusCode: 200, headers, body: JSON.stringify({ success: true, number: purchased.phoneNumber }) };
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
