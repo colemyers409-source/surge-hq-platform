@@ -494,12 +494,12 @@ async function confirmApprove() {
       showToast(`✅ Agent approved! Number provisioned: ${data.number}`);
     } else {
       // Fallback: approve without number if Twilio fails
-      await sb.from('profiles').update({ approved: true, status: 'active', commission_level: level }).eq('id', pendingAgentId);
+      await sb.from('profiles').update({ approved: true, status: 'active', commission_level: level, subscription_active: true }).eq('id', pendingAgentId);
       showToast(`⚠️ Approved (no number provisioned: ${data.error})`, true);
     }
   } catch(e) {
     // Fallback: just approve
-    await sb.from('profiles').update({ approved: true, status: 'active', commission_level: level }).eq('id', pendingAgentId);
+    await sb.from('profiles').update({ approved: true, status: 'active', commission_level: level, subscription_active: true }).eq('id', pendingAgentId);
     showToast('✅ Agent approved! (Add Twilio number manually)', false);
   }
 

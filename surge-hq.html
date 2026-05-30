@@ -468,11 +468,22 @@ async function signOut() {
 async function checkSession() {
   const { data: { session } } = await supabase.auth.getSession();
   if (session) {
-    const { data: profile } = await supabase.from('profiles').select('first_name, approved').eq('id', session.user.id).single();
+    const { data: profile } = await supabase.from('profiles').select('first_name, approved, subscription_active').eq('id', session.user.id).single();
     if (profile?.approved !== false) {
       updateNavForUser(profile?.first_name || session.user.email.split('@')[0]);
       storeSession(session);
     }
+    // Show active plan or checkout button based on subscription
+    const btn = document.getElementById('pricing-signup-btn');
+    if (profile?.subscription_active) {
+      btn.textContent = '✓ Your Plan is Active';
+      btn.style.background = 'rgba(39,174,96,0.15)';
+      btn.style.color = '#27ae60';
+      btn.style.border = '1px solid rgba(39,174,96,0.3)';
+      btn.onclick = null;
+      btn.style.cursor = 'default';
+    }
+    // else leave the button as-is so they can pay
   }
   // Handle Stripe redirect
   const params = new URLSearchParams(window.location.search);
@@ -491,7 +502,6 @@ document.getElementById('nav-login-btn').addEventListener('click', () => openMod
 document.getElementById('nav-signup-btn').addEventListener('click', () => openModal('signup'));
 document.getElementById('hero-login-btn').addEventListener('click', () => openModal('login'));
 document.getElementById('hero-signup-btn').addEventListener('click', () => openModal('signup'));
-document.getElementById('pricing-signup-btn').addEventListener('click', () => openModal('signup'));
 
 checkSession();
 </script>
