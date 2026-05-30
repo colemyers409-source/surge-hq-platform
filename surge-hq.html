@@ -417,31 +417,7 @@ function storeSession(session) {
 }
 
 async function startCheckout() {
-  const btn = document.getElementById('pricing-signup-btn');
-  const errEl = document.getElementById('checkout-error');
-  btn.textContent = 'Redirecting...';
-  btn.disabled = true;
-  errEl.style.display = 'none';
-  try {
-    const stripe = Stripe('pk_live_51TaSsKGh6ZtnYZHh5heDShk6TBC2tYlsMwcQlufAk7dMjRCU2khFfLgR9hPulseHCsf5uo4PuAjSIHAWy2mtPeO600s7ZPxAmu');
-    const { error } = await stripe.redirectToCheckout({
-      lineItems: [{ price: 'price_1TcG75Gh6ZtnYZHhNu0XHATD', quantity: 1 }],
-      mode: 'subscription',
-      successUrl: 'https://hq.surgelifegroup.com?signup=success',
-      cancelUrl: 'https://hq.surgelifegroup.com?signup=cancelled',
-    });
-    if (error) {
-      errEl.textContent = error.message;
-      errEl.style.display = 'block';
-      btn.textContent = 'Get Started — $150/mo →';
-      btn.disabled = false;
-    }
-  } catch(e) {
-    errEl.textContent = 'Something went wrong. Please try again.';
-    errEl.style.display = 'block';
-    btn.textContent = 'Get Started — $150/mo →';
-    btn.disabled = false;
-  }
+  window.location.href = 'https://buy.stripe.com/eVqdR93P91UAfOg90PaAw02';
 }
 
 function goToAgentSpace() {
