@@ -197,6 +197,23 @@ body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(
   </div>
 </div>
 
+<!-- SUBSCRIBE OVERLAY -->
+<div class="auth-overlay" id="subscribe-overlay" style="display:none">
+  <div class="auth-box" style="text-align:center;max-width:420px">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;font-style:italic;color:var(--gold);margin-bottom:0.2rem">Surge</div>
+    <div style="font-size:0.5rem;font-weight:700;letter-spacing:0.28em;color:var(--muted);text-transform:uppercase;margin-bottom:2rem">Dialer</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin-bottom:0.4rem">Activate Your <em style="font-style:italic;color:var(--gold)">Access</em></div>
+    <div style="font-size:0.7rem;color:var(--muted);margin-bottom:2rem">Subscribe to unlock the Surge Power Dialer, Agent Space, and your personal phone number.</div>
+    <div style="background:rgba(168,152,80,0.08);border:1px solid rgba(168,152,80,0.2);border-radius:4px;padding:1.5rem;margin-bottom:1.5rem">
+      <div style="font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem">Surge Agent Access</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;margin-bottom:0.5rem">$150<span style="font-size:1rem;color:var(--muted)">/mo</span></div>
+      <div style="font-size:0.68rem;color:var(--muted);line-height:1.8">✓ Power Dialer &nbsp;·&nbsp; ✓ Agent Space<br>✓ Personal Phone Number &nbsp;·&nbsp; ✓ AI Messaging<br>✓ Carrier Tools &nbsp;·&nbsp; ✓ Call Recordings</div>
+    </div>
+    <button onclick="window.location.href='https://buy.stripe.com/eVqdR93P91UAfOg90PaAw02'" style="width:100%;background:var(--gold);color:#000;border:none;padding:0.9rem;border-radius:3px;font-family:'Montserrat',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;margin-bottom:1rem">Subscribe Now — $150/mo →</button>
+    <div onclick="doSubscribeSignOut()" style="font-size:0.65rem;color:var(--muted);cursor:pointer;text-decoration:underline">Sign out</div>
+  </div>
+</div>
+
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-logo">
@@ -442,8 +459,9 @@ async function doLogin() {
   btn.disabled = true; btn.textContent = 'Signing in...';
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
   if (error) { btn.disabled = false; btn.textContent = 'Sign In →'; showLoginError(error.message); return; }
-  const { data: profile } = await sb.from('profiles').select('approved,first_name,last_name').eq('id', data.user.id).single();
+  const { data: profile } = await sb.from('profiles').select('approved,first_name,last_name,subscription_active').eq('id', data.user.id).single();
   if (profile && profile.approved === false) { btn.disabled = false; btn.textContent = 'Sign In →'; showLoginError('Your account is pending admin approval.'); return; }
+  if (!profile?.subscription_active) { btn.disabled = false; btn.textContent = 'Sign In →'; showSubscribeScreen(); return; }
   document.getElementById('auth-overlay').style.display = 'none';
   const name = profile ? `${profile.first_name||''} ${profile.last_name||''}`.trim() : email.split('@')[0];
   const firstName = profile?.first_name || name.split(' ')[0];
@@ -459,11 +477,28 @@ function showLoginError(msg) {
   el.textContent = msg;
 }
 
+function showSubscribeScreen() {
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('subscribe-overlay').style.display = 'flex';
+}
+
+async function doSubscribeSignOut() {
+  if (sb) await sb.auth.signOut();
+  document.getElementById('subscribe-overlay').style.display = 'none';
+  document.getElementById('auth-overlay').style.display = 'flex';
+}
+
+function showLoginError(msg) {
+  let el = document.getElementById('login-error');
+  if (!el) { el = document.createElement('div'); el.id='login-error'; el.style.cssText='color:#e74c3c;font-size:0.68rem;margin-top:0.8rem;text-align:center;'; document.querySelector('.auth-btn').after(el); }
+  el.textContent = msg;
+}
+
 async function checkDialerSession() {
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
-    const { data: profile } = await sb.from('profiles').select('approved,first_name,last_name').eq('id', session.user.id).single();
-    if (profile?.approved !== false) {
+    const { data: profile } = await sb.from('profiles').select('approved,first_name,last_name,subscription_active').eq('id', session.user.id).single();
+    if (profile?.approved !== false && profile?.subscription_active) {
       document.getElementById('auth-overlay').style.display = 'none';
       const name = `${profile?.first_name||''} ${profile?.last_name||''}`.trim() || session.user.email.split('@')[0];
       const firstName = profile?.first_name || name.split(' ')[0];
@@ -473,6 +508,9 @@ async function checkDialerSession() {
       if (welcomeEl) welcomeEl.textContent = firstName;
       const avatarEl = document.getElementById('dialer-avatar');
       if (avatarEl) avatarEl.textContent = name.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+    } else {
+      // Logged in but not subscribed
+      showSubscribeScreen();
     }
   }
 }
