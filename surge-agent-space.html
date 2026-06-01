@@ -227,6 +227,31 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .persist-ring { width: 100px; height: 100px; margin: 0 auto 1rem; position: relative; }
 .ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 600; color: var(--gold); }
 .persist-sub { font-size: 0.65rem; color: var(--muted); text-align: center; }
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem;}
+.modal.active{display:flex;}
+.modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.5rem;max-width:480px;width:100%;max-height:90vh;overflow:auto;}
+.modal-title{font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--gold);}
+.lb-controls{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;align-items:center;}
+.lb-seg{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.lb-metric-btn,.lb-range-btn{background:transparent;color:var(--muted);border:none;padding:0.4rem 0.8rem;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit;}
+.lb-metric-btn.active,.lb-range-btn.active{background:var(--gold-dim);color:var(--gold);}
+.lb-podium{display:flex;justify-content:center;align-items:flex-end;gap:1rem;margin:1.5rem 0;flex-wrap:wrap;}
+.pod{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center;min-width:120px;}
+.pod-gold{border-color:var(--gold);transform:translateY(-12px);box-shadow:0 0 24px var(--gold-dim);}
+.pod-silver{border-color:#9aa;}
+.pod-bronze{border-color:#a76;}
+.pod-medal{font-size:1.8rem;}
+.pod-name{font-weight:700;font-size:0.85rem;margin-top:0.25rem;}
+.pod-val{color:var(--gold);font-weight:700;margin-top:0.25rem;}
+.pod-rank{color:var(--muted);font-size:0.65rem;margin-top:0.25rem;}
+.pod-me{outline:2px solid var(--gold);}
+.lb-empty{text-align:center;color:var(--muted);padding:2rem;width:100%;}
+.lb-me{background:var(--gold-dim);}
+.lb-youtag{background:var(--gold);color:#000;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;}
+.lb-del{background:transparent;border:1px solid var(--border);color:var(--red);font-size:0.65rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:inherit;}
+.lb-stat{display:inline-block;margin-right:1.5rem;}
+.lb-stat b{color:var(--gold);font-size:1.1rem;}
 </style>
 </head>
 <body>
@@ -239,7 +264,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   </div>
 
   <div class="sidebar-section">
-    <div class="sidebar-section-label">Overview</div>
+    <div class="sidebar-section-label">Overview</div><div class="nav-item" onclick="showPage('leaderboard', this)"><svg viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9 16 14 18 22 12 17 6 22 8 14 2 9 9 9"/></svg>Leaderboard</div><div class="nav-item" onclick="showPage('book', this)"><svg viewBox="0 0 24 24"><path d="M5 4h13v16H6a2 2 0 0 1-1-2z"/><line x1="9" y1="4" x2="9" y2="20"/></svg>Book of Business</div>
     <div class="nav-item active" onclick="showPage('dashboard', this)">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       Dashboard
@@ -749,7 +774,11 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   </div>
 
   <!-- ======= EXPECTED EARNINGS ======= -->
-  <div class="page" id="page-expected">
+  
+<div class="page" id="page-leaderboard"><div class="comm-wrap"><div class="page-header"><div class="page-title">Leader<em>board</em></div><div class="page-sub">Log your deals and see how you stack up against the team.</div></div><div style="margin-bottom:1rem"><button class="calc-btn" onclick="openDealModal()">+ Log a Deal</button></div><div class="lb-controls"><span style="font-size:0.7rem;color:var(--muted);font-weight:600">RANK BY</span><div class="lb-seg"><button class="lb-metric-btn active" data-m="premium" onclick="setLbMetric('premium')">Premium $</button><button class="lb-metric-btn" data-m="deals" onclick="setLbMetric('deals')"># of Deals</button></div><span style="font-size:0.7rem;color:var(--muted);font-weight:600;margin-left:1rem">PERIOD</span><div class="lb-seg"><button class="lb-range-btn" data-r="day" onclick="setLbRange('day')">Day</button><button class="lb-range-btn" data-r="week" onclick="setLbRange('week')">Week</button><button class="lb-range-btn active" data-r="month" onclick="setLbRange('month')">This Month</button><button class="lb-range-btn" data-r="lastmonth" onclick="setLbRange('lastmonth')">Last Month</button><button class="lb-range-btn" data-r="all" onclick="setLbRange('all')">All Time</button></div></div><div class="lb-podium" id="lb-podium"></div><div class="table-section"><div class="table-header"><div class="table-title">Full Rankings</div></div><table><thead><tr><th>Rank</th><th>Agent</th><th>Premium</th><th>Deals</th></tr></thead><tbody id="lb-tbody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
+<div class="page" id="page-book"><div class="comm-wrap"><div class="page-header"><div class="page-title">Book of <em>Business</em></div><div class="page-sub">Every deal you log lives here.</div></div><div style="margin-bottom:1rem"><span class="lb-stat">Total Premium <b id="book-total">$0</b></span><span class="lb-stat">Deals <b id="book-count">0</b></span><button class="calc-btn" onclick="openDealModal()" style="float:right">+ Log a Deal</button></div><div class="table-section"><table><thead><tr><th>Client</th><th>Carrier</th><th>Product</th><th>Premium</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody id="book-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
+<div class="modal" id="deal-modal"><div class="modal-box"><div class="modal-title">Log a Deal</div><div class="calc-field"><label class="calc-label">Client Name</label><input class="calc-input" id="d-client" placeholder="John Smith"></div><div class="calc-field"><label class="calc-label">Carrier</label><select class="calc-select" id="d-carrier"><option value="">Select Carrier</option><option>Aetna / Accendo</option><option>Aflac</option><option>AIG</option><option>American Amicable</option><option>Americo</option><option>Assurity</option><option>Baltimore Life</option><option>Columbus Life</option><option>Elco Mutual</option><option>F&G</option><option>Foresters</option><option>Gerber Life</option><option>GTL</option><option>Kansas City Life</option><option>Mutual of Omaha</option><option>National Life Group</option><option>North American</option><option>Royal Neighbors</option><option>Transamerica</option><option>Trinity Life</option><option>Illinois Mutual</option><option>Other</option></select></div><div class="calc-field"><label class="calc-label">Product</label><input class="calc-input" id="d-product" placeholder="Final Expense"></div><div class="calc-field"><label class="calc-label">Rate Class</label><select class="calc-select" id="d-rateclass"><option>Preferred</option><option>Standard</option><option>Graded</option><option>Modified</option></select></div><div class="calc-field"><label class="calc-label">Annual Premium ($)</label><input class="calc-input" type="number" id="d-premium" placeholder="e.g. 540" min="1"></div><div class="calc-field"><label class="calc-label">Status</label><select class="calc-select" id="d-status"><option>Pending</option><option>Active</option><option>Declined</option></select></div><div style="display:flex;gap:0.5rem;margin-top:1rem"><button class="calc-btn" id="d-submit" onclick="submitDeal()">Add Deal</button><button class="lb-del" style="color:var(--muted)" onclick="closeDealModal()">Cancel</button></div></div></div>
+<div class="page" id="page-expected">
     <div class="comm-wrap">
       <div class="page-header">
         <div class="page-title">Expected <em>Earnings</em></div>
@@ -1366,9 +1395,22 @@ async function signOutAgent() {
 }
 
 // ============ PAGE NAV ============
+
+let LB_METRIC='premium';let LB_RANGE='month';
+function escapeHtml(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function openDealModal(){var m=document.getElementById('deal-modal');if(m)m.classList.add('active');}
+function closeDealModal(){var m=document.getElementById('deal-modal');if(m)m.classList.remove('active');}
+async function submitDeal(){if(!sb||!currentUserId){alert('Please sign in from HQ first.');return;}var client=document.getElementById('d-client').value.trim();var carrier=document.getElementById('d-carrier').value;var product=document.getElementById('d-product').value.trim();var rate=document.getElementById('d-rateclass').value;var prem=parseFloat(document.getElementById('d-premium').value);var status=document.getElementById('d-status').value;if(!client||!carrier||!prem){alert('Please enter client, carrier, and premium.');return;}var btn=document.getElementById('d-submit');if(btn){btn.disabled=true;btn.textContent='Saving...';}var ins=await sb.from('deals').insert({agent_id:currentUserId,agent_name:agentConfig.name,client:client,carrier:carrier,product:product,rate_class:rate,premium:prem,status:status});if(btn){btn.disabled=false;btn.textContent='Add Deal';}if(ins.error){alert('Could not save: '+ins.error.message);return;}document.getElementById('d-client').value='';document.getElementById('d-product').value='';document.getElementById('d-premium').value='';closeDealModal();loadBook();loadLeaderboard();}
+async function deleteDeal(id){if(!sb)return;if(!confirm('Remove this deal from your book?'))return;var r=await sb.from('deals').delete().eq('id',id);if(r.error){alert('Could not remove: '+r.error.message);return;}loadBook();loadLeaderboard();}
+async function loadBook(){var tb=document.getElementById('book-tbody');if(!tb)return;if(!sb||!currentUserId){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Sign in from HQ to see your book.</td></tr>';return;}var r=await sb.from('deals').select('*').eq('agent_id',currentUserId).order('created_at',{ascending:false});var rows=(r.data||[]);var tot=rows.reduce(function(a,d){return a+(parseFloat(d.premium)||0);},0);var bt=document.getElementById('book-total');if(bt)bt.textContent='$'+tot.toLocaleString();var bc=document.getElementById('book-count');if(bc)bc.textContent=rows.length;if(!rows.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No deals logged yet. Tap + Log a Deal to start your book.</td></tr>';return;}tb.innerHTML=rows.map(function(d){return '<tr><td>'+escapeHtml(d.client)+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td>'+escapeHtml(d.product||'-')+'</td><td style="color:var(--gold)">$'+(parseFloat(d.premium)||0).toLocaleString()+'</td><td><span class="badge badge-'+String(d.status||'').toLowerCase()+'">'+escapeHtml(d.status)+'</span></td><td style="color:var(--muted)">'+new Date(d.created_at).toLocaleDateString()+'</td><td><button class="lb-del" data-del="'+d.id+'">Remove</button></td></tr>';}).join('');tb.querySelectorAll('button[data-del]').forEach(function(b){b.onclick=function(){deleteDeal(b.getAttribute('data-del'));};});}
+function lbRangeStart(){var n=new Date();var s=new Date();if(LB_RANGE==='day'){s.setHours(0,0,0,0);}else if(LB_RANGE==='week'){var day=(n.getDay()+6)%7;s.setDate(n.getDate()-day);s.setHours(0,0,0,0);}else if(LB_RANGE==='month'){s=new Date(n.getFullYear(),n.getMonth(),1);}else if(LB_RANGE==='lastmonth'){s=new Date(n.getFullYear(),n.getMonth()-1,1);}else{s=new Date(2000,0,1);}return s;}
+function lbRangeEnd(){var n=new Date();if(LB_RANGE==='lastmonth'){return new Date(n.getFullYear(),n.getMonth(),1);}return new Date(2999,0,1);}
+function setLbMetric(m){LB_METRIC=m;document.querySelectorAll('.lb-metric-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-m')===m);});loadLeaderboard();}
+function setLbRange(r){LB_RANGE=r;document.querySelectorAll('.lb-range-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-r')===r);});loadLeaderboard();}
+async function loadLeaderboard(){var pod=document.getElementById('lb-podium');var tb=document.getElementById('lb-tbody');if(!tb)return;if(!sb){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">Connecting...</td></tr>';return;}var start=lbRangeStart();var end=lbRangeEnd();var r=await sb.from('deals').select('agent_id,agent_name,premium,created_at').gte('created_at',start.toISOString()).lt('created_at',end.toISOString());var rows=(r.data||[]);var map={};rows.forEach(function(d){var k=d.agent_id||d.agent_name;if(!map[k])map[k]={id:d.agent_id,name:d.agent_name||'Agent',deals:0,premium:0};map[k].deals++;map[k].premium+=(parseFloat(d.premium)||0);});var arr=Object.keys(map).map(function(k){return map[k];});arr.sort(function(a,b){return LB_METRIC==='deals'?(b.deals-a.deals)||(b.premium-a.premium):(b.premium-a.premium)||(b.deals-a.deals);});function val(a){return LB_METRIC==='deals'?a.deals+(a.deals===1?' deal':' deals'):'$'+a.premium.toLocaleString();}var medals=['gold','silver','bronze'];if(pod){if(!arr.length){pod.innerHTML='<div class="lb-empty">No deals logged in this period yet. Be the first!</div>';}else{var top=arr.slice(0,3);var order=[1,0,2];var html='';order.forEach(function(i){if(!top[i])return;var a=top[i];var rank=i+1;html+='<div class="pod pod-'+medals[i]+(a.id===currentUserId?' pod-me':'')+'"><div class="pod-medal">'+(rank===1?'🥇':rank===2?'🥈':'🥉')+'</div><div class="pod-name">'+escapeHtml(a.name)+'</div><div class="pod-val">'+val(a)+'</div><div class="pod-rank">#'+rank+'</div></div>';});pod.innerHTML=html;}}if(!arr.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">No deals yet.</td></tr>';return;}tb.innerHTML=arr.map(function(a,i){var me=a.id===currentUserId;return '<tr'+(me?' class="lb-me"':'')+'><td style="font-weight:700;color:'+(i<3?'var(--gold)':'var(--muted)')+'">'+(i+1)+'</td><td>'+escapeHtml(a.name)+(me?' <span class="lb-youtag">YOU</span>':'')+'</td><td style="color:var(--gold)">$'+a.premium.toLocaleString()+'</td><td>'+a.deals+'</td></tr>';}).join('');}
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if (el) el.classList.add('active');
 }
