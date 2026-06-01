@@ -706,7 +706,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     <div class="dash-wrap">
       <div class="page-header">
         <div class="page-title">My <em>Downline</em></div>
-        <div class="page-sub">Agents who signed up using your invite codes.</div>
+        <div class="page-sub">Your entire organization — every agent below you, all levels deep.</div>
       </div>
       <div class="table-section">
         <div class="table-header">
@@ -714,7 +714,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
           <button class="tbl-btn" onclick="loadDownline()">Refresh</button>
         </div>
         <table>
-          <thead><tr><th>Name</th><th>Email</th><th>Level</th><th>Status</th><th>Joined</th></tr></thead>
+          <thead><tr><th>Agent</th><th>Level</th><th>Upline</th><th>Status</th><th>Own Production</th><th>Team Production</th></tr></thead>
           <tbody id="downline-tbody">
             <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem">Loading your downline...</td></tr>
           </tbody>
@@ -901,20 +901,40 @@ async function loadInvites() {
 
 async function loadDownline() {
   if (!sb || !currentUserId) return;
-  const { data } = await sb.from('profiles').select('first_name,last_name,email,commission_level,status,created_at').eq('upline_id', currentUserId).order('created_at', { ascending: false });
-  const tbody = document.getElementById('downline-tbody');
-  if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem">No agents in your downline yet. Send invites to grow your team!</td></tr>'; return; }
-  tbody.innerHTML = data.map(a => `<tr>
-    <td>${a.first_name||''} ${a.last_name||''}</td>
-    <td style="color:var(--muted)">${a.email}</td>
-    <td><span style="color:var(--gold);font-weight:700">${a.commission_level||'GA'}</span></td>
-    <td><span class="badge badge-${a.status==='active'?'active':'pending'}">${a.status||'pending'}</span></td>
-    <td style="color:var(--muted)">${new Date(a.created_at).toLocaleDateString()}</td>
-  </tr>`).join('');
+  var tbody = document.getElementById("downline-tbody");
+  if (tbody) tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem'>Loading your organization...</td></tr>";
+  var profRes = await sb.from("profiles").select("id,first_name,last_name,email,commission_level,status,upline_id");
+  var dealRes = await sb.from("deals").select("agent_id,premium");
+  var profs = profRes.data || [];
+  var deals = dealRes.data || [];
+  var kids = {};
+  profs.forEach(function(p){ if(!p.upline_id) return; (kids[p.upline_id]=kids[p.upline_id]||[]).push(p); });
+  var own = {};
+  deals.forEach(function(d){ var o=own[d.agent_id]||(own[d.agent_id]={prem:0,cnt:0}); o.prem+=Number(d.premium)||0; o.cnt++; });
+  var nm = {};
+  profs.forEach(function(p){ nm[p.id]=((p.first_name||"")+" "+(p.last_name||"")).trim()||p.email||"Agent"; });
+  var teamMemo = {};
+  function team(id){ if(teamMemo[id]) return teamMemo[id]; var t={prem:0,cnt:0}; (kids[id]||[]).forEach(function(k){ var ko=own[k.id]||{prem:0,cnt:0}; var kt=team(k.id); t.prem+=ko.prem+kt.prem; t.cnt+=ko.cnt+kt.cnt; }); teamMemo[id]=t; return t; }
+  var rows=[]; var seen={};
+  (function walk(id,depth){ (kids[id]||[]).forEach(function(k){ if(seen[k.id]) return; seen[k.id]=true; rows.push({p:k,depth:depth}); walk(k.id,depth+1); }); })(currentUserId,0);
+  if(!tbody) return;
+  if(rows.length===0){ tbody.innerHTML="<tr><td colspan='6' style='text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem'>No agents in your downline yet. Share your invite code to grow your team!</td></tr>"; return; }
+  function money(n){ return "$"+Math.round(n).toLocaleString(); }
+  tbody.innerHTML = rows.map(function(r){
+    var p=r.p; var o=own[p.id]||{prem:0,cnt:0}; var t=team(p.id);
+    var pad=r.depth*16;
+    var up=nm[p.upline_id]||"—";
+    var branch=r.depth>0?"<span style='color:var(--muted)'>└ </span>":"";
+    return "<tr><td><span style='padding-left:"+pad+"px'>"+branch+nm[p.id]+"</span></td>"+
+      "<td><span style='color:var(--gold);font-weight:700'>"+(p.commission_level||"GA")+"</span></td>"+
+      "<td style='color:var(--muted)'>"+up+"</td>"+
+      "<td><span class='badge badge-"+(p.status==="active"?"active":"pending")+"'>"+(p.status||"pending")+"</span></td>"+
+      "<td style='color:var(--muted)'>"+money(o.prem)+" · "+o.cnt+" deal"+(o.cnt===1?"":"s")+"</td>"+
+      "<td style='color:var(--gold);font-weight:600'>"+money(t.prem)+" · "+t.cnt+" deal"+(t.cnt===1?"":"s")+"</td></tr>";
+  }).join("");
 }
 
-
-const LEVELS = ['A','GA','SA','SM','SD','JP','SP','EP','RD','ND','VP','P'];
+      const LEVELS = ['A','GA','SA','SM','SD','JP','SP','EP','RD','ND','VP','P'];
 
 // ============ CARRIER DATA (from L&L 2026 Comp Booklet) ============
 const carrierData = [
