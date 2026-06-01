@@ -438,7 +438,7 @@ function agentRow(a, short) {
     <td><span style="color:var(--gold);font-weight:700">${a.commission_level||'—'}</span></td>
     <td style="color:var(--muted);font-size:0.62rem">${a.twilio_number||'<span style="color:rgba(244,244,244,0.2)">Not provisioned</span>'}</td>
     <td><span class="badge badge-${status}">${statusLabel}</span></td>
-    <td style="color:var(--muted);font-size:0.62rem">${a.upline_id ? a.upline_id.slice(0,8)+'...' : '—'}</td>
+    <td style="color:var(--muted)">${uplineSelect(a)}</td>
     <td>${actions}</td>
   </tr>`;
 }
@@ -512,6 +512,9 @@ async function updateLevel(id, level) {
   showToast(`✅ Commission level updated to ${level}`);
 }
 
+
+function uplineSelect(a){var opts=(allAgents||[]).filter(function(x){return x.id!==a.id;}).map(function(x){var nm=((x.first_name||"")+" "+(x.last_name||"")).trim()||x.email||"Agent";return `<option value="${x.id}"${a.upline_id===x.id?" selected":""}>${nm}</option>`;}).join("");return `<select class="level-select" onchange="updateUpline('${a.id}',this.value)"><option value=""${a.upline_id?"":" selected"}>— None —</option>${opts}</select>`;}
+async function updateUpline(id,uplineId){await sb.from("profiles").update({upline_id:uplineId||null}).eq("id",id);showToast("Upline updated");loadAll();}
 async function blockAgent(id) {
   if (!confirm('Block this agent? They will lose access immediately.')) return;
   await sb.from('profiles').update({ blocked: true, status: 'blocked' }).eq('id', id);
