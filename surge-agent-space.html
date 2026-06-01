@@ -438,81 +438,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   </div>
 
   <!-- ======= ANALYTICS ======= -->
-  <div class="page" id="page-analytics">
-    <div class="analytics-wrap">
-      <div class="page-header">
-        <div class="page-title">Sales <em>Analytics</em></div>
-        <div class="page-sub">A breakdown of your production, carriers, and rate classes.</div>
-      </div>
-
-      <div class="analytics-grid">
-        <div class="kpi-card kpi-gold">
-          <div class="kpi-label">Total Deals Sold</div>
-          <div class="kpi-num" style="color:var(--gold)">0</div>
-          <div class="kpi-change" style="color:var(--muted)">No data yet</div>
-        </div>
-        <div class="kpi-card kpi-green">
-          <div class="kpi-label">Active Policies</div>
-          <div class="kpi-num" style="color:var(--green)">0</div>
-          <div class="kpi-change" style="color:var(--muted)">No data yet</div>
-        </div>
-        <div class="kpi-card kpi-blue">
-          <div class="kpi-label">Pending</div>
-          <div class="kpi-num" style="color:var(--blue)">0</div>
-          <div class="kpi-change" style="color:var(--muted)">No data yet</div>
-        </div>
-        <div class="kpi-card kpi-red">
-          <div class="kpi-label">Declined / Cancelled</div>
-          <div class="kpi-num" style="color:var(--red)">0</div>
-          <div class="kpi-change" style="color:var(--muted)">No data yet</div>
-        </div>
-      </div>
-
-      <!-- Monthly production bar chart -->
-      <div class="chart-card full-chart-row">
-        <div class="chart-title">Monthly Production — Deals Sold</div>
-        <div class="monthly-bars" id="monthly-bars"></div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;" id="monthly-labels"></div>
-      </div>
-
-      <div class="chart-row">
-        <!-- Carrier breakdown -->
-        <div class="chart-card">
-          <div class="chart-title">Top Carriers by Deals</div>
-          <div id="carrier-bars"></div>
-        </div>
-
-        <!-- Rate class breakdown -->
-        <div class="chart-card">
-          <div class="chart-title">Rate Class Breakdown</div>
-          <div class="donut-row">
-            <svg class="donut-svg" viewBox="0 0 120 120" width="120" height="120">
-              <!-- Preferred 38% -->
-              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--bg3)" stroke-width="14"/>
-              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--gold)" stroke-width="14" stroke-dasharray="301.6" stroke-dashoffset="0" stroke-linecap="butt" transform="rotate(-90 60 60)" id="donut-preferred"/>
-              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--green)" stroke-width="14" stroke-dasharray="301.6" stroke-dashoffset="186" stroke-linecap="butt" transform="rotate(-90 60 60)" id="donut-standard"/>
-              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--blue)" stroke-width="14" stroke-dasharray="301.6" stroke-dashoffset="231" stroke-linecap="butt" transform="rotate(-90 60 60)" id="donut-graded"/>
-              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--orange)" stroke-width="14" stroke-dasharray="301.6" stroke-dashoffset="255" stroke-linecap="butt" transform="rotate(-90 60 60)" id="donut-modified"/>
-              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--red)" stroke-width="14" stroke-dasharray="301.6" stroke-dashoffset="271" stroke-linecap="butt" transform="rotate(-90 60 60)" id="donut-gi"/>
-            </svg>
-            <div class="donut-legend">
-              <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div><div class="legend-label">Preferred</div><div class="legend-pct">38%</div></div>
-              <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><div class="legend-label">Standard</div><div class="legend-pct">15%</div></div>
-              <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div><div class="legend-label">Graded</div><div class="legend-pct">21%</div></div>
-              <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div><div class="legend-label">Modified</div><div class="legend-pct">9%</div></div>
-              <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><div class="legend-label">Guar. Issue</div><div class="legend-pct">17%</div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Policy status breakdown -->
-      <div class="chart-card" style="margin-bottom:2rem;">
-        <div class="chart-title">Policy Status Percentages</div>
-        <div id="status-bars"></div>
-      </div>
-    </div>
-  </div>
+  <div class="page" id="page-analytics"><div class="comm-wrap"><div class="page-header"><div class="page-title">Sales <em>Analytics</em></div><div class="page-sub">A breakdown of your production, carriers, and rate classes.</div></div><div class="lb-podium" style="justify-content:flex-start;flex-wrap:wrap"><div class="pod"><div class="pod-rank">TOTAL DEALS</div><div class="pod-val" id="an-total">0</div></div><div class="pod"><div class="pod-rank">ACTIVE</div><div class="pod-val" id="an-active">0</div></div><div class="pod"><div class="pod-rank">PENDING</div><div class="pod-val" id="an-pending">0</div></div><div class="pod"><div class="pod-rank">DECLINED / CANCELLED</div><div class="pod-val" id="an-declined">0</div></div></div><div class="table-section" style="margin-top:1.25rem"><div class="table-header"><div class="table-title">Monthly Production — Deals Sold</div></div><div id="an-monthly" style="display:flex;align-items:flex-end;gap:8px;height:190px;padding:1rem 0.5rem 0"></div></div><div class="table-section" style="margin-top:1.25rem"><div class="table-header"><div class="table-title">Top Carriers by Deals</div></div><div id="an-carriers" style="padding:0.75rem 0"></div></div><div class="table-section" style="margin-top:1.25rem"><div class="table-header"><div class="table-title">Rate Class Breakdown</div></div><div id="an-rateclass" style="padding:0.75rem 0"></div></div><div class="table-section" style="margin-top:1.25rem"><div class="table-header"><div class="table-title">Policy Status</div></div><div id="an-status" style="padding:0.75rem 0"></div></div></div></div>
 
   <!-- ======= POLICIES ======= -->
   <div class="page" id="page-policies">
@@ -1245,7 +1171,7 @@ function setLbRange(r){LB_RANGE=r;document.querySelectorAll('.lb-range-btn').for
 async function loadLeaderboard(){var pod=document.getElementById('lb-podium');var tb=document.getElementById('lb-tbody');if(!tb)return;if(!sb){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">Connecting...</td></tr>';return;}var start=lbRangeStart();var end=lbRangeEnd();var r=await sb.from('deals').select('agent_id,agent_name,premium,created_at').gte('created_at',start.toISOString()).lt('created_at',end.toISOString());var rows=(r.data||[]);var map={};rows.forEach(function(d){var k=d.agent_id||d.agent_name;if(!map[k])map[k]={id:d.agent_id,name:d.agent_name||'Agent',deals:0,premium:0};map[k].deals++;map[k].premium+=(parseFloat(d.premium)||0);});var arr=Object.keys(map).map(function(k){return map[k];});arr.sort(function(a,b){return LB_METRIC==='deals'?(b.deals-a.deals)||(b.premium-a.premium):(b.premium-a.premium)||(b.deals-a.deals);});function val(a){return LB_METRIC==='deals'?a.deals+(a.deals===1?' deal':' deals'):'$'+a.premium.toLocaleString();}var medals=['gold','silver','bronze'];if(pod){if(!arr.length){pod.innerHTML='<div class="lb-empty">No deals logged in this period yet. Be the first!</div>';}else{var top=arr.slice(0,3);var order=[1,0,2];var html='';order.forEach(function(i){if(!top[i])return;var a=top[i];var rank=i+1;html+='<div class="pod pod-'+medals[i]+(a.id===currentUserId?' pod-me':'')+'"><div class="pod-medal">'+(rank===1?'🥇':rank===2?'🥈':'🥉')+'</div><div class="pod-name">'+escapeHtml(a.name)+'</div><div class="pod-val">'+val(a)+'</div><div class="pod-rank">#'+rank+'</div></div>';});pod.innerHTML=html;}}if(!arr.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">No deals yet.</td></tr>';return;}tb.innerHTML=arr.map(function(a,i){var me=a.id===currentUserId;return '<tr'+(me?' class="lb-me"':'')+'><td style="font-weight:700;color:'+(i<3?'var(--gold)':'var(--muted)')+'">'+(i+1)+'</td><td>'+escapeHtml(a.name)+(me?' <span class="lb-youtag">YOU</span>':'')+'</td><td style="color:var(--gold)">$'+a.premium.toLocaleString()+'</td><td>'+a.deals+'</td></tr>';}).join('');}
 
 function syncDashboard(rows){rows=rows||[];var now=new Date();var mStart=new Date(now.getFullYear(),now.getMonth(),1);var total=rows.length,pending=0,active=0,declined=0,cancelled=0,mPrem=0,mCount=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='pending')pending++;else if(s==='active')active++;else if(s==='declined')declined++;else if(s==='cancelled')cancelled++;var dt=new Date(d.created_at);if(dt>=mStart){mPrem+=(parseFloat(d.premium)||0);mCount++;}});function setT(sel,val){var el=document.querySelector(sel);if(el)el.textContent=val;}setT('#page-dashboard .kpi-card.kpi-gold .kpi-num','$'+mPrem.toLocaleString());setT('#page-dashboard .kpi-card.kpi-gold .kpi-change',mCount+' deal'+(mCount===1?'':'s')+' this month');setT('#page-dashboard .kpi-card.kpi-red .kpi-num',String(pending));setT('#page-dashboard .status-card.active-filter .status-count',String(total));setT('#page-dashboard .status-count.status-pending',String(pending));setT('#page-dashboard .status-count.status-active',String(active));setT('#page-dashboard .status-count.status-declined',String(declined));setT('#page-dashboard .status-count.status-cancelled',String(cancelled));var decided=active+declined;setT('#page-dashboard .kpi-card.kpi-green .kpi-num',total>0?(Math.round((active+cancelled)/total*100)+'%'):'—');setT('#page-dashboard .kpi-card.kpi-blue .kpi-num',(active+cancelled)>0?(Math.round(active/(active+cancelled)*100)+'%'):'—');try{if(typeof policies!=='undefined'&&Array.isArray(policies)){policies.length=0;rows.forEach(function(d){policies.push({client:d.client,product:d.product||'-',carrier:d.carrier,rateClass:d.rate_class||'-',premium:'$'+(parseFloat(d.premium)||0).toLocaleString(),date:new Date(d.created_at).toLocaleDateString(),status:d.status});});if(typeof renderPolicies==='function')renderPolicies();}}catch(e){}}
-function refreshAll(){if(typeof loadBook==='function')loadBook();if(typeof loadLeaderboard==='function')loadLeaderboard();if(typeof loadExpected==='function')loadExpected();if(typeof loadCommissions==='function')loadCommissions();if(typeof loadPersistency==='function')loadPersistency();}
+function refreshAll(){if(typeof loadBook==='function')loadBook();if(typeof loadLeaderboard==='function')loadLeaderboard();if(typeof loadExpected==='function')loadExpected();if(typeof loadCommissions==='function')loadCommissions();if(typeof loadPersistency==='function')loadPersistency();if(typeof buildAnalytics==='function')buildAnalytics();}
 var __sdTries=0;var __sdTimer=setInterval(function(){__sdTries++;if(typeof sb!=='undefined'&&sb&&typeof currentUserId!=='undefined'&&currentUserId){clearInterval(__sdTimer);refreshAll();}else if(__sdTries>40){clearInterval(__sdTimer);}},800);
 
 async function loadExpected(){var elTot=document.getElementById('exp-total-premium');if(!elTot)return;if(!sb||!currentUserId){elTot.textContent='$0';return;}var r=await sb.from('deals').select('premium,carrier,status').eq('agent_id',currentUserId);var rows=(r.data||[]);var li=0;try{li=LEVELS.indexOf(agentConfig.level);if(li<0)li=0;}catch(e){li=0;}var totPrem=0,payout=0,activePrem=0,pendPrem=0;rows.forEach(function(d){var p=parseFloat(d.premium)||0;totPrem+=p;var s=String(d.status||'').toLowerCase();if(s==='active')activePrem+=p;else if(s==='pending')pendPrem+=p;var rate=null;try{var c=carrierData.find(function(x){return x.name===d.carrier;});if(c&&c.products&&c.products[0]&&c.products[0].rates){rate=c.products[0].rates[li];}}catch(e){}if(rate!=null){payout+=p*rate/100;}});function st(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}st('exp-total-premium','$'+Math.round(totPrem).toLocaleString());st('exp-payout','$'+Math.round(payout).toLocaleString());st('exp-active-premium','$'+Math.round(activePrem).toLocaleString());st('exp-pending-premium','$'+Math.round(pendPrem).toLocaleString());st('exp-deal-count',String(rows.length));}
@@ -1257,7 +1183,7 @@ async function updateDealStatus(id,status){if(!sb)return;var r=await sb.from('de
 async function loadPersistency(){var tb=document.getElementById('pers-tbody');if(!tb)return;if(!sb||!currentUserId)return;var r=await sb.from('deals').select('*').eq('agent_id',currentUserId).order('created_at',{ascending:false});var rows=(r.data||[]);var total=rows.length,active=0,declined=0,pending=0,cancelled=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='active')active++;else if(s==='declined')declined++;else if(s==='pending')pending++;else if(s==='cancelled')cancelled++;});var placed=active+cancelled;function st(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}st('pers-placement',total>0?Math.round(placed/total*100)+'%':'—');st('pers-persistency',placed>0?Math.round(active/placed*100)+'%':'—');st('pers-active',String(active));st('pers-lapsed',String(cancelled));if(!rows.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">No policies yet. Log deals in your Book of Business.</td></tr>';return;}tb.innerHTML=rows.map(function(d){return '<tr><td>'+escapeHtml(d.client)+'</td><td>'+escapeHtml(d.product||'-')+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td style="color:var(--muted)">'+new Date(d.created_at).toLocaleDateString()+'</td><td>'+statusSelect(d)+'</td></tr>';}).join('');tb.querySelectorAll('select[data-deal]').forEach(function(s){s.onchange=function(){updateDealStatus(s.getAttribute('data-deal'),s.value);};});}
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();}
+  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if (el) el.classList.add('active');
 }
@@ -1501,6 +1427,9 @@ function showTemplate(key, el) {
 }
 
 init();
+
+async function buildMonthlyChart(){return;}
+async function buildAnalytics(){var pa=document.getElementById('page-analytics');if(!pa)return;if(!sb||!currentUserId)return;var r=await sb.from('deals').select('*').eq('agent_id',currentUserId);var rows=(r.data||[]);var total=rows.length,active=0,pending=0,declined=0,cancelled=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='active')active++;else if(s==='pending')pending++;else if(s==='declined')declined++;else if(s==='cancelled')cancelled++;});function setId(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}setId('an-total',String(total));setId('an-active',String(active));setId('an-pending',String(pending));setId('an-declined',String(declined+cancelled));var now=new Date();var months=[];for(var i=5;i>=0;i--){var dt=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({y:dt.getFullYear(),m:dt.getMonth(),label:dt.toLocaleString('default',{month:'short'}),count:0});}rows.forEach(function(d){var dt=new Date(d.created_at);months.forEach(function(mo){if(dt.getFullYear()===mo.y&&dt.getMonth()===mo.m)mo.count++;});});var maxC=1;months.forEach(function(mo){if(mo.count>maxC)maxC=mo.count;});var mEl=document.getElementById('an-monthly');if(mEl){if(!total){mEl.innerHTML='<div style="color:var(--muted);padding:1rem">No deals yet.</div>';}else{mEl.innerHTML=months.map(function(mo){var h=Math.round(mo.count/maxC*140);return '<div style="flex:1;text-align:center"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px">'+mo.count+'</div><div style="background:var(--gold);height:'+h+'px;border-radius:4px 4px 0 0;min-height:2px"></div><div style="font-size:0.65rem;color:var(--muted);margin-top:6px">'+mo.label+'</div></div>';}).join('');}}function barList(map,colorVar){var keys=Object.keys(map);if(!keys.length||!total)return '<div style="color:var(--muted);padding:0.5rem">No data yet.</div>';keys.sort(function(a,b){return map[b]-map[a];});return keys.map(function(k){var pct=Math.round(map[k]/total*100);return '<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><div style="width:150px;font-size:0.75rem">'+k+'</div><div style="flex:1;background:var(--bg3);border-radius:6px;overflow:hidden;height:10px"><div style="width:'+pct+'%;height:100%;background:'+colorVar+'"></div></div><div style="width:42px;text-align:right;font-size:0.75rem;font-weight:700">'+pct+'%</div></div>';}).join('');}var cmap={};rows.forEach(function(d){var c=d.carrier||'Other';cmap[c]=(cmap[c]||0)+1;});var cEl=document.getElementById('an-carriers');if(cEl)cEl.innerHTML=barList(cmap,'var(--gold)');var rmap={};rows.forEach(function(d){var rc=d.rate_class||'Unspecified';rmap[rc]=(rmap[rc]||0)+1;});var rcEl=document.getElementById('an-rateclass');if(rcEl)rcEl.innerHTML=barList(rmap,'var(--gold-1)');var smap={};rows.forEach(function(d){var s=d.status||'Pending';smap[s]=(smap[s]||0)+1;});var sEl=document.getElementById('an-status');if(sEl)sEl.innerHTML=barList(smap,'var(--green)');}
 </script>
 </body>
 </html>
