@@ -775,67 +775,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 <div class="page" id="page-leaderboard"><div class="comm-wrap"><div class="page-header"><div class="page-title">Leader<em>board</em></div><div class="page-sub">Log your deals and see how you stack up against the team.</div></div><div class="lb-controls"><span style="font-size:0.7rem;color:var(--muted);font-weight:600">RANK BY</span><div class="lb-seg"><button class="lb-metric-btn active" data-m="premium" onclick="setLbMetric('premium')">Premium $</button><button class="lb-metric-btn" data-m="deals" onclick="setLbMetric('deals')"># of Deals</button></div><span style="font-size:0.7rem;color:var(--muted);font-weight:600;margin-left:1rem">PERIOD</span><div class="lb-seg"><button class="lb-range-btn" data-r="day" onclick="setLbRange('day')">Day</button><button class="lb-range-btn" data-r="week" onclick="setLbRange('week')">Week</button><button class="lb-range-btn active" data-r="month" onclick="setLbRange('month')">This Month</button><button class="lb-range-btn" data-r="lastmonth" onclick="setLbRange('lastmonth')">Last Month</button><button class="lb-range-btn" data-r="all" onclick="setLbRange('all')">All Time</button></div></div><div class="lb-podium" id="lb-podium"></div><div class="table-section"><div class="table-header"><div class="table-title">Full Rankings</div></div><table><thead><tr><th>Rank</th><th>Agent</th><th>Premium</th><th>Deals</th></tr></thead><tbody id="lb-tbody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
 <div class="page" id="page-book"><div class="comm-wrap"><div class="page-header"><div class="page-title">Book of <em>Business</em></div><div class="page-sub">Every deal you log lives here.</div></div><div style="margin-bottom:1rem"><span class="lb-stat">Total Premium <b id="book-total">$0</b></span><span class="lb-stat">Deals <b id="book-count">0</b></span><button class="calc-btn" onclick="openDealModal()" style="float:right">+ Log a Deal</button></div><div class="table-section"><table><thead><tr><th>Client</th><th>Carrier</th><th>Product</th><th>Premium</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody id="book-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
 <div class="modal" id="deal-modal"><div class="modal-box"><div class="modal-title">Log a Deal</div><div class="calc-field"><label class="calc-label">Client Name</label><input class="calc-input" id="d-client" placeholder="John Smith"></div><div class="calc-field"><label class="calc-label">Carrier</label><select class="calc-select" id="d-carrier"><option value="">Select Carrier</option><option>Aetna / Accendo</option><option>Aflac</option><option>AIG</option><option>American Amicable</option><option>Americo</option><option>Assurity</option><option>Baltimore Life</option><option>Columbus Life</option><option>Elco Mutual</option><option>F&G</option><option>Foresters</option><option>Gerber Life</option><option>GTL</option><option>Kansas City Life</option><option>Mutual of Omaha</option><option>National Life Group</option><option>North American</option><option>Royal Neighbors</option><option>Transamerica</option><option>Trinity Life</option><option>Illinois Mutual</option><option>Other</option></select></div><div class="calc-field"><label class="calc-label">Product</label><input class="calc-input" id="d-product" placeholder="Final Expense"></div><div class="calc-field"><label class="calc-label">Rate Class</label><select class="calc-select" id="d-rateclass"><option>Preferred</option><option>Standard</option><option>Graded</option><option>Modified</option></select></div><div class="calc-field"><label class="calc-label">Annual Premium ($)</label><input class="calc-input" type="number" id="d-premium" placeholder="e.g. 540" min="1"></div><div class="calc-field"><label class="calc-label">Status</label><select class="calc-select" id="d-status"><option>Pending</option><option>Active</option><option>Declined</option></select></div><div style="display:flex;gap:0.5rem;margin-top:1rem"><button class="calc-btn" id="d-submit" onclick="submitDeal()">Add Deal</button><button class="lb-del" style="color:var(--muted)" onclick="closeDealModal()">Cancel</button></div></div></div>
-<div class="page" id="page-expected">
-    <div class="comm-wrap">
-      <div class="page-header">
-        <div class="page-title">Expected <em>Earnings</em></div>
-        <div class="page-sub">Enter any deal and instantly see your commission payout based on your assigned level.</div>
-      </div>
-      <div class="comm-calc" style="margin-bottom:1.5rem">
-        <div class="calc-title">⚡ Commission Calculator — Level: <span id="exp-level-badge" style="color:var(--gold);font-weight:700"></span></div>
-        <div class="calc-grid">
-          <div class="calc-field">
-            <label class="calc-label">Carrier</label>
-            <select class="calc-select" id="exp-carrier" onchange="updateExpProducts()">
-              <option value="">Select Carrier</option>
-              <option>Aetna / Accendo</option><option>Aflac</option><option>AIG</option>
-              <option>American Amicable</option><option>Americo</option><option>Assurity</option>
-              <option>Baltimore Life</option><option>Columbus Life</option><option>Elco Mutual</option>
-              <option>F&G</option><option>Foresters</option><option>Gerber Life</option><option>GTL</option>
-              <option>Instabrain / Fidelity Life</option><option>Kansas City Life</option>
-              <option>Lafayette Life</option><option>Mutual of Omaha</option><option>National Life Group</option>
-              <option>North American</option><option>Royal Neighbors</option><option>Transamerica</option>
-              <option>Trinity Life</option><option>Illinois Mutual</option><option>Sentinel Security Life</option>
-            </select>
-          </div>
-          <div class="calc-field">
-            <label class="calc-label">Product / Rate Class</label>
-            <select class="calc-select" id="exp-product"><option value="">Select carrier first</option></select>
-          </div>
-          <div class="calc-field">
-            <label class="calc-label">Annual Premium ($)</label>
-            <input class="calc-input" type="number" id="exp-premium" placeholder="e.g. 540" min="1">
-          </div>
-          <div class="calc-field">
-            <label class="calc-label">Level</label>
-            <select class="calc-select" id="exp-level">
-              <option value="A">A — Apprentice</option><option value="GA">GA — General Agent</option>
-              <option value="SA">SA — Supervising Agent</option><option value="SM">SM — Sales Manager</option>
-              <option value="SD">SD — Sales Director</option><option value="JP">JP — Jr Partner</option>
-              <option value="SP" selected>SP — Senior Partner</option><option value="EP">EP — Executive Partner</option>
-              <option value="RD">RD — Regional Director</option><option value="ND">ND — National Director</option>
-              <option value="VP">VP — Vice President</option><option value="P">P — President</option>
-            </select>
-          </div>
-          <button class="calc-btn" onclick="calculateExp()">Calculate →</button>
-        </div>
-        <div class="calc-result" id="exp-result">
-          <div class="result-card">
-            <div class="result-info">
-              <div class="result-label">Your Year 1 Commission</div>
-              <div class="result-details" id="exp-result-details"></div>
-            </div>
-            <div style="text-align:right">
-              <div class="result-amount" id="exp-result-amount">$0</div>
-              <div class="result-pct" id="exp-result-pct"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      
-    </div>
-  </div>
+<div class="page" id="page-expected"><div class="comm-wrap"><div class="page-header"><div class="page-title">Expected <em>Earnings</em></div><div class="page-sub">Your whole book at a glance — total premium and projected Year 1 payout at your level.</div></div><div class="lb-podium" style="justify-content:flex-start;flex-wrap:wrap"><div class="pod"><div class="pod-rank">TOTAL PREMIUM</div><div class="pod-val" id="exp-total-premium">$0</div></div><div class="pod pod-gold" style="transform:none;box-shadow:0 0 24px var(--gold-dim)"><div class="pod-rank">PROJECTED YEAR 1 PAYOUT</div><div class="pod-val" id="exp-payout">$0</div></div><div class="pod"><div class="pod-rank">ACTIVE PREMIUM</div><div class="pod-val" id="exp-active-premium">$0</div></div><div class="pod"><div class="pod-rank">PENDING PREMIUM</div><div class="pod-val" id="exp-pending-premium">$0</div></div><div class="pod"><div class="pod-rank">DEALS</div><div class="pod-val" id="exp-deal-count">0</div></div></div><div class="page-sub" style="margin-top:1.25rem">Payout is an estimate based on your commission level and each carrier's Year 1 rate. For a single-deal breakdown, use the Commissions calculator.</div></div></div>
 
   <!-- ======= INVITE TEAM ======= -->
   <div class="page" id="page-invite">
@@ -1367,9 +1307,11 @@ async function loadLeaderboard(){var pod=document.getElementById('lb-podium');va
 function syncDashboard(rows){rows=rows||[];var now=new Date();var mStart=new Date(now.getFullYear(),now.getMonth(),1);var total=rows.length,pending=0,active=0,declined=0,cancelled=0,mPrem=0,mCount=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='pending')pending++;else if(s==='active')active++;else if(s==='declined')declined++;else if(s==='cancelled')cancelled++;var dt=new Date(d.created_at);if(dt>=mStart){mPrem+=(parseFloat(d.premium)||0);mCount++;}});function setT(sel,val){var el=document.querySelector(sel);if(el)el.textContent=val;}setT('#page-dashboard .kpi-card.kpi-gold .kpi-num','$'+mPrem.toLocaleString());setT('#page-dashboard .kpi-card.kpi-gold .kpi-change',mCount+' deal'+(mCount===1?'':'s')+' this month');setT('#page-dashboard .kpi-card.kpi-red .kpi-num',String(pending));setT('#page-dashboard .status-card.active-filter .status-count',String(total));setT('#page-dashboard .status-count.status-pending',String(pending));setT('#page-dashboard .status-count.status-active',String(active));setT('#page-dashboard .status-count.status-declined',String(declined));setT('#page-dashboard .status-count.status-cancelled',String(cancelled));var decided=active+declined;setT('#page-dashboard .kpi-card.kpi-green .kpi-num',decided>0?(Math.round(active/decided*100)+'%'):'—');setT('#page-dashboard .kpi-card.kpi-blue .kpi-num',total>0?(Math.round(active/total*100)+'%'):'—');try{if(typeof policies!=='undefined'&&Array.isArray(policies)){policies.length=0;rows.forEach(function(d){policies.push({client:d.client,product:d.product||'-',carrier:d.carrier,rateClass:d.rate_class||'-',premium:'$'+(parseFloat(d.premium)||0).toLocaleString(),date:new Date(d.created_at).toLocaleDateString(),status:d.status});});if(typeof renderPolicies==='function')renderPolicies();}}catch(e){}}
 function refreshAll(){if(typeof loadBook==='function')loadBook();if(typeof loadLeaderboard==='function')loadLeaderboard();}
 var __sdTries=0;var __sdTimer=setInterval(function(){__sdTries++;if(typeof sb!=='undefined'&&sb&&typeof currentUserId!=='undefined'&&currentUserId){clearInterval(__sdTimer);refreshAll();}else if(__sdTries>40){clearInterval(__sdTimer);}},800);
+
+async function loadExpected(){var elTot=document.getElementById('exp-total-premium');if(!elTot)return;if(!sb||!currentUserId){elTot.textContent='$0';return;}var r=await sb.from('deals').select('premium,carrier,status').eq('agent_id',currentUserId);var rows=(r.data||[]);var li=0;try{li=LEVELS.indexOf(agentConfig.level);if(li<0)li=0;}catch(e){li=0;}var totPrem=0,payout=0,activePrem=0,pendPrem=0;rows.forEach(function(d){var p=parseFloat(d.premium)||0;totPrem+=p;var s=String(d.status||'').toLowerCase();if(s==='active')activePrem+=p;else if(s==='pending')pendPrem+=p;var rate=null;try{var c=carrierData.find(function(x){return x.name===d.carrier;});if(c&&c.products&&c.products[0]&&c.products[0].rates){rate=c.products[0].rates[li];}}catch(e){}if(rate!=null){payout+=p*rate/100;}});function st(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}st('exp-total-premium','$'+Math.round(totPrem).toLocaleString());st('exp-payout','$'+Math.round(payout).toLocaleString());st('exp-active-premium','$'+Math.round(activePrem).toLocaleString());st('exp-pending-premium','$'+Math.round(pendPrem).toLocaleString());st('exp-deal-count',String(rows.length));}
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='dashboard'){refreshAll();}
+  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if (el) el.classList.add('active');
 }
