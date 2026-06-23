@@ -2,11 +2,1374 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=https://app.useagentspace.com/login">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Surge Agent Space</title>
-<script>window.location.replace("https://app.useagentspace.com/login");</script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #A89850; --gold-l: #C4B06A; --gold-dim: rgba(168,152,80,0.08);
+  --gold-b: rgba(168,152,80,0.22); --bg: #050505; --bg2: #0a0a0a; --bg3: #111;
+  --text: #f4f4f4; --muted: rgba(244,244,244,0.45); --faint: rgba(244,244,244,0.18);
+  --border: rgba(255,255,255,0.06); --border-s: rgba(255,255,255,0.1);
+  --green: #27ae60; --red: #e74c3c; --orange: #e67e22; --blue: #e8e8e8;
+}
+html, body { height: 100%; }
+body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); display: flex; }
+
+/* SIDEBAR */
+.sidebar { width: 220px; min-height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem 0; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; overflow-y: auto; }
+.sidebar-logo { padding: 0 1.5rem 1.5rem; border-bottom: 1px solid var(--border); }
+.logo-main { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 300; font-style: italic; color: var(--gold); }
+.logo-sub { font-size: 0.48rem; font-weight: 700; letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+.sidebar-section { padding: 1.2rem 0; border-bottom: 1px solid var(--border); }
+.sidebar-section-label { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); padding: 0 1.5rem; margin-bottom: 0.6rem; }
+.nav-item { display: flex; align-items: center; gap: 0.65rem; padding: 0.55rem 1.5rem; font-size: 0.72rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.2s; border-left: 2px solid transparent; }
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+.nav-item.active { color: var(--gold); border-left-color: var(--gold); background: var(--gold-dim); }
+.nav-item svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; }
+.sidebar-bottom { margin-top: auto; padding: 1.5rem; border-top: 1px solid var(--border); }
+.agent-info { display: flex; align-items: center; gap: 0.75rem; }
+.agent-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--gold-dim); border: 1px solid var(--gold-b); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+.agent-name { font-size: 0.72rem; font-weight: 600; }
+.agent-role { font-size: 0.6rem; color: var(--gold); margin-top: 2px; font-weight: 700; letter-spacing: 0.08em; }
+
+/* MAIN */
+.main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+.topbar { height: 56px; background: rgba(5,5,5,0.97); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 40; }
+.topbar-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.topbar-right { display: flex; align-items: center; gap: 1rem; }
+.level-badge { background: var(--gold); color: #000; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; padding: 0.3rem 0.8rem; border-radius: 2px; }
+
+.page { display: none; flex: 1; flex-direction: column; }
+.page.active { display: flex; }
+.dash-wrap { padding: 2rem; flex: 1; overflow-y: auto; }
+.page-header { margin-bottom: 2rem; }
+.page-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; margin-bottom: 0.25rem; }
+.page-title em { font-style: italic; color: var(--gold); }
+.page-sub { font-size: 0.72rem; color: var(--muted); font-weight: 300; }
+
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.kpi-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; position: relative; overflow: hidden; }
+.kpi-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
+.kpi-green::after { background: var(--green); }
+.kpi-gold::after { background: var(--gold); }
+.kpi-red::after { background: var(--red); }
+.kpi-blue::after { background: var(--blue); }
+.kpi-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+.kpi-num { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 600; margin-bottom: 0.2rem; }
+.kpi-change { font-size: 0.62rem; color: var(--muted); }
+.kpi-change.up { color: var(--green); }
+.kpi-change.down { color: var(--red); }
+
+/* STATUS */
+.policy-status-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.status-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+.status-card:hover { border-color: var(--gold-b); }
+.status-card.active-filter { border-color: var(--gold-b); background: var(--gold-dim); }
+.status-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.status-count { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; margin-bottom: 0.2rem; }
+.status-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.status-pending { color: var(--orange); }
+.status-active { color: var(--green); }
+.status-declined { color: var(--red); }
+.status-cancelled { color: #e08080; }
+
+/* METRICS */
+.metrics-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+.metric-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem; }
+.metric-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+.metric-title { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.metric-period { font-size: 0.6rem; color: var(--muted); }
+.metric-big { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 600; color: var(--gold); margin-bottom: 0.3rem; }
+.metric-label { font-size: 0.65rem; color: var(--muted); }
+.progress-bar { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin-top: 1rem; }
+.progress-fill { height: 100%; background: var(--gold); border-radius: 2px; }
+
+/* TABLE */
+.table-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 2rem; }
+.table-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+.table-title { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.table-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tbl-btn { padding: 0.35rem 0.8rem; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.6rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--bg3); color: var(--muted); transition: all 0.2s; }
+.tbl-btn:hover { color: var(--text); border-color: var(--border-s); }
+.tbl-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+table { width: 100%; border-collapse: collapse; }
+th { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg3); }
+td { font-size: 0.75rem; color: var(--text); padding: 0.85rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+tr:hover td { background: rgba(255,255,255,0.01); }
+.badge { display: inline-block; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.15rem 0.5rem; border-radius: 2px; }
+.badge-pending { background: rgba(230,126,34,0.12); color: var(--orange); border: 1px solid rgba(230,126,34,0.25); }
+.badge-active { background: rgba(39,174,96,0.12); color: var(--green); border: 1px solid rgba(39,174,96,0.25); }
+.badge-declined { background: rgba(231,76,60,0.12); color: var(--red); border: 1px solid rgba(231,76,60,0.25); }
+.badge-cancelled { background: rgba(200,80,80,0.08); color: #e08080; border: 1px solid rgba(200,80,80,0.2); }
+.badge-paid { background: rgba(39,174,96,0.12); color: var(--green); border: 1px solid rgba(39,174,96,0.25); }
+.badge-chargeback { background: rgba(231,76,60,0.12); color: var(--red); border: 1px solid rgba(231,76,60,0.25); }
+
+/* ============ ANALYTICS ============ */
+.analytics-wrap { padding: 2rem; flex: 1; overflow-y: auto; }
+.analytics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+.chart-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem; }
+.chart-title { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.5rem; }
+.bar-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+.bar-label { font-size: 0.68rem; color: var(--muted); width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { flex: 1; height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; background: var(--gold); transition: width 0.6s ease; }
+.bar-fill.green { background: var(--green); }
+.bar-fill.blue { background: var(--blue); }
+.bar-fill.red { background: var(--red); }
+.bar-fill.orange { background: var(--orange); }
+.bar-pct { font-size: 0.65rem; font-weight: 700; color: var(--text); width: 35px; text-align: right; flex-shrink: 0; }
+.donut-row { display: flex; align-items: center; gap: 2rem; }
+.donut-svg { flex-shrink: 0; }
+.donut-legend { flex: 1; }
+.legend-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { font-size: 0.68rem; color: var(--muted); flex: 1; }
+.legend-pct { font-size: 0.68rem; font-weight: 700; color: var(--text); }
+.full-chart-row { margin-bottom: 2rem; }
+.monthly-bars { display: flex; align-items: flex-end; gap: 0.5rem; height: 120px; padding-top: 1rem; }
+.month-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; height: 100%; justify-content: flex-end; }
+.month-bar { width: 100%; background: var(--gold); border-radius: 2px 2px 0 0; opacity: 0.8; min-height: 4px; transition: opacity 0.2s; cursor: pointer; }
+.month-bar:hover { opacity: 1; }
+.month-label { font-size: 0.55rem; color: var(--muted); letter-spacing: 0.05em; }
+.month-val { font-size: 0.6rem; color: var(--gold); font-weight: 700; }
+
+/* ============ COMMISSIONS ============ */
+.comm-wrap { padding: 2rem; flex: 1; overflow-y: auto; }
+.comm-calc { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem; margin-bottom: 2rem; }
+.calc-title { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem; }
+.calc-grid { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 1rem; align-items: end; }
+.calc-field { display: flex; flex-direction: column; gap: 0.4rem; }
+.calc-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
+.calc-select, .calc-input { background: var(--bg3); border: 1px solid var(--border); border-radius: 2px; color: var(--text); font-family: 'Montserrat', sans-serif; font-size: 0.75rem; padding: 0.6rem 0.8rem; outline: none; transition: border-color 0.2s; width: 100%; }
+.calc-select:focus, .calc-input:focus { border-color: var(--gold-b); }
+.calc-select option { background: var(--bg3); }
+.calc-btn { background: var(--gold); color: #000; border: none; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.65rem 1.5rem; cursor: pointer; white-space: nowrap; }
+.calc-btn:hover { background: var(--gold-l); }
+.calc-result { margin-top: 1.2rem; display: none; }
+.calc-result.show { display: block; }
+.result-card { background: var(--bg3); border: 1px solid var(--gold-b); border-radius: 4px; padding: 1.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+.result-info { }
+.result-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+.result-details { font-size: 0.72rem; color: var(--muted); }
+.result-details strong { color: var(--text); }
+.result-amount { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 600; color: var(--gold); }
+.result-pct { font-size: 0.72rem; color: var(--muted); }
+
+/* Commission chart */
+.comm-chart-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 2rem; }
+.comm-chart-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+.carrier-search { background: var(--bg3); border: 1px solid var(--border); border-radius: 2px; color: var(--text); font-family: 'Montserrat', sans-serif; font-size: 0.72rem; padding: 0.4rem 0.8rem; outline: none; width: 200px; }
+.carrier-search:focus { border-color: var(--gold-b); }
+.carrier-accordion { }
+.carrier-row { border-bottom: 1px solid var(--border); }
+.carrier-row-header { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.5rem; cursor: pointer; transition: background 0.15s; }
+.carrier-row-header:hover { background: var(--bg3); }
+.carrier-name { font-size: 0.78rem; font-weight: 600; }
+.carrier-cat { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-left: 0.8rem; }
+.carrier-my-rate { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; color: var(--gold); }
+.carrier-chevron { font-size: 0.7rem; color: var(--muted); transition: transform 0.2s; }
+.carrier-chevron.open { transform: rotate(180deg); }
+.carrier-products { display: none; overflow-x: auto; }
+.carrier-products.open { display: block; }
+.carrier-products table { width: 100%; border-collapse: collapse; min-width: 700px; }
+.carrier-products th { background: rgba(0,0,0,0.3); font-size: 0.5rem; letter-spacing: 0.14em; padding: 0.5rem 0.8rem; }
+.carrier-products td { font-size: 0.7rem; padding: 0.6rem 0.8rem; }
+.my-rate-cell { color: var(--gold); font-weight: 700; font-size: 0.85rem; }
+
+/* ============ TOOLKIT ============ */
+.toolkit-wrap { padding: 2rem; flex: 1; overflow-y: auto; }
+.toolkit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.toolkit-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.toolkit-card:hover { border-color: var(--gold-b); background: var(--gold-dim); transform: translateY(-1px); }
+.toolkit-left { }
+.toolkit-carrier { font-size: 0.78rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+.toolkit-type { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.toolkit-arrow { font-size: 1rem; color: var(--gold); opacity: 0; transition: opacity 0.2s; }
+.toolkit-card:hover .toolkit-arrow { opacity: 1; }
+.toolkit-section-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.8rem; margin-top: 1.5rem; }
+
+/* AI */
+.ai-section { padding: 2rem; flex: 1; overflow-y: auto; }
+.ai-grid { display: grid; grid-template-columns: 1fr 340px; gap: 1.5rem; }
+.ai-templates { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; }
+.ai-templates-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.ai-template { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.ai-template:hover { background: var(--bg3); }
+.ai-template.active-template { background: var(--gold-dim); border-left: 2px solid var(--gold); }
+.template-name { font-size: 0.78rem; font-weight: 600; margin-bottom: 0.2rem; }
+.template-trigger { font-size: 0.62rem; color: var(--muted); }
+.template-status { display: flex; align-items: center; gap: 0.4rem; font-size: 0.58rem; margin-top: 0.3rem; }
+.t-dot { width: 6px; height: 6px; border-radius: 50%; }
+.t-on { background: var(--green); }
+.t-off { background: var(--muted); }
+.ai-preview { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; display: flex; flex-direction: column; }
+.ai-preview-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
+.ai-preview-title { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.3rem; }
+.ai-preview-sub { font-size: 0.65rem; color: var(--muted); }
+.ai-preview-body { padding: 1.5rem; flex: 1; }
+.msg-bubble { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; font-size: 0.75rem; line-height: 1.7; color: var(--text); margin-bottom: 1rem; }
+.msg-bubble strong { color: var(--gold); }
+.ai-preview-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; }
+.ai-btn { flex: 1; padding: 0.6rem; border: none; border-radius: 2px; font-family: 'Montserrat', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+.ai-send { background: var(--gold); color: #000; }
+.ai-edit { background: var(--bg3); color: var(--muted); border: 1px solid var(--border); }
+
+/* PERSISTENCY */
+.persist-wrap { padding: 2rem; flex: 1; overflow-y: auto; }
+.persist-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.persist-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem; }
+.persist-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; }
+.persist-ring { width: 100px; height: 100px; margin: 0 auto 1rem; position: relative; }
+.ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 600; color: var(--gold); }
+.persist-sub { font-size: 0.65rem; color: var(--muted); text-align: center; }
+
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem;}
+.modal.active{display:flex;}
+.modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.5rem;max-width:480px;width:100%;max-height:90vh;overflow:auto;}
+.modal-title{font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--gold);}
+.lb-controls{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;align-items:center;}
+.lb-seg{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.lb-metric-btn,.lb-range-btn{background:transparent;color:var(--muted);border:none;padding:0.4rem 0.8rem;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit;}
+.lb-metric-btn.active,.lb-range-btn.active{background:var(--gold-dim);color:var(--gold);}
+.lb-podium{display:flex;justify-content:center;align-items:flex-end;gap:1rem;margin:1.5rem 0;flex-wrap:wrap;}
+.pod{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center;min-width:120px;}
+.pod-gold{border-color:var(--gold);transform:translateY(-12px);box-shadow:0 0 24px var(--gold-dim);}
+.pod-silver{border-color:#9aa;}
+.pod-bronze{border-color:#a76;}
+.pod-medal{font-size:1.8rem;}
+.pod-name{font-weight:700;font-size:0.85rem;margin-top:0.25rem;}
+.pod-val{color:var(--gold);font-weight:700;margin-top:0.25rem;}
+.pod-rank{color:var(--muted);font-size:0.65rem;margin-top:0.25rem;}
+.pod-me{outline:2px solid var(--gold);}
+.lb-empty{text-align:center;color:var(--muted);padding:2rem;width:100%;}
+.lb-me{background:var(--gold-dim);}
+.lb-youtag{background:var(--gold);color:#000;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;}
+.lb-del{background:transparent;border:1px solid var(--border);color:var(--red);font-size:0.65rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:inherit;}
+.lb-stat{display:inline-block;margin-right:1.5rem;}
+.lb-stat b{color:var(--gold);font-size:1.1rem;}
+</style>
 </head>
-<body style="font-family:sans-serif;background:#0a0a0a;color:#f4f4f4;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center">
-<p>Redirecting to your Agent Space&hellip; <a href="https://app.useagentspace.com/login" style="color:#A89850">Click here if you are not redirected.</a></p>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-main">Agent Space</div>
+    <div class="logo-sub">Surge Life Group</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Overview</div><div class="nav-item" onclick="showPage('leaderboard', this)"><svg viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9 16 14 18 22 12 17 6 22 8 14 2 9 9 9"/></svg>Leaderboard</div><div class="nav-item" onclick="showPage('book', this)"><svg viewBox="0 0 24 24"><path d="M5 4h13v16H6a2 2 0 0 1-1-2z"/><line x1="9" y1="4" x2="9" y2="20"/></svg>Book of Business</div>
+    <div class="nav-item active" onclick="showPage('dashboard', this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('analytics', this)">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Analytics
+    </div>
+    
+    <div class="nav-item" onclick="showPage('persistency', this)">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Persistency
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Money</div>
+    <div class="nav-item" onclick="showPage('commissions', this)">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Commissions
+    </div>
+    <div class="nav-item" onclick="showPage('expected', this)">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 10l3 3 5-5"/></svg>
+      Expected Earnings
+    </div>
+    <div class="nav-item" onclick="showPage('carrier', this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Carrier Info
+    </div>
+    <div class="nav-item" onclick="showPage('toolkit', this)">
+      <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      Insurance Toolkit
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Tools</div>
+    <div class="nav-item" onclick="showPage('ai', this)">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      AI Messaging
+    </div>
+    <div class="nav-item" onclick="showPage('invite', this)">
+      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      Invite Team
+    </div>
+    <div class="nav-item" onclick="showPage('downline', this)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      My Downline
+    </div>
+    <div class="nav-item" onclick="window.open('https://leads.surgelifegroup.com','_blank')">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+      Marketplace
+    </div>
+    <div class="nav-item" onclick="window.open('https://dialer.surgelifegroup.com','_blank')">
+      <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      Surge Dialer
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="agent-info" onclick="toggleProfileMenu()" style="cursor:pointer;position:relative">
+      <div class="agent-avatar" id="sb-avatar">--</div>
+      <div style="flex:1">
+        <div class="agent-name" id="sb-name">My Account</div>
+        <div class="agent-role" id="sb-level">Agent</div>
+      </div>
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0"><polyline points="18 15 12 9 6 15"/></svg>
+    </div>
+    <div id="profile-menu" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:4px;margin-top:0.5rem;overflow:hidden">
+      <div onclick="signOutAgent()" style="padding:0.7rem 1rem;font-size:0.72rem;color:var(--red);cursor:pointer;display:flex;align-items:center;gap:0.5rem;transition:background 0.15s" onmouseover="this.style.background='rgba(231,76,60,0.08)'" onmouseout="this.style.background='transparent'">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Surge Agent Space</div>
+    <div class="topbar-right">
+      <span class="level-badge" id="top-level-badge">SP</span>
+    </div>
+  </div>
+
+  <!-- ======= DASHBOARD ======= -->
+  <div class="page active" id="page-dashboard">
+    <div class="dash-wrap">
+      <div class="page-header">
+        <div class="page-title">Good morning, <em id="dash-first-name">Agent</em></div>
+        <div class="page-sub">Here's your book of business at a glance.</div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-gold">
+          <div class="kpi-label">Monthly Premium</div>
+          <div class="kpi-num" style="color:var(--gold)">$0</div>
+          <div class="kpi-change" style="color:var(--muted)">No data yet</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">Placement Rate</div>
+          <div class="kpi-num" style="color:var(--green)">—</div>
+          <div class="kpi-change" style="color:var(--muted)">No data yet</div>
+        </div>
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-label">Persistency</div>
+          <div class="kpi-num" style="color:var(--blue)">—</div>
+          <div class="kpi-change" style="color:var(--muted)">No data yet</div>
+        </div>
+        <div class="kpi-card kpi-red">
+          <div class="kpi-label">Pending Apps</div>
+          <div class="kpi-num" style="color:var(--orange)">0</div>
+          <div class="kpi-change" style="color:var(--muted)">Awaiting approval</div>
+        </div>
+      </div>
+      <div class="policy-status-row">
+        <div class="status-card active-filter" onclick="filterPolicies('all')">
+          <div class="status-icon">📋</div>
+          <div class="status-count">0</div>
+          <div class="status-label">All Policies</div>
+        </div>
+        <div class="status-card" onclick="filterPolicies('pending')">
+          <div class="status-icon">⏳</div>
+          <div class="status-count status-pending">0</div>
+          <div class="status-label">Pending</div>
+        </div>
+        <div class="status-card" onclick="filterPolicies('active')">
+          <div class="status-icon">✅</div>
+          <div class="status-count status-active">0</div>
+          <div class="status-label">Active</div>
+        </div>
+        <div class="status-card" onclick="filterPolicies('declined')">
+          <div class="status-icon">❌</div>
+          <div class="status-count status-declined">0</div>
+          <div class="status-label">Declined</div>
+        </div>
+        <div class="status-card" onclick="filterPolicies('cancelled')">
+          <div class="status-icon">🚫</div>
+          <div class="status-count status-cancelled">0</div>
+          <div class="status-label">Cancelled</div>
+        </div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-header"><div class="metric-title">Placement Rate</div><div class="metric-period">Last 30 days</div></div>
+          <div class="metric-big">—</div>
+          <div class="metric-label">No policies submitted yet</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header"><div class="metric-title">Persistency Rate</div><div class="metric-period">Last 12 months</div></div>
+          <div class="metric-big">—</div>
+          <div class="metric-label">No active policies yet</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="table-section">
+        <div class="table-header">
+          <div class="table-title">Recent Policies</div>
+          <div class="table-actions">
+            <button class="tbl-btn active" onclick="filterPolicies('all')">All</button>
+            <button class="tbl-btn" onclick="filterPolicies('pending')">Pending</button>
+            <button class="tbl-btn" onclick="filterPolicies('active')">Active</button>
+            <button class="tbl-btn" onclick="filterPolicies('declined')">Declined</button>
+          </div>
+        </div>
+        <table><thead><tr><th>Client</th><th>Product</th><th>Carrier</th><th>Premium</th><th>Submitted</th><th>Status</th></tr></thead>
+        <tbody id="policy-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= ANALYTICS ======= -->
+  <div class="page" id="page-analytics"><div class="comm-wrap"><div class="page-header"><div class="page-title">Sales <em>Analytics</em></div><div class="page-sub">A breakdown of your production, carriers, and rate classes.</div></div><div class="lb-podium" style="justify-content:flex-start;flex-wrap:wrap"><div class="pod"><div class="pod-rank">TOTAL DEALS</div><div class="pod-val" id="an-total">0</div></div><div class="pod"><div class="pod-rank">ACTIVE</div><div class="pod-val" id="an-active">0</div></div><div class="pod"><div class="pod-rank">PENDING</div><div class="pod-val" id="an-pending">0</div></div><div class="pod"><div class="pod-rank">DECLINED / CANCELLED</div><div class="pod-val" id="an-declined">0</div></div></div><div class="table-section" style="margin-top:1.25rem"><div class="table-header"><div class="table-title">Monthly Production — Deals Sold</div></div><div id="an-monthly" style="display:flex;align-items:flex-end;gap:8px;height:190px;padding:1rem 0.5rem 0"></div></div><div class="table-section" style="margin-top:1.25rem"><div class="table-header"><div class="table-title">Top Carriers by Deals</div></div><div id="an-carriers" style="padding:0.75rem 0"></div></div><div class="table-section" style="margin-top:1.25rem"><div class="table-header"><div class="table-title">Rate Class Breakdown</div></div><div id="an-rateclass" style="padding:0.75rem 0"></div></div><div class="table-section" style="margin-top:1.25rem"><div class="table-header"><div class="table-title">Policy Status</div></div><div id="an-status" style="padding:0.75rem 0"></div></div></div></div>
+
+  <!-- ======= POLICIES ======= -->
+  
+
+  <!-- ======= PERSISTENCY ======= -->
+  <div class="page" id="page-persistency"><div class="comm-wrap"><div class="page-header"><div class="page-title">Persistency & <em>Placement</em></div><div class="page-sub">Live numbers from your book — set each policy's status to keep these accurate.</div></div><div class="lb-podium" style="justify-content:flex-start;flex-wrap:wrap"><div class="pod pod-gold" style="transform:none;box-shadow:0 0 24px var(--gold-dim)"><div class="pod-rank">PLACEMENT RATE</div><div class="pod-val" id="pers-placement">—</div></div><div class="pod"><div class="pod-rank">PERSISTENCY</div><div class="pod-val" id="pers-persistency">—</div></div><div class="pod"><div class="pod-rank">IN FORCE</div><div class="pod-val" id="pers-active">0</div></div><div class="pod"><div class="pod-rank">LAPSED</div><div class="pod-val" id="pers-lapsed">0</div></div></div><div class="table-section" style="margin-top:1.25rem"><div class="table-header"><div class="table-title">Policy Health Breakdown</div></div><table><thead><tr><th>Client</th><th>Product</th><th>Carrier</th><th>Placed Date</th><th>Status</th></tr></thead><tbody id="pers-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">No policies yet.</td></tr></tbody></table></div></div></div>
+
+  <!-- ======= COMMISSIONS ======= -->
+  <div class="page" id="page-commissions">
+    <div class="comm-wrap">
+      <div class="page-header">
+        <div class="page-title">My <em>Commissions</em></div>
+        <div class="page-sub">Pick a carrier, rate class, and premium to see your commission on a single deal.</div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-gold">
+          <div class="kpi-label">This Month</div>
+          <div class="kpi-num" style="color:var(--gold)">$3,420</div>
+          <div class="kpi-change up">↑ 18% vs last month</div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">YTD Earnings</div>
+          <div class="kpi-num" style="color:var(--green)">$28,640</div>
+          <div class="kpi-change up">↑ On track</div>
+        </div>
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-label">Pending</div>
+          <div class="kpi-num" style="color:var(--blue)">$1,850</div>
+          <div class="kpi-change" style="color:var(--muted)">7 policies pending</div>
+        </div>
+        <div class="kpi-card kpi-red">
+          <div class="kpi-label">Chargebacks</div>
+          <div class="kpi-num" style="color:var(--red)">$420</div>
+          <div class="kpi-change down">2 cancelled policies</div>
+        </div>
+      </div>
+
+      <!-- EXPECTED COMMISSIONS CALCULATOR -->
+      <div class="comm-calc">
+        <div class="calc-title">⚡ Expected Commission Calculator</div>
+        <div class="calc-grid">
+          <div class="calc-field">
+            <label class="calc-label">Carrier</label>
+            <select class="calc-select" id="calc-carrier" onchange="updateProducts()">
+              <option value="">Select Carrier</option>
+              <option>Aetna / Accendo</option>
+              <option>Aflac</option>
+              <option>AIG</option>
+              <option>American Amicable</option>
+              <option>Americo</option>
+              <option>Assurity</option>
+              <option>Baltimore Life</option>
+              <option>Columbus Life</option>
+              <option>Elco Mutual</option>
+              <option>F&G</option>
+              <option>Foresters</option>
+              <option>Gerber Life</option>
+              <option>GTL</option>
+              <option>Instabrain / Fidelity Life</option>
+              <option>Kansas City Life</option>
+              <option>Lafayette Life</option>
+              <option>Mutual of Omaha</option>
+              <option>National Life Group</option>
+              <option>North American</option>
+              <option>Royal Neighbors</option>
+              <option>Transamerica</option>
+              <option>Trinity Life</option>
+              <option>Illinois Mutual</option>
+              <option>Sentinel Security Life</option>
+            </select>
+          </div>
+          <div class="calc-field">
+            <label class="calc-label">Product / Rate Class</label>
+            <select class="calc-select" id="calc-product">
+              <option value="">Select carrier first</option>
+            </select>
+          </div>
+          <div class="calc-field">
+            <label class="calc-label">Annual Premium ($)</label>
+            <input class="calc-input" type="number" id="calc-premium" placeholder="e.g. 540" min="1">
+          </div>
+          <div class="calc-field">
+            <label class="calc-label">Your Level</label>
+            <select class="calc-select" id="calc-level">
+              <option value="A">A — Apprentice</option>
+              <option value="GA">GA — General Agent</option>
+              <option value="SA">SA — Supervising Agent</option>
+              <option value="SM">SM — Sales Manager</option>
+              <option value="SD">SD — Sales Director</option>
+              <option value="JP">JP — Jr Partner</option>
+              <option value="SP" selected>SP — Senior Partner</option>
+              <option value="EP">EP — Executive Partner</option>
+              <option value="RD">RD — Regional Director</option>
+              <option value="ND">ND — National Director</option>
+              <option value="VP">VP — Vice President</option>
+              <option value="P">P — President</option>
+            </select>
+          </div>
+          <button class="calc-btn" onclick="calculateComm()">Calculate →</button>
+        </div>
+        <div class="calc-result" id="calc-result">
+          <div class="result-card">
+            <div class="result-info">
+              <div class="result-label">Expected Year 1 Commission</div>
+              <div class="result-details" id="result-details"></div>
+            </div>
+            <div>
+              <div class="result-amount" id="result-amount">$0</div>
+              <div class="result-pct" id="result-pct"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMMISSION CHART BY CARRIER -->
+      <div class="comm-chart-section">
+        <div class="comm-chart-header">
+          <div class="table-title">Rate Reference — All Carriers</div>
+          <input class="carrier-search" id="carrier-search" placeholder="Search carrier..." oninput="filterCarriers()">
+        </div>
+        <div class="carrier-accordion" id="carrier-accordion"></div>
+      </div>
+
+      <!-- COMMISSION HISTORY -->
+      <div class="table-section">
+        <div class="table-header"><div class="table-title">Commission History</div></div>
+        <table><thead><tr><th>Client</th><th>Carrier</th><th>Premium</th><th>Commission</th><th>Status</th></tr></thead><tbody id="comm-history-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">No commissions yet.</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= CARRIER INFO ======= -->
+  <div class="page" id="page-carrier">
+    <div class="toolkit-wrap">
+      <div class="page-header">
+        <div class="page-title">Carrier <em>Info</em></div>
+        <div class="page-sub">One-click access to every carrier agent portal. Opens in a new tab.</div>
+      </div>
+
+      <div class="toolkit-section-label">Final Expense Carriers</div>
+      <div class="toolkit-grid">
+        <a class="toolkit-card" href="https://www.aetnaseniorproducts.com/ssi/index.html" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Aetna / Accendo</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://agents.aflac.com" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Aflac</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://connext.corebridgefinancial.com/life/connext-security/public/login" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">AIG / Corebridge</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://account.americoagent.com/Identity/Account/Login/?returnUrl=https%3a%2f%2ftools.americoagent.com%2f" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Americo</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.insuranceapplication.com/cgi/webappmobile/login.aspx?ReturnUrl=%2fcgi%2fwebappmobile%2f" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">American Amicable</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://myezbiz.foresters.com/my.policy" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Foresters Financial</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.gerberlife.com/gl/ap/view/agency/login.jsp" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Gerber Life</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.gtlic.com" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">GTL (Guarantee Trust Life)</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://portal.instabrain.io/Account/Login" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Instabrain / Fidelity Life</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://agents.ethoslife.com/login/" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Ethos Life</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://agentportal.baltlife.com/" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Baltimore Life</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.trinitylifeinc.com" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Trinity Life</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.sentinelsecuritylife.com" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Sentinel Security Life</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+      </div>
+
+      <div class="toolkit-section-label">Life / Term / IUL Carriers</div>
+      <div class="toolkit-grid">
+        <a class="toolkit-card" href="https://www.assurity.com/for-producers" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Assurity</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.fglife.com/financial-professionals" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">F&G Annuities & Life</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://login.kclife.com/oauth2/v1/authorize?client_id=okta.2b1959c8-bcc0-56eb-a589-cfcfb7422f26&code_challenge=27HwImJORLQ3kUehvcgZJbtqvsKeY78EPhcvKIrm9XY&code_challenge_method=S256&nonce=4R9haOANoRaNFSj9D2T4tAdBJLKzxBOMyODE8MbkSaIrrP20JRa4sewujuj2bhda&redirect_uri=https%3A%2F%2Flogin.kclife.com%2Fenduser%2Fcallback&response_type=code&state=i4oiLg00fdaXKLnIIKcqFgt7aGXBAoqabkL8sOfWAiRnYk77dvxPb0kI7oILxiD8&scope=openid" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Kansas City Life</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.lafayettelife.com/agent-resources" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Lafayette Life</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.mutualofomaha.com/" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Mutual of Omaha</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.nationallife.com/agent" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">National Life Group / NLG</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.northamericancompany.com/financial-professionals" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">North American</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://agent.royalneighbors.org/secure" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">RNA / Royal Neighbors of America</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://secure.transamerica.com/login/sign-in/login.html?TAM_OP=login" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Transamerica</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.illinoismutual.com/producer-resources" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Illinois Mutual</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.elcomutual.com" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Elco Mutual</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+        <a class="toolkit-card" href="https://www.columbuslife.com/financial-professionals" target="_blank"><div class="toolkit-left"><div class="toolkit-carrier">Columbus Life</div><div class="toolkit-type">Agent Login Portal</div></div><div class="toolkit-arrow">→</div></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= EXPECTED EARNINGS ======= -->
+  
+<div class="page" id="page-leaderboard"><div class="comm-wrap"><div class="page-header"><div class="page-title">Leader<em>board</em></div><div class="page-sub">Log your deals and see how you stack up against the team.</div></div><div class="lb-controls"><span style="font-size:0.7rem;color:var(--muted);font-weight:600">RANK BY</span><div class="lb-seg"><button class="lb-metric-btn active" data-m="premium" onclick="setLbMetric('premium')">Premium $</button><button class="lb-metric-btn" data-m="deals" onclick="setLbMetric('deals')"># of Deals</button></div><span style="font-size:0.7rem;color:var(--muted);font-weight:600;margin-left:1rem">PERIOD</span><div class="lb-seg"><button class="lb-range-btn" data-r="day" onclick="setLbRange('day')">Day</button><button class="lb-range-btn" data-r="week" onclick="setLbRange('week')">Week</button><button class="lb-range-btn active" data-r="month" onclick="setLbRange('month')">This Month</button><button class="lb-range-btn" data-r="lastmonth" onclick="setLbRange('lastmonth')">Last Month</button><button class="lb-range-btn" data-r="all" onclick="setLbRange('all')">All Time</button></div></div><div class="lb-podium" id="lb-podium"></div><div class="table-section"><div class="table-header"><div class="table-title">Full Rankings</div></div><table><thead><tr><th>Rank</th><th>Agent</th><th>Premium</th><th>Deals</th></tr></thead><tbody id="lb-tbody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
+<div class="page" id="page-book"><div class="comm-wrap"><div class="page-header"><div class="page-title">Book of <em>Business</em></div><div class="page-sub">Every deal you log lives here.</div></div><div style="margin-bottom:1rem"><span class="lb-stat">Total Premium <b id="book-total">$0</b></span><span class="lb-stat">Deals <b id="book-count">0</b></span><button class="calc-btn" onclick="openDealModal()" style="float:right">+ Log a Deal</button></div><div class="table-section"><table><thead><tr><th>Client</th><th>Carrier</th><th>Product</th><th>Premium</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody id="book-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
+<div class="modal" id="deal-modal"><div class="modal-box"><div class="modal-title">Log a Deal</div><div class="calc-field"><label class="calc-label">Client Name</label><input class="calc-input" id="d-client" placeholder="John Smith"></div><div class="calc-field"><label class="calc-label">Carrier</label><select class="calc-select" id="d-carrier"><option value="">Select Carrier</option><option>Aetna / Accendo</option><option>Aflac</option><option>AIG</option><option>American Amicable</option><option>Americo</option><option>Assurity</option><option>Baltimore Life</option><option>Columbus Life</option><option>Elco Mutual</option><option>F&G</option><option>Foresters</option><option>Gerber Life</option><option>GTL</option><option>Kansas City Life</option><option>Mutual of Omaha</option><option>National Life Group</option><option>North American</option><option>Royal Neighbors</option><option>Transamerica</option><option>Trinity Life</option><option>Illinois Mutual</option><option>Other</option></select></div><div class="calc-field"><label class="calc-label">Product</label><input class="calc-input" id="d-product" placeholder="Final Expense"></div><div class="calc-field"><label class="calc-label">Rate Class</label><select class="calc-select" id="d-rateclass"><option>Preferred</option><option>Standard</option><option>Graded</option><option>Modified</option></select></div><div class="calc-field"><label class="calc-label">Annual Premium ($)</label><input class="calc-input" type="number" id="d-premium" placeholder="e.g. 540" min="1"></div><div class="calc-field"><label class="calc-label">Status</label><select class="calc-select" id="d-status"><option>Pending</option><option>Active</option><option>Declined</option><option>Cancelled</option></select></div><div style="display:flex;gap:0.5rem;margin-top:1rem"><button class="calc-btn" id="d-submit" onclick="submitDeal()">Add Deal</button><button class="lb-del" style="color:var(--muted)" onclick="closeDealModal()">Cancel</button></div></div></div>
+<div class="page" id="page-expected"><div class="comm-wrap"><div class="page-header"><div class="page-title">Expected <em>Earnings</em></div><div class="page-sub">Your whole book at a glance — total premium and projected Year 1 payout at your level.</div></div><div class="lb-podium" style="justify-content:flex-start;flex-wrap:wrap"><div class="pod"><div class="pod-rank">TOTAL PREMIUM</div><div class="pod-val" id="exp-total-premium">$0</div></div><div class="pod pod-gold" style="transform:none;box-shadow:0 0 24px var(--gold-dim)"><div class="pod-rank">PROJECTED YEAR 1 PAYOUT</div><div class="pod-val" id="exp-payout">$0</div></div><div class="pod"><div class="pod-rank">ACTIVE PREMIUM</div><div class="pod-val" id="exp-active-premium">$0</div></div><div class="pod"><div class="pod-rank">PENDING PREMIUM</div><div class="pod-val" id="exp-pending-premium">$0</div></div><div class="pod"><div class="pod-rank">DEALS</div><div class="pod-val" id="exp-deal-count">0</div></div></div><div class="page-sub" style="margin-top:1.25rem">Payout is an estimate based on your commission level and each carrier's Year 1 rate. For a single-deal breakdown, use the Commissions calculator.</div></div></div>
+
+  <!-- ======= INVITE TEAM ======= -->
+  <div class="page" id="page-invite">
+    <div class="dash-wrap">
+      <div class="page-header">
+        <div class="page-title">Invite Your <em>Team</em></div>
+        <div class="page-sub">Generate a unique invite code for your recruit. They use it to create their account.</div>
+      </div>
+
+      <!-- INVITE FORM -->
+      <div class="comm-calc" style="max-width:700px;margin-bottom:2rem">
+        <div class="calc-title">📨 Create an Invite</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div class="calc-field">
+            <label class="calc-label">Recruit Full Name</label>
+            <input class="calc-input" type="text" id="inv-name" placeholder="John Smith">
+          </div>
+          <div class="calc-field">
+            <label class="calc-label">Recruit Email</label>
+            <input class="calc-input" type="email" id="inv-email" placeholder="agent@example.com">
+          </div>
+          <div class="calc-field">
+            <label class="calc-label">Recruit Phone</label>
+            <input class="calc-input" type="tel" id="inv-phone" placeholder="(479) 555-0123">
+          </div>
+          <div class="calc-field">
+            <label class="calc-label">Commission Level</label>
+            <select class="calc-select" id="inv-level">
+              <option value="A">A — Apprentice</option>
+              <option value="GA" selected>GA — General Agent</option>
+              <option value="SA">SA — Supervising Agent</option>
+              <option value="SM">SM — Sales Manager</option>
+              <option value="SD">SD — Sales Director</option>
+              <option value="JP">JP — Jr Partner</option>
+              <option value="SP">SP — Senior Partner</option>
+              <option value="EP">EP — Executive Partner</option>
+              <option value="RD">RD — Regional Director</option>
+              <option value="ND">ND — National Director</option>
+              <option value="VP">VP — Vice President</option>
+              <option value="P">P — President</option>
+            </select>
+          </div>
+        </div>
+        <button class="calc-btn" onclick="createInvite()" id="inv-btn">Generate Invite Code →</button>
+        <div id="inv-error" style="color:var(--red);font-size:0.68rem;margin-top:0.8rem"></div>
+
+        <!-- INVITE RESULT -->
+        <div id="inv-result" style="display:none;margin-top:1.5rem">
+          <div style="background:var(--bg3);border:1px solid var(--gold-b);border-radius:4px;padding:1.5rem">
+            <div style="font-size:0.55rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem">Invite Code Generated</div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+              <div id="inv-code-display" style="font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:600;color:var(--gold);letter-spacing:0.1em"></div>
+              <button onclick="copyInviteCode()" style="background:var(--bg2);border:1px solid var(--border);color:var(--muted);padding:0.4rem 0.8rem;border-radius:2px;font-family:'Montserrat',sans-serif;font-size:0.62rem;font-weight:700;cursor:pointer" id="copy-btn">Copy</button>
+            </div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.8rem">
+              Share this with <strong id="inv-result-name" style="color:var(--text)"></strong> — they enter this code when signing up at <span style="color:var(--gold)">hq.surgelifegroup.com</span>
+            </div>
+            <div style="font-size:0.68rem;padding:0.8rem;background:var(--gold-dim);border-radius:2px;border:1px solid var(--gold-b);color:var(--muted)">
+              ✅ Their account will be <strong style="color:var(--green)">pre-approved</strong> with <strong id="inv-result-level" style="color:var(--gold)"></strong> commission level — no admin approval needed.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SENT INVITES TABLE -->
+      <div class="table-section">
+        <div class="table-header">
+          <div class="table-title">Invites Sent</div>
+          <button class="tbl-btn" onclick="loadInvites()">Refresh</button>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Level</th><th>Code</th><th>Status</th><th>Sent</th></tr></thead>
+          <tbody id="invites-tbody">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem">No invites sent yet — create one above.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= DOWNLINE ======= -->
+  <div class="page" id="page-downline">
+    <div class="dash-wrap">
+      <div class="page-header">
+        <div class="page-title">My <em>Downline</em></div>
+        <div class="page-sub">Your entire organization — every agent below you, all levels deep.</div>
+      </div>
+      <div class="table-section">
+        <div class="table-header">
+          <div class="table-title">Downline Agents</div>
+          <button class="tbl-btn" onclick="loadDownline()">Refresh</button>
+        </div>
+        <table>
+          <thead><tr><th>Agent</th><th>Level</th><th>Upline</th><th>Status</th><th>Own Production</th><th>Team Production</th></tr></thead>
+          <tbody id="downline-tbody">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem">Loading your downline...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= INSURANCE TOOLKIT ======= -->
+  <div class="page" id="page-toolkit">
+    <div class="dash-wrap">
+      <div class="page-header">
+        <div class="page-title">Insurance <em>Toolkit</em></div>
+        <div class="page-sub">Access quoting tools, underwriting guides, and resources.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(1,1fr);gap:1rem;margin-bottom:2rem;max-width:400px">
+        <a href="https://www.insurancetoolkits.com" target="_blank" class="platform-card" style="text-decoration:none;display:block">
+          <div style="font-size:2rem;margin-bottom:0.8rem">🛠️</div>
+          <div class="card-tag">Primary Tool</div>
+          <div class="card-title" style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;margin-bottom:0.4rem">Insurance <em style="font-style:italic;color:var(--gold)">Toolkits</em></div>
+          <div style="font-size:0.72rem;color:var(--muted)">Quoting, underwriting guides, and sales resources.</div>
+          <div style="margin-top:0.8rem;font-size:0.65rem;color:var(--gold);font-weight:700">OPEN →</div>
+        </a>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1.5rem;text-align:center">
+        <div style="font-size:0.6rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.5rem">All Tools Open In New Tab</div>
+        <div style="font-size:0.75rem;color:var(--muted)">Click any card above to open the tool in a new browser tab.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= AI MESSAGING ======= -->
+  <div class="page" id="page-ai"><div class="comm-wrap"><div class="page-header"><div class="page-title">AI <em>Messaging</em></div><div class="page-sub">Automated client messaging.</div></div><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5rem 2rem;text-align:center"><div style="font-size:3rem;margin-bottom:1rem">🚀</div><div style="font-size:1.6rem;font-weight:700;color:var(--gold);letter-spacing:0.12em;font-family:'Cormorant Garamond',serif">Coming Soon</div><div style="color:var(--muted);margin-top:0.75rem;max-width:440px">Automated SMS &amp; email to your clients is on the way.</div></div></div></div>
+
+</div>
+
+<script>
+// ============ SUPABASE ============
+const SUPA_URL = 'https://szdzbycppkavfwuzlljh.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6ZHpieWNwcGthdmZ3dXpsbGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODIxNzgsImV4cCI6MjA5NTE1ODE3OH0.Jw21eHChMDHlskSs2PegmBXLYNIQkjl8GByOIApadhA';
+let sb = null;
+let currentUserId = null;
+let agentConfig = { name: 'Agent', level: 'GA', levelFull: 'General Agent' };
+async function initSupabase() {
+  if (!window.supabase) return;
+  sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  try {
+    // Check URL params first (passed from HQ login)
+    const params = new URLSearchParams(window.location.search);
+    const urlAccess = params.get('at');
+    const urlRefresh = params.get('rt');
+    if (urlAccess && urlRefresh) {
+      localStorage.setItem('surge_access_token', urlAccess);
+      localStorage.setItem('surge_refresh_token', urlRefresh);
+      // Clean URL without reloading
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    // Try localStorage tokens
+    const accessToken = localStorage.getItem('surge_access_token');
+    const refreshToken = localStorage.getItem('surge_refresh_token');
+    if (accessToken && refreshToken) {
+      await sb.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+    }
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentUserId = session.user.id;
+      localStorage.setItem('surge_access_token', session.access_token);
+      localStorage.setItem('surge_refresh_token', session.refresh_token);
+      const emailName = session.user.email.split('@')[0];
+      document.getElementById('sb-name').textContent = emailName;
+      document.getElementById('sb-avatar').textContent = emailName.slice(0,2).toUpperCase();
+      document.getElementById('dash-first-name').textContent = emailName;
+      const { data: profile } = await sb.from('profiles').select('first_name,last_name,commission_level').eq('id', session.user.id).single();
+      const firstName = profile?.first_name || '';
+      const lastName = profile?.last_name || '';
+      const fullName = (firstName + ' ' + lastName).trim() || emailName;
+      const level = profile?.commission_level || 'GA';
+      const levelNames = { A:'Apprentice',GA:'General Agent',SA:'Supervising Agent',SM:'Sales Manager',SD:'Sales Director',JP:'Jr Partner',SP:'Senior Partner',EP:'Executive Partner',RD:'Regional Director',ND:'National Director',VP:'Vice President',P:'President' };
+      const levelFull = levelNames[level] || level;
+      agentConfig.name = fullName;
+      agentConfig.level = level;
+      agentConfig.levelFull = levelFull;
+      const initials = fullName.split(' ').map(x=>x[0]).filter(Boolean).join('').slice(0,2).toUpperCase();
+      document.getElementById('sb-avatar').textContent = initials;
+      document.getElementById('sb-name').textContent = fullName;
+      document.getElementById('sb-level').textContent = level + ' — ' + levelFull;
+      document.getElementById('top-level-badge').textContent = level;
+      document.getElementById('dash-first-name').textContent = firstName || fullName;
+      const calcLevel = document.getElementById('calc-level');
+      if (calcLevel) calcLevel.value = level;
+      const expLevel = document.getElementById('exp-level');
+      if (expLevel) expLevel.value = level;
+      const expBadge = document.getElementById('exp-level-badge');
+      if (expBadge) expBadge.textContent = level + ' — ' + levelFull;
+    } else {
+      document.getElementById('sb-name').textContent = 'Not signed in';
+      document.getElementById('sb-level').textContent = 'Please log in at HQ';
+    }
+  } catch(e) {
+    console.error('Supabase init error:', e);
+  }
+}
+
+// ============ INVITE SYSTEM ============
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:8}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+async function createInvite() {
+  const name = document.getElementById('inv-name').value.trim();
+  const email = document.getElementById('inv-email').value.trim();
+  const phone = document.getElementById('inv-phone').value.trim();
+  const level = document.getElementById('inv-level').value;
+  const errEl = document.getElementById('inv-error');
+  const btn = document.getElementById('inv-btn');
+  errEl.textContent = '';
+  if (!name || !email) { errEl.textContent = 'Please enter recruit name and email.'; return; }
+  btn.disabled = true; btn.textContent = 'Generating...';
+  const code = generateCode();
+  if (sb && currentUserId) {
+    const { error } = await sb.from('invitations').insert({
+      created_by: currentUserId,
+      invite_code: code,
+      recruit_name: name,
+      recruit_email: email,
+      recruit_phone: phone,
+      commission_level: level,
+      used: false
+    });
+    if (error) { errEl.textContent = 'Error: ' + error.message; btn.disabled = false; btn.textContent = 'Generate Invite Code →'; return; }
+  }
+  document.getElementById('inv-code-display').textContent = code;
+  document.getElementById('inv-result-name').textContent = name;
+  document.getElementById('inv-result-level').textContent = level;
+  document.getElementById('inv-result').style.display = 'block';
+  btn.disabled = false; btn.textContent = 'Generate Another →';
+
+  // Auto-text the recruit their invite code
+  if (phone) {
+    try {
+      await fetch('/.netlify/functions/twilio-send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recruitName: name,
+          recruitPhone: phone,
+          inviteCode: code,
+          agentName: agentConfig.name
+        })
+      });
+    } catch(e) { console.log('SMS not sent - Twilio not configured yet'); }
+  }
+
+  loadInvites();
+}
+
+function copyInviteCode() {
+  const code = document.getElementById('inv-code-display').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'Copied! ✓';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'Copy'; btn.style.color = ''; }, 2000);
+  });
+}
+
+async function loadInvites() {
+  if (!sb || !currentUserId) return;
+  const { data } = await sb.from('invitations').select('*').eq('created_by', currentUserId).order('created_at', { ascending: false });
+  const tbody = document.getElementById('invites-tbody');
+  if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem">No invites sent yet.</td></tr>'; return; }
+  tbody.innerHTML = data.map(inv => `<tr>
+    <td>${inv.recruit_name}</td>
+    <td style="color:var(--muted)">${inv.recruit_email}</td>
+    <td style="color:var(--muted)">${inv.recruit_phone||'—'}</td>
+    <td><span style="color:var(--gold);font-weight:700">${inv.commission_level}</span></td>
+    <td><span style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--gold);letter-spacing:0.1em">${inv.invite_code}</span></td>
+    <td><span class="badge ${inv.used ? 'badge-active' : 'badge-pending'}">${inv.used ? 'Used' : 'Pending'}</span></td>
+    <td style="color:var(--muted)">${new Date(inv.created_at).toLocaleDateString()}</td>
+  </tr>`).join('');
+}
+
+
+async function loadDownline() {
+  if (!sb || !currentUserId) return;
+  var tbody = document.getElementById("downline-tbody");
+  if (tbody) tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem'>Loading your organization...</td></tr>";
+  var profRes = await sb.from("profiles").select("id,first_name,last_name,email,commission_level,status,upline_id");
+  var dealRes = await sb.from("deals").select("agent_id,premium");
+  var profs = profRes.data || [];
+  var deals = dealRes.data || [];
+  var kids = {};
+  profs.forEach(function(p){ if(!p.upline_id) return; (kids[p.upline_id]=kids[p.upline_id]||[]).push(p); });
+  var own = {};
+  deals.forEach(function(d){ var o=own[d.agent_id]||(own[d.agent_id]={prem:0,cnt:0}); o.prem+=Number(d.premium)||0; o.cnt++; });
+  var nm = {};
+  profs.forEach(function(p){ nm[p.id]=((p.first_name||"")+" "+(p.last_name||"")).trim()||p.email||"Agent"; });
+  var teamMemo = {};
+  function team(id){ if(teamMemo[id]) return teamMemo[id]; var t={prem:0,cnt:0}; (kids[id]||[]).forEach(function(k){ var ko=own[k.id]||{prem:0,cnt:0}; var kt=team(k.id); t.prem+=ko.prem+kt.prem; t.cnt+=ko.cnt+kt.cnt; }); teamMemo[id]=t; return t; }
+  var rows=[]; var seen={};
+  (function walk(id,depth){ (kids[id]||[]).forEach(function(k){ if(seen[k.id]) return; seen[k.id]=true; rows.push({p:k,depth:depth}); walk(k.id,depth+1); }); })(currentUserId,0);
+  if(!tbody) return;
+  if(rows.length===0){ tbody.innerHTML="<tr><td colspan='6' style='text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem'>No agents in your downline yet. Share your invite code to grow your team!</td></tr>"; return; }
+  function money(n){ return "$"+Math.round(n).toLocaleString(); }
+  tbody.innerHTML = rows.map(function(r){
+    var p=r.p; var o=own[p.id]||{prem:0,cnt:0}; var t=team(p.id);
+    var pad=r.depth*16;
+    var up=nm[p.upline_id]||"—";
+    var branch=r.depth>0?"<span style='color:var(--muted)'>└ </span>":"";
+    return "<tr><td><span style='padding-left:"+pad+"px'>"+branch+nm[p.id]+"</span></td>"+
+      "<td><span style='color:var(--gold);font-weight:700'>"+(p.commission_level||"GA")+"</span></td>"+
+      "<td style='color:var(--muted)'>"+up+"</td>"+
+      "<td><span class='badge badge-"+(p.status==="active"?"active":"pending")+"'>"+(p.status||"pending")+"</span></td>"+
+      "<td style='color:var(--muted)'>"+money(o.prem)+" · "+o.cnt+" deal"+(o.cnt===1?"":"s")+"</td>"+
+      "<td style='color:var(--gold);font-weight:600'>"+money(t.prem)+" · "+t.cnt+" deal"+(t.cnt===1?"":"s")+"</td></tr>";
+  }).join("");
+}
+
+      const LEVELS = ['A','GA','SA','SM','SD','JP','SP','EP','RD','ND','VP','P'];
+
+// ============ CARRIER DATA (from L&L 2026 Comp Booklet) ============
+const carrierData = [
+  { name:'Aetna / Accendo', cat:'Final Expense', products:[
+    { name:'Level Ages 40-89', rates:[70,70,77.5,85,92.5,100,107.5,115,120,125,130,137] },
+    { name:'Modified Ages 40-75', rates:[60,60,67.5,75,82.5,90,97.5,105,110,115,120,127] }
+  ]},
+  { name:'Aflac', cat:'Final Expense', products:[
+    { name:'Level Ages 45-80', rates:[63,63,70,78,85,93,100,108,113,118,123,130] },
+    { name:'Modified Ages 40-75', rates:[55,55,65,75,80,85,90,95,100,105,110,117] }
+  ]},
+  { name:'AIG', cat:'Final Expense', products:[
+    { name:'SIWL (Preferred)', rates:[82,87,92,97,102,107,112,117,122,127,132,137] },
+    { name:'SIWL Graded', rates:[42,47,52,57,62,67,72,77,82,87,92,97] },
+    { name:'Guaranteed Issue', rates:[45,45,45,50,55,60,65,70,75,80,85,90] }
+  ]},
+  { name:'American Amicable', cat:'Final Expense', products:[
+    { name:'Senior/Family Choice FEX 0-79 (Preferred)', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
+    { name:'Senior/Family Choice FEX 80-85', rates:[40,45,50,55,60,65,70,75,80,85,90,95] },
+    { name:'ROP Graded 0-79', rates:[60,65,70,75,80,85,90,95,100,105,110,115] },
+    { name:'ROP Graded 80-85', rates:[40,45,50,55,60,65,70,75,80,85,90,95] }
+  ]},
+  { name:'Americo', cat:'Life / Term', products:[
+    { name:'Instant Decision IUL', rates:[70,70,75,80,85,90,95,100,105,110,125,130] },
+    { name:'Term 100', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
+    { name:'Term 125 (15yr)', rates:[90,95,100,105,110,115,120,125,130,135,140,145] },
+    { name:'Term 125 (20-30yr)', rates:[70,75,80,85,90,95,100,105,110,125,130,135] }
+  ]},
+  { name:'Assurity', cat:'Life / Term', products:[
+    { name:'Whole Life Pay for Life (Preferred)', rates:[62,64,66,70,72,74,76,78,80,85,90,95] },
+    { name:'AWL Pay to 65 (0-45)', rates:[44,46,48,52,54,56,58,60,62.5,65,67.5,70] },
+    { name:'10 Year Term', rates:[36,40,45,55,60,65,70,75,80,85,90,92] },
+    { name:'15 Year Term', rates:[41,45,50,60,65,70,75,80,85,90,95,97] },
+    { name:'20 & 30 Year Term', rates:[55,58,60,65,70,75,80,85,95,102,110,112] }
+  ]},
+  { name:'Baltimore Life', cat:'Final Expense', products:[
+    { name:'iProvide Preferred Ages 45-80', rates:[80,85,90,95,100,105,110,115,120,125,130,135] },
+    { name:'iProvide Preferred Ages 81-89', rates:[60,65,70,75,80,85,90,90,100,105,110,115] },
+    { name:'iProvide Standard Ages 45-80', rates:[60,65,70,75,80,85,90,95,100,105,110,115] },
+    { name:'iProvide Modified Ages 45-80', rates:[40,45,50,55,60,65,70,75,80,85,90,95] }
+  ]},
+  { name:'Columbus Life', cat:'IUL', products:[
+    { name:'Indexed UL (SIUL)', rates:[65,70,75,80,85,90,95,100,105,110,115,120] }
+  ]},
+  { name:'Elco Mutual', cat:'Final Expense', products:[
+    { name:'Final Expense (Preferred)', rates:[70,75,80,85,90,95,100,105,110,115,120,125] },
+    { name:'Golden Eagle', rates:[55,60,65,70,75,80,85,90,95,100,105,110] }
+  ]},
+  { name:'F&G', cat:'Life', products:[
+    { name:'Everlast Ages 18-80 (Preferred)', rates:[65,70,75,80,85,90,95,100,105,110,115,120] },
+    { name:'Pathsetter Ages 18-80', rates:[70,75,80,85,90,95,100,105,110,115,120,125] },
+    { name:'Everlast / Pathsetter Ages 0-17', rates:[45,55,60,62.5,65,67.5,70,72.5,75,77.5,80,82.5] }
+  ]},
+  { name:'Foresters', cat:'Final Expense', products:[
+    { name:'PlanRight 50-80 (Preferred)', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
+    { name:'PlanRight 81-85', rates:[45,50,55,60,65,70,75,80,85,90,95,100] },
+    { name:'Basic PlanRight (Graded)', rates:[32.5,35,37.5,40,42.5,45,47.5,50,55,60,65,70] }
+  ]},
+  { name:'Gerber Life', cat:'Final Expense', products:[
+    { name:'Guarantee Issue', rates:[45,45,45,50,50,50,55,60,65,70,75,75] }
+  ]},
+  { name:'GTL', cat:'Final Expense', products:[
+    { name:'Heritage FE (Final Expense)', rates:[45,45,45,45,45,50,55,60,65,70,75,80] },
+    { name:'Life Select (Whole Life)', rates:[40,40,40,40,45,50,55,60,65,70,75,80] }
+  ]},
+  { name:'Instabrain / Fidelity Life', cat:'Life / Term', products:[
+    { name:'Accidental', rates:[40,45,50,55,60,65,70,75,80,85,90,95] },
+    { name:'Final Expense', rates:[35,37.5,40,42.5,45,47.5,50,55,60,65,70,75] },
+    { name:'Term (Preferred)', rates:[80,80,85,90,95,100,105,110,115,120,125,130] }
+  ]},
+  { name:'Kansas City Life', cat:'Life / Term', products:[
+    { name:'Signature Term (Preferred)', rates:[80,85,90,95,100,105,110,115,120,125,130,135] },
+    { name:'Cash Back Life Term', rates:[50,55,60,65,70,75,80,85,90,95,100,105] }
+  ]},
+  { name:'Lafayette Life', cat:'Whole Life', products:[
+    { name:'Whole Life Patriot/Contender (Standard)', rates:[55,55,55,55,55,60,65,70,80,85,90,95] },
+    { name:'Whole Life Heritage', rates:[55,55,55,55,55,60,65,70,75,80,85,90] }
+  ]},
+  { name:'Mutual of Omaha', cat:'Life / Term', products:[
+    { name:'TLE Term Life Express (Preferred)', rates:[90,95,100,105,110,115,120,125,130,135,140,145] },
+    { name:'Living Promise Final Expense', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
+    { name:'Index IUL Express', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
+    { name:'Indexed Universal Life IUL', rates:[70,75,80,85,90,95,100,105,110,115,120,125] },
+    { name:'TLA Term Life Answers (Standard)', rates:[65,70,75,80,85,90,95,100,105,110,115,120] },
+    { name:'Accidental Death', rates:[75,80,85,90,95,100,105,110,115,120,125,130] }
+  ]},
+  { name:'National Life Group', cat:'IUL / Term', products:[
+    { name:'FlexLife IUL', rates:[40,50,60,70,75,80,85,90,95,100,105,110] },
+    { name:'Level Term', rates:[40,50,60,70,75,80,85,90,95,100,105,110] }
+  ]},
+  { name:'North American', cat:'IUL / Term', products:[
+    { name:'Builder Plus 4 IUL (Preferred)', rates:[55,60,65,70,75,80,85,90,95,100,105,110] },
+    { name:'ADDvantage 20-30yr Term', rates:[55,60,65,70,75,80,85,90,95,100,105,110] },
+    { name:'ADDvantage 10yr Term', rates:[45,47.5,50,52.5,55,57.5,60,65,70,75,80,85] },
+    { name:'ADDvantage 15yr Term', rates:[50,52.5,55,57.5,60,62.5,65,70,75,80,85,90] }
+  ]},
+  { name:'Royal Neighbors', cat:'Whole Life', products:[
+    { name:'SIWL Ages 50-75 (Preferred)', rates:[70,75,80,85,90,95,100,105,110,115,120,125] },
+    { name:'SIWL Ages 76-80 (Standard)', rates:[55,60,65,70,75,80,85,90,95,100,105,110] },
+    { name:'SIWL Ages 81-85 (Modified)', rates:[30,35,40,50,50,55,60,70,75,80,85,90] },
+    { name:'Graded Ages 50-75', rates:[45,50,55,60,62.5,65,67.5,70,72.5,75,80,77.5] },
+    { name:'Jet Whole Life $100k+ (Preferred)', rates:[70,75,80,85,90,95,100,105,110,115,120,125] },
+    { name:'Jet Term', rates:[70,75,80,85,90,95,100,105,110,115,120,125] }
+  ]},
+  { name:'Transamerica', cat:'Final Expense / Term', products:[
+    { name:'FE Express Solution (Preferred)', rates:[90,95,100,105,110,115,120,125,130,135,140,145] },
+    { name:'Whole Life Lifetime WL', rates:[80,85,90,95,100,105,110,115,125,135,140,145] },
+    { name:'Immediate Solution (Standard)', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
+    { name:'Graded FE Express (Graded)', rates:[53,58,63,68,73,78,83,88,93,98,99,106] },
+    { name:'Trendsetter Super 20/25/30yr', rates:[65,70,75,80,82,85,90,92,95,100,105,110] },
+    { name:'Trendsetter LB 20/25/30yr', rates:[75,80,85,90,92,95,100,102,105,110,115,120] }
+  ]},
+  { name:'Trinity Life', cat:'Final Expense', products:[
+    { name:'Golden Eagle Ages 50-80 (Preferred)', rates:[50,55,60,65,70,75,80,85,90,95,100,105] },
+    { name:'Golden Eagle Ages 81-85', rates:[25,30,35,40,45,47.5,50,55,57.5,60,65,70] },
+    { name:'Graded Benefit Ages 50-80', rates:[45,50,55,60,65,67.5,70,75,80,85,90,95] }
+  ]},
+  { name:'Illinois Mutual', cat:'Final Expense', products:[
+    { name:'Simplified Issue Ages 45-75 (Standard)', rates:[65,70,75,80,85,90,95,100,105,110,115,120] },
+    { name:'Simplified Issue Ages 76-80', rates:[50,55,60,65,70,75,80,85,90,95,100,105] },
+    { name:'Simplified Issue Ages 81-85 (Modified)', rates:[25,30,35,40,45,50,55,60,65,70,75,80] }
+  ]},
+  { name:'Sentinel Security Life', cat:'Final Expense', products:[
+    { name:'Level NewVantage I Ages 0-75 (Preferred)', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
+    { name:'Level NewVantage I Ages 76-80 (Standard)', rates:[55,60,65,70,75,80,85,90,95,100,105,115] },
+    { name:'Level NewVantage I Ages 81-85', rates:[40,45,50,55,60,65,70,75,80,85,90,95] },
+    { name:'Graded NewVantage II Ages 45-75', rates:[55,60,65,70,75,80,85,90,95,100,105,110] },
+    { name:'Modified NewVantage III Ages 45-75', rates:[40,45,50,55,60,65,70,75,80,85,90,95] }
+  ]}
+];
+
+// ============ POLICIES DATA ============
+const policies = [];
+
+
+// ============ INIT ============
+function init() {
+  // Load everything after Supabase resolves real identity
+  initSupabase().then(() => {
+    document.getElementById('calc-level').value = agentConfig.level;
+    const expBadge = document.getElementById('exp-level-badge');
+    if (expBadge) expBadge.textContent = agentConfig.level + ' — ' + agentConfig.levelFull;
+    const expLevel = document.getElementById('exp-level');
+    if (expLevel) expLevel.value = agentConfig.level;
+    loadInvites(); loadDownline(); renderPolicies(); buildCarrierAccordion(); buildAnalytics(); buildMonthlyChart();
+  });
+}
+
+function toggleProfileMenu() {
+  const menu = document.getElementById('profile-menu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+async function signOutAgent() {
+  if (sb) await sb.auth.signOut();
+  localStorage.removeItem('surge_access_token');
+  localStorage.removeItem('surge_refresh_token');
+  window.location.href = 'https://hq.surgelifegroup.com';
+}
+
+// ============ PAGE NAV ============
+
+let LB_METRIC='premium';let LB_RANGE='month';
+function escapeHtml(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function openDealModal(){var m=document.getElementById('deal-modal');if(m)m.classList.add('active');}
+function closeDealModal(){var m=document.getElementById('deal-modal');if(m)m.classList.remove('active');}
+async function submitDeal(){if(!sb||!currentUserId){alert('Please sign in from HQ first.');return;}var client=document.getElementById('d-client').value.trim();var carrier=document.getElementById('d-carrier').value;var product=document.getElementById('d-product').value.trim();var rate=document.getElementById('d-rateclass').value;var prem=parseFloat(document.getElementById('d-premium').value);var status=document.getElementById('d-status').value;if(!client||!carrier||!prem){alert('Please enter client, carrier, and premium.');return;}var btn=document.getElementById('d-submit');if(btn){btn.disabled=true;btn.textContent='Saving...';}var ins=await sb.from('deals').insert({agent_id:currentUserId,agent_name:agentConfig.name,client:client,carrier:carrier,product:product,rate_class:rate,premium:prem,status:status});if(btn){btn.disabled=false;btn.textContent='Add Deal';}if(ins.error){alert('Could not save: '+ins.error.message);return;}document.getElementById('d-client').value='';document.getElementById('d-product').value='';document.getElementById('d-premium').value='';closeDealModal();loadBook();loadLeaderboard();}
+async function deleteDeal(id){if(!sb)return;if(!confirm('Remove this deal from your book?'))return;var r=await sb.from('deals').delete().eq('id',id);if(r.error){alert('Could not remove: '+r.error.message);return;}loadBook();loadLeaderboard();}
+async function loadBook(){var tb=document.getElementById('book-tbody');if(!tb)return;if(!sb||!currentUserId){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Sign in from HQ to see your book.</td></tr>';return;}var r=await sb.from('deals').select('*').eq('agent_id',currentUserId).order('created_at',{ascending:false});var rows=(r.data||[]);syncDashboard(rows);var tot=rows.reduce(function(a,d){return a+(parseFloat(d.premium)||0);},0);var bt=document.getElementById('book-total');if(bt)bt.textContent='$'+tot.toLocaleString();var bc=document.getElementById('book-count');if(bc)bc.textContent=rows.length;if(!rows.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No deals logged yet. Tap + Log a Deal to start your book.</td></tr>';return;}tb.innerHTML=rows.map(function(d){return '<tr><td>'+escapeHtml(d.client)+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td>'+escapeHtml(d.product||'-')+'</td><td style="color:var(--gold)">$'+(parseFloat(d.premium)||0).toLocaleString()+'</td><td>'+statusSelect(d)+'</td><td style="color:var(--muted)">'+new Date(d.created_at).toLocaleDateString()+'</td><td><button class="lb-del" data-del="'+d.id+'">Remove</button></td></tr>';}).join('');tb.querySelectorAll('button[data-del]').forEach(function(b){b.onclick=function(){deleteDeal(b.getAttribute('data-del'));};});tb.querySelectorAll('select[data-deal]').forEach(function(s){s.onchange=function(){updateDealStatus(s.getAttribute('data-deal'),s.value);};});}
+function lbRangeStart(){var n=new Date();var s=new Date();if(LB_RANGE==='day'){s.setHours(0,0,0,0);}else if(LB_RANGE==='week'){var day=(n.getDay()+6)%7;s.setDate(n.getDate()-day);s.setHours(0,0,0,0);}else if(LB_RANGE==='month'){s=new Date(n.getFullYear(),n.getMonth(),1);}else if(LB_RANGE==='lastmonth'){s=new Date(n.getFullYear(),n.getMonth()-1,1);}else{s=new Date(2000,0,1);}return s;}
+function lbRangeEnd(){var n=new Date();if(LB_RANGE==='lastmonth'){return new Date(n.getFullYear(),n.getMonth(),1);}return new Date(2999,0,1);}
+function setLbMetric(m){LB_METRIC=m;document.querySelectorAll('.lb-metric-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-m')===m);});loadLeaderboard();}
+function setLbRange(r){LB_RANGE=r;document.querySelectorAll('.lb-range-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-r')===r);});loadLeaderboard();}
+async function loadLeaderboard(){var pod=document.getElementById('lb-podium');var tb=document.getElementById('lb-tbody');if(!tb)return;if(!sb){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">Connecting...</td></tr>';return;}var start=lbRangeStart();var end=lbRangeEnd();var r=await sb.from('deals').select('agent_id,agent_name,premium,created_at').gte('created_at',start.toISOString()).lt('created_at',end.toISOString());var rows=(r.data||[]);var map={};rows.forEach(function(d){var k=d.agent_id||d.agent_name;if(!map[k])map[k]={id:d.agent_id,name:d.agent_name||'Agent',deals:0,premium:0};map[k].deals++;map[k].premium+=(parseFloat(d.premium)||0);});var arr=Object.keys(map).map(function(k){return map[k];});arr.sort(function(a,b){return LB_METRIC==='deals'?(b.deals-a.deals)||(b.premium-a.premium):(b.premium-a.premium)||(b.deals-a.deals);});function val(a){return LB_METRIC==='deals'?a.deals+(a.deals===1?' deal':' deals'):'$'+a.premium.toLocaleString();}var medals=['gold','silver','bronze'];if(pod){if(!arr.length){pod.innerHTML='<div class="lb-empty">No deals logged in this period yet. Be the first!</div>';}else{var top=arr.slice(0,3);var order=[1,0,2];var html='';order.forEach(function(i){if(!top[i])return;var a=top[i];var rank=i+1;html+='<div class="pod pod-'+medals[i]+(a.id===currentUserId?' pod-me':'')+'"><div class="pod-medal">'+(rank===1?'🥇':rank===2?'🥈':'🥉')+'</div><div class="pod-name">'+escapeHtml(a.name)+'</div><div class="pod-val">'+val(a)+'</div><div class="pod-rank">#'+rank+'</div></div>';});pod.innerHTML=html;}}if(!arr.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">No deals yet.</td></tr>';return;}tb.innerHTML=arr.map(function(a,i){var me=a.id===currentUserId;return '<tr'+(me?' class="lb-me"':'')+'><td style="font-weight:700;color:'+(i<3?'var(--gold)':'var(--muted)')+'">'+(i+1)+'</td><td>'+escapeHtml(a.name)+(me?' <span class="lb-youtag">YOU</span>':'')+'</td><td style="color:var(--gold)">$'+a.premium.toLocaleString()+'</td><td>'+a.deals+'</td></tr>';}).join('');}
+
+function syncDashboard(rows){rows=rows||[];var now=new Date();var mStart=new Date(now.getFullYear(),now.getMonth(),1);var total=rows.length,pending=0,active=0,declined=0,cancelled=0,mPrem=0,mCount=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='pending')pending++;else if(s==='active')active++;else if(s==='declined')declined++;else if(s==='cancelled')cancelled++;var dt=new Date(d.created_at);if(dt>=mStart){mPrem+=(parseFloat(d.premium)||0);mCount++;}});function setT(sel,val){var el=document.querySelector(sel);if(el)el.textContent=val;}setT('#page-dashboard .kpi-card.kpi-gold .kpi-num','$'+mPrem.toLocaleString());setT('#page-dashboard .kpi-card.kpi-gold .kpi-change',mCount+' deal'+(mCount===1?'':'s')+' this month');setT('#page-dashboard .kpi-card.kpi-red .kpi-num',String(pending));setT('#page-dashboard .status-card.active-filter .status-count',String(total));setT('#page-dashboard .status-count.status-pending',String(pending));setT('#page-dashboard .status-count.status-active',String(active));setT('#page-dashboard .status-count.status-declined',String(declined));setT('#page-dashboard .status-count.status-cancelled',String(cancelled));var decided=active+declined;setT('#page-dashboard .kpi-card.kpi-green .kpi-num',total>0?(Math.round((active+cancelled)/total*100)+'%'):'—');setT('#page-dashboard .kpi-card.kpi-blue .kpi-num',(active+cancelled)>0?(Math.round(active/(active+cancelled)*100)+'%'):'—');try{if(typeof policies!=='undefined'&&Array.isArray(policies)){policies.length=0;rows.forEach(function(d){policies.push({client:d.client,product:d.product||'-',carrier:d.carrier,rateClass:d.rate_class||'-',premium:'$'+(parseFloat(d.premium)||0).toLocaleString(),date:new Date(d.created_at).toLocaleDateString(),status:d.status});});if(typeof renderPolicies==='function')renderPolicies();}}catch(e){}}
+function refreshAll(){if(typeof loadBook==='function')loadBook();if(typeof loadLeaderboard==='function')loadLeaderboard();if(typeof loadExpected==='function')loadExpected();if(typeof loadCommissions==='function')loadCommissions();if(typeof loadPersistency==='function')loadPersistency();if(typeof buildAnalytics==='function')buildAnalytics();}
+var __sdTries=0;var __sdTimer=setInterval(function(){__sdTries++;if(typeof sb!=='undefined'&&sb&&typeof currentUserId!=='undefined'&&currentUserId){clearInterval(__sdTimer);refreshAll();}else if(__sdTries>40){clearInterval(__sdTimer);}},800);
+
+async function loadExpected(){var elTot=document.getElementById('exp-total-premium');if(!elTot)return;if(!sb||!currentUserId){elTot.textContent='$0';return;}var r=await sb.from('deals').select('premium,carrier,status').eq('agent_id',currentUserId);var rows=(r.data||[]);var li=0;try{li=LEVELS.indexOf(agentConfig.level);if(li<0)li=0;}catch(e){li=0;}var totPrem=0,payout=0,activePrem=0,pendPrem=0;rows.forEach(function(d){var p=parseFloat(d.premium)||0;totPrem+=p;var s=String(d.status||'').toLowerCase();if(s==='active')activePrem+=p;else if(s==='pending')pendPrem+=p;var rate=null;try{var c=carrierData.find(function(x){return x.name===d.carrier;});if(c&&c.products&&c.products[0]&&c.products[0].rates){rate=c.products[0].rates[li];}}catch(e){}if(rate!=null){payout+=p*rate/100;}});function st(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}st('exp-total-premium','$'+Math.round(totPrem).toLocaleString());st('exp-payout','$'+Math.round(payout).toLocaleString());st('exp-active-premium','$'+Math.round(activePrem).toLocaleString());st('exp-pending-premium','$'+Math.round(pendPrem).toLocaleString());st('exp-deal-count',String(rows.length));}
+
+async function loadCommissions(){var pc=document.getElementById('page-commissions');if(!pc)return;if(!sb||!currentUserId)return;var r=await sb.from('deals').select('premium,carrier,status,created_at').eq('agent_id',currentUserId);var rows=(r.data||[]);var li=0;try{li=LEVELS.indexOf(agentConfig.level);if(li<0)li=0;}catch(e){li=0;}function commOf(d){var p=parseFloat(d.premium)||0;var rate=null;try{var c=carrierData.find(function(x){return x.name===d.carrier;});if(c&&c.products&&c.products[0])rate=c.products[0].rates[li];}catch(e){}return rate!=null?p*rate/100:0;}var now=new Date();var mStart=new Date(now.getFullYear(),now.getMonth(),1);var yStart=new Date(now.getFullYear(),0,1);var month=0,ytd=0,pendingPrem=0,cancelled=0,pendCount=0,cancCount=0;rows.forEach(function(d){var dt=new Date(d.created_at);var cm=commOf(d);if(dt>=yStart)ytd+=cm;if(dt>=mStart)month+=cm;var s=String(d.status||'').toLowerCase();if(s==='pending'){pendingPrem+=(parseFloat(d.premium)||0);pendCount++;}if(s==='cancelled'){cancelled+=cm;cancCount++;}});function setC(color,num,chg){var card=pc.querySelector('.kpi-card.kpi-'+color);if(!card)return;var n=card.querySelector('.kpi-num');if(n)n.textContent=num;var c=card.querySelector('.kpi-change');if(c)c.textContent=chg;}setC('gold','$'+Math.round(month).toLocaleString(),'commission this month');setC('green','$'+Math.round(ytd).toLocaleString(),'year to date');setC('blue','$'+Math.round(pendingPrem).toLocaleString(),pendCount+' pending');setC('red','$'+Math.round(cancelled).toLocaleString(),cancCount+' cancelled');var ctb=document.getElementById('comm-history-tbody');if(ctb){if(!rows.length){ctb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">No commissions yet.</td></tr>';}else{var sorted=rows.slice().sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at);});ctb.innerHTML=sorted.map(function(d){return '<tr><td>'+escapeHtml(d.client)+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td>$'+(parseFloat(d.premium)||0).toLocaleString()+'</td><td style="color:var(--gold)">$'+Math.round(commOf(d)).toLocaleString()+'</td><td><span class="badge badge-'+String(d.status||'').toLowerCase()+'">'+escapeHtml(d.status)+'</span></td></tr>';}).join('');}}}
+
+function statusSelect(d){var opts=['Pending','Active','Declined','Cancelled'];return '<select class="calc-select" data-deal="'+d.id+'" style="padding:3px 6px;font-size:0.7rem;width:auto;min-width:115px">'+opts.map(function(o){return '<option'+(String(d.status)===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select>';}
+async function updateDealStatus(id,status){if(!sb)return;var r=await sb.from('deals').update({status:status}).eq('id',id);if(r&&r.error){alert('Could not update: '+r.error.message);return;}refreshAll();}
+async function loadPersistency(){var tb=document.getElementById('pers-tbody');if(!tb)return;if(!sb||!currentUserId)return;var r=await sb.from('deals').select('*').eq('agent_id',currentUserId).order('created_at',{ascending:false});var rows=(r.data||[]);var total=rows.length,active=0,declined=0,pending=0,cancelled=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='active')active++;else if(s==='declined')declined++;else if(s==='pending')pending++;else if(s==='cancelled')cancelled++;});var placed=active+cancelled;function st(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}st('pers-placement',total>0?Math.round(placed/total*100)+'%':'—');st('pers-persistency',placed>0?Math.round(active/placed*100)+'%':'—');st('pers-active',String(active));st('pers-lapsed',String(cancelled));if(!rows.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">No policies yet. Log deals in your Book of Business.</td></tr>';return;}tb.innerHTML=rows.map(function(d){return '<tr><td>'+escapeHtml(d.client)+'</td><td>'+escapeHtml(d.product||'-')+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td style="color:var(--muted)">'+new Date(d.created_at).toLocaleDateString()+'</td><td>'+statusSelect(d)+'</td></tr>';}).join('');tb.querySelectorAll('select[data-deal]').forEach(function(s){s.onchange=function(){updateDealStatus(s.getAttribute('data-deal'),s.value);};});}
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();}
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+// ============ POLICIES ============
+function badgeClass(s) {
+  return {active:'badge-active',pending:'badge-pending',declined:'badge-declined',cancelled:'badge-cancelled'}[s]||'badge-pending';
+}
+function renderPolicies(filter='all') {
+  const filtered = filter==='all' ? policies : policies.filter(p=>p.status===filter);
+  const html = filtered.map(p=>`<tr>
+    <td>${p.client}</td><td>${p.product}</td>
+    <td style="color:var(--muted)">${p.carrier}</td>
+    <td style="color:var(--muted);font-size:0.68rem">${p.rateClass||'—'}</td>
+    <td style="color:var(--gold)">${p.premium}</td>
+    <td style="color:var(--muted)">${p.date}</td>
+    <td><span class="badge ${badgeClass(p.status)}">${p.status}</span></td>
+  </tr>`).join('');
+  ['policy-tbody','policy-tbody-2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=html; });
+}
+
+function renderPolicies(filter){filter=filter||'all';var list=(typeof policies!=='undefined'&&Array.isArray(policies))?policies:[];var filtered=(filter==='all')?list:list.filter(function(p){return String(p.status||'').toLowerCase()===String(filter).toLowerCase();});var html=filtered.map(function(p){return '<tr><td>'+escapeHtml(p.client)+'</td><td>'+escapeHtml(p.product)+'</td><td style="color:var(--muted)">'+escapeHtml(p.carrier)+'</td><td style="color:var(--gold)">'+escapeHtml(p.premium)+'</td><td style="color:var(--muted)">'+escapeHtml(p.date)+'</td><td><span class="badge '+(typeof badgeClass==='function'?badgeClass(p.status):'')+'">'+escapeHtml(p.status)+'</span></td></tr>';}).join('');if(!filtered.length){html='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">No policies yet.</td></tr>';}['policy-tbody','policy-tbody-2'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=html;});}
+function filterPolicies(f) { renderPolicies(f); }
+
+// ============ CALCULATOR ============
+const productMap = {};
+carrierData.forEach(c => { productMap[c.name] = c.products; });
+
+function updateProducts() {
+  const carrier = document.getElementById('calc-carrier').value;
+  const sel = document.getElementById('calc-product');
+  sel.innerHTML = '<option value="">Select product</option>';
+  if (carrier && productMap[carrier]) {
+    productMap[carrier].forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name;
+      opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('calc-result').classList.remove('show');
+}
+
+function calculateComm() {
+  const carrier = document.getElementById('calc-carrier').value;
+  const productName = document.getElementById('calc-product').value;
+  const premium = parseFloat(document.getElementById('calc-premium').value);
+  const level = document.getElementById('calc-level').value;
+  if (!carrier || !productName || !premium || !level) { alert('Please fill in all fields.'); return; }
+  const li = LEVELS.indexOf(level);
+  const c = carrierData.find(x=>x.name===carrier);
+  const p = c ? c.products.find(x=>x.name===productName) : null;
+  if (!p) return;
+  const rate = p.rates[li];
+  const earned = (premium * rate / 100).toFixed(2);
+  document.getElementById('result-details').innerHTML = `<strong>${carrier}</strong> · ${productName} · <strong>${level}</strong> level`;
+  document.getElementById('result-amount').textContent = '$' + parseFloat(earned).toLocaleString();
+  document.getElementById('result-pct').textContent = rate + '% commission rate';
+  document.getElementById('calc-result').classList.add('show');
+}
+
+// ============ CARRIER ACCORDION ============
+function buildCarrierAccordion() {
+  const li = LEVELS.indexOf(agentConfig.level);
+  const container = document.getElementById('carrier-accordion');
+  container.innerHTML = carrierData.map((c,ci) => {
+    const bestRate = Math.max(...c.products.map(p=>p.rates[li]));
+    const rows = c.products.map(p => {
+      const cells = LEVELS.map((l,i) => `<td class="${i===li?'my-rate-cell':''}">${p.rates[i]}%</td>`).join('');
+      return `<tr><td style="color:var(--muted);font-size:0.7rem">${p.name}</td>${cells}</tr>`;
+    }).join('');
+    const headers = LEVELS.map((l,i)=>`<th style="${i===li?'color:var(--gold)':''}">${l}</th>`).join('');
+    return `<div class="carrier-row" id="crow-${ci}">
+      <div class="carrier-row-header" onclick="toggleCarrier(${ci})">
+        <div><span class="carrier-name">${c.name}</span><span class="carrier-cat">${c.cat}</span></div>
+        <div style="display:flex;align-items:center;gap:1rem">
+          <div style="text-align:right"><div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px">My Rate</div><div class="carrier-my-rate">${bestRate}%</div></div>
+          <span class="carrier-chevron" id="chev-${ci}">▼</span>
+        </div>
+      </div>
+      <div class="carrier-products" id="cprod-${ci}">
+        <table><thead><tr><th>Product</th>${headers}</tr></thead><tbody>${rows}</tbody></table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCarrier(ci) {
+  const prod = document.getElementById('cprod-'+ci);
+  const chev = document.getElementById('chev-'+ci);
+  const open = prod.classList.contains('open');
+  prod.classList.toggle('open', !open);
+  chev.classList.toggle('open', !open);
+}
+
+function filterCarriers() {
+  const q = document.getElementById('carrier-search').value.toLowerCase();
+  document.querySelectorAll('.carrier-row').forEach((row,i) => {
+    const name = carrierData[i].name.toLowerCase();
+    row.style.display = name.includes(q) ? '' : 'none';
+  });
+}
+
+// ============ ANALYTICS ============
+function buildAnalytics() {
+  // Carrier bars
+  const carrierCounts = [
+    {label:'Mutual of Omaha', val:38, color:'gold'},
+    {label:'Foresters', val:26, color:'green'},
+    {label:'Americo', val:18, color:'blue'},
+    {label:'Transamerica', val:10, color:'orange'},
+    {label:'AIG', val:8, color:''},
+  ];
+  document.getElementById('carrier-bars').innerHTML = carrierCounts.map(c=>`
+    <div class="bar-row">
+      <div class="bar-label">${c.label}</div>
+      <div class="bar-track"><div class="bar-fill ${c.color}" style="width:${c.val}%"></div></div>
+      <div class="bar-pct">${c.val}%</div>
+    </div>`).join('');
+
+  // Status bars
+  const statusData = [
+    {label:'Active', val:62, color:'green'},
+    {label:'Pending', val:21, color:''},
+    {label:'Declined', val:9, color:'red'},
+    {label:'Cancelled', val:8, color:'orange'},
+  ];
+  document.getElementById('status-bars').innerHTML = statusData.map(s=>`
+    <div class="bar-row">
+      <div class="bar-label">${s.label}</div>
+      <div class="bar-track"><div class="bar-fill ${s.color}" style="width:${s.val}%"></div></div>
+      <div class="bar-pct">${s.val}%</div>
+    </div>`).join('');
+}
+
+function buildMonthlyChart() {
+  const months = [
+    {m:'Jun',v:2},{m:'Jul',v:3},{m:'Aug',v:1},{m:'Sep',v:4},{m:'Oct',v:3},
+    {m:'Nov',v:5},{m:'Dec',v:4},{m:'Jan',v:6},{m:'Feb',v:4},{m:'Mar',v:7},{m:'Apr',v:5},{m:'May',v:6}
+  ];
+  const max = Math.max(...months.map(x=>x.v));
+  const barsEl = document.getElementById('monthly-bars');
+  const labelsEl = document.getElementById('monthly-labels');
+  barsEl.innerHTML = months.map(m=>`
+    <div class="month-bar-wrap">
+      <div class="month-val">${m.v}</div>
+      <div class="month-bar" style="height:${Math.round((m.v/max)*100)}%" title="${m.v} deals in ${m.m}"></div>
+    </div>`).join('');
+  labelsEl.innerHTML = months.map(m=>`<div style="flex:1;text-align:center;font-size:0.55rem;color:var(--muted)">${m.m}</div>`).join('');
+}
+
+// ============ EXPECTED EARNINGS PAGE ============
+function updateExpProducts() {
+  const carrier = document.getElementById('exp-carrier').value;
+  const sel = document.getElementById('exp-product');
+  sel.innerHTML = '<option value="">Select product</option>';
+  if (carrier && productMap[carrier]) {
+    productMap[carrier].forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.name; opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('exp-result').classList.remove('show');
+}
+
+function calculateExp() {
+  const carrier = document.getElementById('exp-carrier').value;
+  const productName = document.getElementById('exp-product').value;
+  const premium = parseFloat(document.getElementById('exp-premium').value);
+  const level = document.getElementById('exp-level').value;
+  if (!carrier || !productName || !premium || !level) { alert('Please fill in all fields.'); return; }
+  const li = LEVELS.indexOf(level);
+  const c = carrierData.find(x=>x.name===carrier);
+  const p = c ? c.products.find(x=>x.name===productName) : null;
+  if (!p) return;
+  const rate = p.rates[li];
+  const earned = (premium * rate / 100).toFixed(2);
+  document.getElementById('exp-result-details').innerHTML = `<strong>${carrier}</strong> · ${productName} · Level <strong>${level}</strong>`;
+  document.getElementById('exp-result-amount').textContent = '$' + parseFloat(earned).toLocaleString();
+  document.getElementById('exp-result-pct').textContent = rate + '% commission rate · Year 1';
+  document.getElementById('exp-result').classList.add('show');
+}
+
+const loggedDeals = [];
+function logDeal() {
+  const client = document.getElementById('log-client').value.trim();
+  const carrier = document.getElementById('log-carrier').value;
+  const premium = parseFloat(document.getElementById('log-premium').value);
+  const product = document.getElementById('log-product').value.trim();
+  const rateClass = document.getElementById('log-rateclass').value;
+  const status = document.getElementById('log-status').value;
+  if (!client || !carrier || !premium) { alert('Please enter client name, carrier, and premium.'); return; }
+  const li = LEVELS.indexOf(agentConfig.level);
+  const c = carrierData.find(x=>x.name===carrier);
+  let rate = null, earned = null;
+  if (c && c.products.length > 0) {
+    rate = c.products[0].rates[li];
+    earned = (premium * rate / 100).toFixed(2);
+  }
+  loggedDeals.push({client, carrier, product: product||'—', rateClass, premium, rate, earned, status});
+  renderLoggedDeals();
+  document.getElementById('log-client').value = '';
+  document.getElementById('log-premium').value = '';
+  document.getElementById('log-product').value = '';
+}
+
+function renderLoggedDeals() {
+  const tbody = document.getElementById('logged-deals-tbody');
+  if (!loggedDeals.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem">No deals logged yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = loggedDeals.map(d=>`<tr>
+    <td>${d.client}</td>
+    <td style="color:var(--muted)">${d.carrier}</td>
+    <td>${d.product}</td>
+    <td style="color:var(--muted)">${d.rateClass}</td>
+    <td style="color:var(--gold)">$${d.premium.toLocaleString()}/yr</td>
+    <td style="color:var(--green)">${d.earned ? '$'+parseFloat(d.earned).toLocaleString()+' ('+d.rate+'%)' : '—'}</td>
+    <td><span class="badge badge-${d.status.toLowerCase()}">${d.status}</span></td>
+  </tr>`).join('');
+}
+
+
+const templates = {
+  welcome:{title:'Welcome Message',sub:'Sent automatically when policy is placed',msg:'Hi <strong>[Client First Name]</strong>! 👋 This is <strong>[Agent Name]</strong> with Surge Life Group. Your <strong>[Policy Type]</strong> policy is now active! 🎉<br><br>Coverage: <strong>[Coverage Amount]</strong> · Premium: <strong>[Premium]</strong>. So glad to have you protected!'},
+  payment:{title:'Payment Reminder',sub:'Sent 3 days before premium due date',msg:'Hi <strong>[Client First Name]</strong>! Just a friendly reminder that your <strong>[Policy Type]</strong> premium of <strong>[Premium]</strong> is due in 3 days. Keeping your policy active protects your family!'},
+  annual:{title:'Annual Review',sub:'Sent on policy anniversary',msg:'Hi <strong>[Client First Name]</strong>! 🎉 Happy anniversary! Your <strong>[Policy Type]</strong> policy is 1 year old today. Would you like to schedule a quick review to make sure your coverage still fits your needs?'},
+  decline:{title:'Decline Follow-Up',sub:'Sent when a policy is declined',msg:'Hi <strong>[Client First Name]</strong>, I wanted to follow up about your recent application. Unfortunately it wasn\'t approved with <strong>[Carrier]</strong>, but I have other options that may work for you. Can we chat this week?'},
+  birthday:{title:'Birthday Message',sub:'Sent on client birthday',msg:'Happy Birthday <strong>[Client First Name]</strong>! 🎂 Wishing you a wonderful day! This is <strong>[Agent Name]</strong> from Surge Life Group — so glad to have you as a client!'},
+  lapse:{title:'Lapse Warning',sub:'Sent when payment is missed',msg:'Hi <strong>[Client First Name]</strong>, we noticed your <strong>[Policy Type]</strong> payment of <strong>[Premium]</strong> was missed. Your policy will lapse in <strong>30 days</strong> without payment. Please contact me ASAP.'},
+};
+function showTemplate(key, el) {
+  const t = templates[key];
+  document.getElementById('preview-title').textContent = t.title;
+  document.getElementById('preview-sub').textContent = t.sub;
+  document.getElementById('preview-msg').innerHTML = t.msg;
+  document.querySelectorAll('.ai-template').forEach(x=>x.classList.remove('active-template'));
+  if (el) el.classList.add('active-template');
+}
+
+init();
+
+async function buildMonthlyChart(){return;}
+async function buildAnalytics(){var pa=document.getElementById('page-analytics');if(!pa)return;if(!sb||!currentUserId)return;var r=await sb.from('deals').select('*').eq('agent_id',currentUserId);var rows=(r.data||[]);var total=rows.length,active=0,pending=0,declined=0,cancelled=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='active')active++;else if(s==='pending')pending++;else if(s==='declined')declined++;else if(s==='cancelled')cancelled++;});function setId(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}setId('an-total',String(total));setId('an-active',String(active));setId('an-pending',String(pending));setId('an-declined',String(declined+cancelled));var now=new Date();var months=[];for(var i=5;i>=0;i--){var dt=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({y:dt.getFullYear(),m:dt.getMonth(),label:dt.toLocaleString('default',{month:'short'}),count:0});}rows.forEach(function(d){var dt=new Date(d.created_at);months.forEach(function(mo){if(dt.getFullYear()===mo.y&&dt.getMonth()===mo.m)mo.count++;});});var maxC=1;months.forEach(function(mo){if(mo.count>maxC)maxC=mo.count;});var mEl=document.getElementById('an-monthly');if(mEl){if(!total){mEl.innerHTML='<div style="color:var(--muted);padding:1rem">No deals yet.</div>';}else{mEl.innerHTML=months.map(function(mo){var h=Math.round(mo.count/maxC*140);return '<div style="flex:1;text-align:center"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px">'+mo.count+'</div><div style="background:var(--gold);height:'+h+'px;border-radius:4px 4px 0 0;min-height:2px"></div><div style="font-size:0.65rem;color:var(--muted);margin-top:6px">'+mo.label+'</div></div>';}).join('');}}function barList(map,colorVar){var keys=Object.keys(map);if(!keys.length||!total)return '<div style="color:var(--muted);padding:0.5rem">No data yet.</div>';keys.sort(function(a,b){return map[b]-map[a];});return keys.map(function(k){var pct=Math.round(map[k]/total*100);return '<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><div style="width:150px;font-size:0.75rem">'+k+'</div><div style="flex:1;background:var(--bg3);border-radius:6px;overflow:hidden;height:10px"><div style="width:'+pct+'%;height:100%;background:'+colorVar+'"></div></div><div style="width:42px;text-align:right;font-size:0.75rem;font-weight:700">'+pct+'%</div></div>';}).join('');}var cmap={};rows.forEach(function(d){var c=d.carrier||'Other';cmap[c]=(cmap[c]||0)+1;});var cEl=document.getElementById('an-carriers');if(cEl)cEl.innerHTML=barList(cmap,'var(--gold)');var rmap={};rows.forEach(function(d){var rc=d.rate_class||'Unspecified';rmap[rc]=(rmap[rc]||0)+1;});var rcEl=document.getElementById('an-rateclass');if(rcEl)rcEl.innerHTML=barList(rmap,'var(--gold-1)');var smap={};rows.forEach(function(d){var s=d.status||'Pending';smap[s]=(smap[s]||0)+1;});var sEl=document.getElementById('an-status');if(sEl)sEl.innerHTML=barList(smap,'var(--green)');}
+</script>
 </body>
 </html>
