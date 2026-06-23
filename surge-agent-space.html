@@ -290,6 +290,10 @@ tr:hover td { background: rgba(255,255,255,0.01); }
       <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 10l3 3 5-5"/></svg>
       Expected Earnings
     </div>
+    <div class="nav-item" onclick="showPage('bonus', this)">
+      <svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+      Bonus
+    </div>
     <div class="nav-item" onclick="showPage('carrier', this)">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Carrier Info
@@ -486,30 +490,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
             <label class="calc-label">Carrier</label>
             <select class="calc-select" id="calc-carrier" onchange="updateProducts()">
               <option value="">Select Carrier</option>
-              <option>Aetna / Accendo</option>
-              <option>Aflac</option>
-              <option>AIG</option>
-              <option>American Amicable</option>
-              <option>Americo</option>
-              <option>Assurity</option>
-              <option>Baltimore Life</option>
-              <option>Columbus Life</option>
-              <option>Elco Mutual</option>
-              <option>F&G</option>
-              <option>Foresters</option>
-              <option>Gerber Life</option>
-              <option>GTL</option>
-              <option>Instabrain / Fidelity Life</option>
-              <option>Kansas City Life</option>
-              <option>Lafayette Life</option>
-              <option>Mutual of Omaha</option>
-              <option>National Life Group</option>
-              <option>North American</option>
-              <option>Royal Neighbors</option>
-              <option>Transamerica</option>
-              <option>Trinity Life</option>
-              <option>Illinois Mutual</option>
-              <option>Sentinel Security Life</option>
+              <option>AIL</option>
             </select>
           </div>
           <div class="calc-field">
@@ -522,23 +503,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
             <label class="calc-label">Annual Premium ($)</label>
             <input class="calc-input" type="number" id="calc-premium" placeholder="e.g. 540" min="1">
           </div>
-          <div class="calc-field">
-            <label class="calc-label">Your Level</label>
-            <select class="calc-select" id="calc-level">
-              <option value="A">A — Apprentice</option>
-              <option value="GA">GA — General Agent</option>
-              <option value="SA">SA — Supervising Agent</option>
-              <option value="SM">SM — Sales Manager</option>
-              <option value="SD">SD — Sales Director</option>
-              <option value="JP">JP — Jr Partner</option>
-              <option value="SP" selected>SP — Senior Partner</option>
-              <option value="EP">EP — Executive Partner</option>
-              <option value="RD">RD — Regional Director</option>
-              <option value="ND">ND — National Director</option>
-              <option value="VP">VP — Vice President</option>
-              <option value="P">P — President</option>
-            </select>
-          </div>
+          
           <button class="calc-btn" onclick="calculateComm()">Calculate →</button>
         </div>
         <div class="calc-result" id="calc-result">
@@ -558,7 +523,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
       <!-- COMMISSION CHART BY CARRIER -->
       <div class="comm-chart-section">
         <div class="comm-chart-header">
-          <div class="table-title">Rate Reference — All Carriers</div>
+          <div class="table-title">AIL Commission Schedule</div>
           <input class="carrier-search" id="carrier-search" placeholder="Search carrier..." oninput="filterCarriers()">
         </div>
         <div class="carrier-accordion" id="carrier-accordion"></div>
@@ -568,6 +533,33 @@ tr:hover td { background: rgba(255,255,255,0.01); }
       <div class="table-section">
         <div class="table-header"><div class="table-title">Commission History</div></div>
         <table><thead><tr><th>Client</th><th>Carrier</th><th>Premium</th><th>Commission</th><th>Status</th></tr></thead><tbody id="comm-history-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">No commissions yet.</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= BONUS ======= -->
+  <div class="page" id="page-bonus">
+    <div class="comm-wrap">
+      <div class="page-header">
+        <div class="page-title">Production <em>Bonus</em></div>
+        <div class="page-sub">Paid on top of commission, in full with your weekly advance. Tier is set by your total submitted AP this month and resets on the 1st.</div>
+      </div>
+      <div class="lb-podium" style="justify-content:flex-start;flex-wrap:wrap">
+        <div class="pod"><div class="pod-rank">SUBMITTED THIS MONTH</div><div class="pod-val" id="bonus-submitted">$0</div></div>
+        <div class="pod pod-gold" style="transform:none;box-shadow:0 0 24px var(--gold-dim)"><div class="pod-rank">CURRENT TIER</div><div class="pod-val" id="bonus-tier">0%</div></div>
+        <div class="pod"><div class="pod-rank">BONUS EARNED (MTD)</div><div class="pod-val" id="bonus-earned">$0</div></div>
+        <div class="pod"><div class="pod-rank">TO NEXT TIER</div><div class="pod-val" id="bonus-next">—</div></div>
+      </div>
+      <div class="table-section" style="margin-top:1.5rem">
+        <div class="table-header"><div class="table-title">Monthly Bonus Tiers</div></div>
+        <table><thead><tr><th>Monthly Submitted AP</th><th>Bonus %</th></tr></thead><tbody id="bonus-tiers-tbody"></tbody></table>
+      </div>
+      <div class="table-section" style="margin-top:1.5rem">
+        <div class="table-header"><div class="table-title">This Month's Deals — Locked Bonus</div></div>
+        <table><thead><tr><th>Client</th><th>Product</th><th>AP</th><th>Running Total</th><th>Tier</th><th>Bonus</th></tr></thead><tbody id="bonus-deals-tbody"><tr><td colspan="6" style="color:var(--muted);text-align:center;padding:1rem">No submitted deals yet this month.</td></tr></tbody></table>
+      </div>
+      <div class="page-sub" style="margin-top:1.25rem;line-height:1.8">
+        <strong style="color:var(--gold)">How it works.</strong> Your tier is based on your running total of submitted annual premium for the calendar month. The moment a deal is submitted it locks in the tier you are in at that point — climbing into a higher tier later does <strong>not</strong> raise the bonus on deals you already submitted (not retroactive). Bonus is a percent of that deal's annual premium, paid in full with your weekly advance, on top of commission. Everything resets on the 1st of each month.
       </div>
     </div>
   </div>
@@ -619,7 +611,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   
 <div class="page" id="page-leaderboard"><div class="comm-wrap"><div class="page-header"><div class="page-title">Leader<em>board</em></div><div class="page-sub">Log your deals and see how you stack up against the team.</div></div><div class="lb-controls"><span style="font-size:0.7rem;color:var(--muted);font-weight:600">RANK BY</span><div class="lb-seg"><button class="lb-metric-btn active" data-m="premium" onclick="setLbMetric('premium')">Premium $</button><button class="lb-metric-btn" data-m="deals" onclick="setLbMetric('deals')"># of Deals</button></div><span style="font-size:0.7rem;color:var(--muted);font-weight:600;margin-left:1rem">PERIOD</span><div class="lb-seg"><button class="lb-range-btn" data-r="day" onclick="setLbRange('day')">Day</button><button class="lb-range-btn" data-r="week" onclick="setLbRange('week')">Week</button><button class="lb-range-btn active" data-r="month" onclick="setLbRange('month')">This Month</button><button class="lb-range-btn" data-r="lastmonth" onclick="setLbRange('lastmonth')">Last Month</button><button class="lb-range-btn" data-r="all" onclick="setLbRange('all')">All Time</button></div></div><div class="lb-podium" id="lb-podium"></div><div class="table-section"><div class="table-header"><div class="table-title">Full Rankings</div></div><table><thead><tr><th>Rank</th><th>Agent</th><th>Premium</th><th>Deals</th></tr></thead><tbody id="lb-tbody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
 <div class="page" id="page-book"><div class="comm-wrap"><div class="page-header"><div class="page-title">Book of <em>Business</em></div><div class="page-sub">Every deal you log lives here.</div></div><div style="margin-bottom:1rem"><span class="lb-stat">Total Premium <b id="book-total">$0</b></span><span class="lb-stat">Deals <b id="book-count">0</b></span><button class="calc-btn" onclick="openDealModal()" style="float:right">+ Log a Deal</button></div><div class="table-section"><table><thead><tr><th>Client</th><th>Carrier</th><th>Product</th><th>Premium</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody id="book-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
-<div class="modal" id="deal-modal"><div class="modal-box"><div class="modal-title">Log a Deal</div><div class="calc-field"><label class="calc-label">Client Name</label><input class="calc-input" id="d-client" placeholder="John Smith"></div><div class="calc-field"><label class="calc-label">Carrier</label><select class="calc-select" id="d-carrier"><option value="">Select Carrier</option><option>Aetna / Accendo</option><option>Aflac</option><option>AIG</option><option>American Amicable</option><option>Americo</option><option>Assurity</option><option>Baltimore Life</option><option>Columbus Life</option><option>Elco Mutual</option><option>F&G</option><option>Foresters</option><option>Gerber Life</option><option>GTL</option><option>Kansas City Life</option><option>Mutual of Omaha</option><option>National Life Group</option><option>North American</option><option>Royal Neighbors</option><option>Transamerica</option><option>Trinity Life</option><option>Illinois Mutual</option><option>Other</option></select></div><div class="calc-field"><label class="calc-label">Product</label><input class="calc-input" id="d-product" placeholder="Final Expense"></div><div class="calc-field"><label class="calc-label">Rate Class</label><select class="calc-select" id="d-rateclass"><option>Preferred</option><option>Standard</option><option>Graded</option><option>Modified</option></select></div><div class="calc-field"><label class="calc-label">Annual Premium ($)</label><input class="calc-input" type="number" id="d-premium" placeholder="e.g. 540" min="1"></div><div class="calc-field"><label class="calc-label">Status</label><select class="calc-select" id="d-status"><option>Pending</option><option>Active</option><option>Declined</option><option>Cancelled</option></select></div><div style="display:flex;gap:0.5rem;margin-top:1rem"><button class="calc-btn" id="d-submit" onclick="submitDeal()">Add Deal</button><button class="lb-del" style="color:var(--muted)" onclick="closeDealModal()">Cancel</button></div></div></div>
+<div class="modal" id="deal-modal"><div class="modal-box"><div class="modal-title">Log a Deal</div><div class="calc-field"><label class="calc-label">Client Name</label><input class="calc-input" id="d-client" placeholder="John Smith"></div><div class="calc-field"><label class="calc-label">Carrier</label><select class="calc-select" id="d-carrier"><option value="">Select Carrier</option><option>AIL</option></select></div><div class="calc-field"><label class="calc-label">Product</label><select class="calc-select" id="d-product"><option value="">Select Product</option><option>4 Year Renewable & Convertible Term</option><option>10 Year Renewable & Convertible Term</option><option>15 Year Decreasing Term</option><option>20 Year Level Term</option><option>30 Year Decreasing Term</option><option>Whole Life</option><option>Preferred Life</option><option>Executive Life</option><option>Select Life</option><option>LPU 65</option><option>Senior Graded Whole Life</option></select></div><div class="calc-field"><label class="calc-label">Rate Class</label><select class="calc-select" id="d-rateclass"><option>Preferred</option><option>Standard</option><option>Graded</option><option>Modified</option></select></div><div class="calc-field"><label class="calc-label">Annual Premium ($)</label><input class="calc-input" type="number" id="d-premium" placeholder="e.g. 540" min="1"></div><div class="calc-field"><label class="calc-label">Status</label><select class="calc-select" id="d-status"><option>Pending</option><option>Active</option><option>Declined</option><option>Cancelled</option></select></div><div style="display:flex;gap:0.5rem;margin-top:1rem"><button class="calc-btn" id="d-submit" onclick="submitDeal()">Add Deal</button><button class="lb-del" style="color:var(--muted)" onclick="closeDealModal()">Cancel</button></div></div></div>
 <div class="page" id="page-expected"><div class="comm-wrap"><div class="page-header"><div class="page-title">Expected <em>Earnings</em></div><div class="page-sub">Your whole book at a glance — total premium and projected Year 1 payout at your level.</div></div><div class="lb-podium" style="justify-content:flex-start;flex-wrap:wrap"><div class="pod"><div class="pod-rank">TOTAL PREMIUM</div><div class="pod-val" id="exp-total-premium">$0</div></div><div class="pod pod-gold" style="transform:none;box-shadow:0 0 24px var(--gold-dim)"><div class="pod-rank">PROJECTED YEAR 1 PAYOUT</div><div class="pod-val" id="exp-payout">$0</div></div><div class="pod"><div class="pod-rank">ACTIVE PREMIUM</div><div class="pod-val" id="exp-active-premium">$0</div></div><div class="pod"><div class="pod-rank">PENDING PREMIUM</div><div class="pod-val" id="exp-pending-premium">$0</div></div><div class="pod"><div class="pod-rank">DEALS</div><div class="pod-val" id="exp-deal-count">0</div></div></div><div class="page-sub" style="margin-top:1.25rem">Payout is an estimate based on your commission level and each carrier's Year 1 rate. For a single-deal breakdown, use the Commissions calculator.</div></div></div>
 
   <!-- ======= INVITE TEAM ======= -->
@@ -938,133 +930,22 @@ async function loadDownline() {
 
 // ============ CARRIER DATA (from L&L 2026 Comp Booklet) ============
 const carrierData = [
-  { name:'Aetna / Accendo', cat:'Final Expense', products:[
-    { name:'Level Ages 40-89', rates:[70,70,77.5,85,92.5,100,107.5,115,120,125,130,137] },
-    { name:'Modified Ages 40-75', rates:[60,60,67.5,75,82.5,90,97.5,105,110,115,120,127] }
-  ]},
-  { name:'Aflac', cat:'Final Expense', products:[
-    { name:'Level Ages 45-80', rates:[63,63,70,78,85,93,100,108,113,118,123,130] },
-    { name:'Modified Ages 40-75', rates:[55,55,65,75,80,85,90,95,100,105,110,117] }
-  ]},
-  { name:'AIG', cat:'Final Expense', products:[
-    { name:'SIWL (Preferred)', rates:[82,87,92,97,102,107,112,117,122,127,132,137] },
-    { name:'SIWL Graded', rates:[42,47,52,57,62,67,72,77,82,87,92,97] },
-    { name:'Guaranteed Issue', rates:[45,45,45,50,55,60,65,70,75,80,85,90] }
-  ]},
-  { name:'American Amicable', cat:'Final Expense', products:[
-    { name:'Senior/Family Choice FEX 0-79 (Preferred)', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
-    { name:'Senior/Family Choice FEX 80-85', rates:[40,45,50,55,60,65,70,75,80,85,90,95] },
-    { name:'ROP Graded 0-79', rates:[60,65,70,75,80,85,90,95,100,105,110,115] },
-    { name:'ROP Graded 80-85', rates:[40,45,50,55,60,65,70,75,80,85,90,95] }
-  ]},
-  { name:'Americo', cat:'Life / Term', products:[
-    { name:'Instant Decision IUL', rates:[70,70,75,80,85,90,95,100,105,110,125,130] },
-    { name:'Term 100', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
-    { name:'Term 125 (15yr)', rates:[90,95,100,105,110,115,120,125,130,135,140,145] },
-    { name:'Term 125 (20-30yr)', rates:[70,75,80,85,90,95,100,105,110,125,130,135] }
-  ]},
-  { name:'Assurity', cat:'Life / Term', products:[
-    { name:'Whole Life Pay for Life (Preferred)', rates:[62,64,66,70,72,74,76,78,80,85,90,95] },
-    { name:'AWL Pay to 65 (0-45)', rates:[44,46,48,52,54,56,58,60,62.5,65,67.5,70] },
-    { name:'10 Year Term', rates:[36,40,45,55,60,65,70,75,80,85,90,92] },
-    { name:'15 Year Term', rates:[41,45,50,60,65,70,75,80,85,90,95,97] },
-    { name:'20 & 30 Year Term', rates:[55,58,60,65,70,75,80,85,95,102,110,112] }
-  ]},
-  { name:'Baltimore Life', cat:'Final Expense', products:[
-    { name:'iProvide Preferred Ages 45-80', rates:[80,85,90,95,100,105,110,115,120,125,130,135] },
-    { name:'iProvide Preferred Ages 81-89', rates:[60,65,70,75,80,85,90,90,100,105,110,115] },
-    { name:'iProvide Standard Ages 45-80', rates:[60,65,70,75,80,85,90,95,100,105,110,115] },
-    { name:'iProvide Modified Ages 45-80', rates:[40,45,50,55,60,65,70,75,80,85,90,95] }
-  ]},
-  { name:'Columbus Life', cat:'IUL', products:[
-    { name:'Indexed UL (SIUL)', rates:[65,70,75,80,85,90,95,100,105,110,115,120] }
-  ]},
-  { name:'Elco Mutual', cat:'Final Expense', products:[
-    { name:'Final Expense (Preferred)', rates:[70,75,80,85,90,95,100,105,110,115,120,125] },
-    { name:'Golden Eagle', rates:[55,60,65,70,75,80,85,90,95,100,105,110] }
-  ]},
-  { name:'F&G', cat:'Life', products:[
-    { name:'Everlast Ages 18-80 (Preferred)', rates:[65,70,75,80,85,90,95,100,105,110,115,120] },
-    { name:'Pathsetter Ages 18-80', rates:[70,75,80,85,90,95,100,105,110,115,120,125] },
-    { name:'Everlast / Pathsetter Ages 0-17', rates:[45,55,60,62.5,65,67.5,70,72.5,75,77.5,80,82.5] }
-  ]},
-  { name:'Foresters', cat:'Final Expense', products:[
-    { name:'PlanRight 50-80 (Preferred)', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
-    { name:'PlanRight 81-85', rates:[45,50,55,60,65,70,75,80,85,90,95,100] },
-    { name:'Basic PlanRight (Graded)', rates:[32.5,35,37.5,40,42.5,45,47.5,50,55,60,65,70] }
-  ]},
-  { name:'Gerber Life', cat:'Final Expense', products:[
-    { name:'Guarantee Issue', rates:[45,45,45,50,50,50,55,60,65,70,75,75] }
-  ]},
-  { name:'GTL', cat:'Final Expense', products:[
-    { name:'Heritage FE (Final Expense)', rates:[45,45,45,45,45,50,55,60,65,70,75,80] },
-    { name:'Life Select (Whole Life)', rates:[40,40,40,40,45,50,55,60,65,70,75,80] }
-  ]},
-  { name:'Instabrain / Fidelity Life', cat:'Life / Term', products:[
-    { name:'Accidental', rates:[40,45,50,55,60,65,70,75,80,85,90,95] },
-    { name:'Final Expense', rates:[35,37.5,40,42.5,45,47.5,50,55,60,65,70,75] },
-    { name:'Term (Preferred)', rates:[80,80,85,90,95,100,105,110,115,120,125,130] }
-  ]},
-  { name:'Kansas City Life', cat:'Life / Term', products:[
-    { name:'Signature Term (Preferred)', rates:[80,85,90,95,100,105,110,115,120,125,130,135] },
-    { name:'Cash Back Life Term', rates:[50,55,60,65,70,75,80,85,90,95,100,105] }
-  ]},
-  { name:'Lafayette Life', cat:'Whole Life', products:[
-    { name:'Whole Life Patriot/Contender (Standard)', rates:[55,55,55,55,55,60,65,70,80,85,90,95] },
-    { name:'Whole Life Heritage', rates:[55,55,55,55,55,60,65,70,75,80,85,90] }
-  ]},
-  { name:'Mutual of Omaha', cat:'Life / Term', products:[
-    { name:'TLE Term Life Express (Preferred)', rates:[90,95,100,105,110,115,120,125,130,135,140,145] },
-    { name:'Living Promise Final Expense', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
-    { name:'Index IUL Express', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
-    { name:'Indexed Universal Life IUL', rates:[70,75,80,85,90,95,100,105,110,115,120,125] },
-    { name:'TLA Term Life Answers (Standard)', rates:[65,70,75,80,85,90,95,100,105,110,115,120] },
-    { name:'Accidental Death', rates:[75,80,85,90,95,100,105,110,115,120,125,130] }
-  ]},
-  { name:'National Life Group', cat:'IUL / Term', products:[
-    { name:'FlexLife IUL', rates:[40,50,60,70,75,80,85,90,95,100,105,110] },
-    { name:'Level Term', rates:[40,50,60,70,75,80,85,90,95,100,105,110] }
-  ]},
-  { name:'North American', cat:'IUL / Term', products:[
-    { name:'Builder Plus 4 IUL (Preferred)', rates:[55,60,65,70,75,80,85,90,95,100,105,110] },
-    { name:'ADDvantage 20-30yr Term', rates:[55,60,65,70,75,80,85,90,95,100,105,110] },
-    { name:'ADDvantage 10yr Term', rates:[45,47.5,50,52.5,55,57.5,60,65,70,75,80,85] },
-    { name:'ADDvantage 15yr Term', rates:[50,52.5,55,57.5,60,62.5,65,70,75,80,85,90] }
-  ]},
-  { name:'Royal Neighbors', cat:'Whole Life', products:[
-    { name:'SIWL Ages 50-75 (Preferred)', rates:[70,75,80,85,90,95,100,105,110,115,120,125] },
-    { name:'SIWL Ages 76-80 (Standard)', rates:[55,60,65,70,75,80,85,90,95,100,105,110] },
-    { name:'SIWL Ages 81-85 (Modified)', rates:[30,35,40,50,50,55,60,70,75,80,85,90] },
-    { name:'Graded Ages 50-75', rates:[45,50,55,60,62.5,65,67.5,70,72.5,75,80,77.5] },
-    { name:'Jet Whole Life $100k+ (Preferred)', rates:[70,75,80,85,90,95,100,105,110,115,120,125] },
-    { name:'Jet Term', rates:[70,75,80,85,90,95,100,105,110,115,120,125] }
-  ]},
-  { name:'Transamerica', cat:'Final Expense / Term', products:[
-    { name:'FE Express Solution (Preferred)', rates:[90,95,100,105,110,115,120,125,130,135,140,145] },
-    { name:'Whole Life Lifetime WL', rates:[80,85,90,95,100,105,110,115,125,135,140,145] },
-    { name:'Immediate Solution (Standard)', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
-    { name:'Graded FE Express (Graded)', rates:[53,58,63,68,73,78,83,88,93,98,99,106] },
-    { name:'Trendsetter Super 20/25/30yr', rates:[65,70,75,80,82,85,90,92,95,100,105,110] },
-    { name:'Trendsetter LB 20/25/30yr', rates:[75,80,85,90,92,95,100,102,105,110,115,120] }
-  ]},
-  { name:'Trinity Life', cat:'Final Expense', products:[
-    { name:'Golden Eagle Ages 50-80 (Preferred)', rates:[50,55,60,65,70,75,80,85,90,95,100,105] },
-    { name:'Golden Eagle Ages 81-85', rates:[25,30,35,40,45,47.5,50,55,57.5,60,65,70] },
-    { name:'Graded Benefit Ages 50-80', rates:[45,50,55,60,65,67.5,70,75,80,85,90,95] }
-  ]},
-  { name:'Illinois Mutual', cat:'Final Expense', products:[
-    { name:'Simplified Issue Ages 45-75 (Standard)', rates:[65,70,75,80,85,90,95,100,105,110,115,120] },
-    { name:'Simplified Issue Ages 76-80', rates:[50,55,60,65,70,75,80,85,90,95,100,105] },
-    { name:'Simplified Issue Ages 81-85 (Modified)', rates:[25,30,35,40,45,50,55,60,65,70,75,80] }
-  ]},
-  { name:'Sentinel Security Life', cat:'Final Expense', products:[
-    { name:'Level NewVantage I Ages 0-75 (Preferred)', rates:[75,80,85,90,95,100,105,110,115,120,125,130] },
-    { name:'Level NewVantage I Ages 76-80 (Standard)', rates:[55,60,65,70,75,80,85,90,95,100,105,115] },
-    { name:'Level NewVantage I Ages 81-85', rates:[40,45,50,55,60,65,70,75,80,85,90,95] },
-    { name:'Graded NewVantage II Ages 45-75', rates:[55,60,65,70,75,80,85,90,95,100,105,110] },
-    { name:'Modified NewVantage III Ages 45-75', rates:[40,45,50,55,60,65,70,75,80,85,90,95] }
+  { name:'AIL', cat:'American Income Life', products:[
+    { name:'4 Year Renewable & Convertible Term', comp:60 },
+    { name:'10 Year Renewable & Convertible Term', comp:60 },
+    { name:'15 Year Decreasing Term', comp:60 },
+    { name:'20 Year Level Term', comp:60 },
+    { name:'30 Year Decreasing Term', comp:60 },
+    { name:'Whole Life', comp:60 },
+    { name:'Preferred Life', comp:60 },
+    { name:'Executive Life', comp:60 },
+    { name:'Select Life', comp:60 },
+    { name:'LPU 65', comp:60 },
+    { name:'Senior Graded Whole Life', comp:60 }
   ]}
 ];
+// Flat comp for everyone. rates[] mirrored from comp so legacy level-indexed consumers still work.
+carrierData.forEach(c => c.products.forEach(p => { p.rates = Array(12).fill(p.comp); }));
 
 // ============ POLICIES DATA ============
 const policies = [];
@@ -1074,7 +955,6 @@ const policies = [];
 function init() {
   // Load everything after Supabase resolves real identity
   initSupabase().then(() => {
-    document.getElementById('calc-level').value = agentConfig.level;
     const expBadge = document.getElementById('exp-level-badge');
     if (expBadge) expBadge.textContent = agentConfig.level + ' — ' + agentConfig.levelFull;
     const expLevel = document.getElementById('exp-level');
@@ -1123,7 +1003,7 @@ async function updateDealStatus(id,status){if(!sb)return;var r=await sb.from('de
 async function loadPersistency(){var tb=document.getElementById('pers-tbody');if(!tb)return;if(!sb||!currentUserId)return;var r=await sb.from('deals').select('*').eq('agent_id',currentUserId).order('created_at',{ascending:false});var rows=(r.data||[]);var total=rows.length,active=0,declined=0,pending=0,cancelled=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='active')active++;else if(s==='declined')declined++;else if(s==='pending')pending++;else if(s==='cancelled')cancelled++;});var placed=active+cancelled;function st(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}st('pers-placement',total>0?Math.round(placed/total*100)+'%':'—');st('pers-persistency',placed>0?Math.round(active/placed*100)+'%':'—');st('pers-active',String(active));st('pers-lapsed',String(cancelled));if(!rows.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">No policies yet. Log deals in your Book of Business.</td></tr>';return;}tb.innerHTML=rows.map(function(d){return '<tr><td>'+escapeHtml(d.client)+'</td><td>'+escapeHtml(d.product||'-')+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td style="color:var(--muted)">'+new Date(d.created_at).toLocaleDateString()+'</td><td>'+statusSelect(d)+'</td></tr>';}).join('');tb.querySelectorAll('select[data-deal]').forEach(function(s){s.onchange=function(){updateDealStatus(s.getAttribute('data-deal'),s.value);};});}
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();}
+  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if (el) el.classList.add('active');
 }
@@ -1148,6 +1028,52 @@ function renderPolicies(filter='all') {
 function renderPolicies(filter){filter=filter||'all';var list=(typeof policies!=='undefined'&&Array.isArray(policies))?policies:[];var filtered=(filter==='all')?list:list.filter(function(p){return String(p.status||'').toLowerCase()===String(filter).toLowerCase();});var html=filtered.map(function(p){return '<tr><td>'+escapeHtml(p.client)+'</td><td>'+escapeHtml(p.product)+'</td><td style="color:var(--muted)">'+escapeHtml(p.carrier)+'</td><td style="color:var(--gold)">'+escapeHtml(p.premium)+'</td><td style="color:var(--muted)">'+escapeHtml(p.date)+'</td><td><span class="badge '+(typeof badgeClass==='function'?badgeClass(p.status):'')+'">'+escapeHtml(p.status)+'</span></td></tr>';}).join('');if(!filtered.length){html='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">No policies yet.</td></tr>';}['policy-tbody','policy-tbody-2'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=html;});}
 function filterPolicies(f) { renderPolicies(f); }
 
+// ============ BONUS ============
+const BONUS_TIERS = [
+  { min:0,     max:2499,     pct:0  },
+  { min:2500,  max:4249,     pct:10 },
+  { min:4250,  max:10250,    pct:19 },
+  { min:10251, max:20250,    pct:21 },
+  { min:20251, max:30250,    pct:23 },
+  { min:30251, max:Infinity, pct:29 }
+];
+function bonusTierFor(total){ const t=BONUS_TIERS.find(t=>total>=t.min&&total<=t.max); return t?t.pct:0; }
+function nextBonusTier(total){ return BONUS_TIERS.find(t=>t.min>total)||null; }
+function renderBonusTiers(){
+  const tb=document.getElementById('bonus-tiers-tbody'); if(!tb)return;
+  tb.innerHTML=BONUS_TIERS.map(t=>{
+    const range = t.max===Infinity ? ('$'+t.min.toLocaleString()+'+') : ('$'+t.min.toLocaleString()+' – $'+t.max.toLocaleString());
+    return `<tr><td>${range}</td><td style="color:var(--gold)">${t.pct}%</td></tr>`;
+  }).join('');
+}
+async function loadBonus(){
+  renderBonusTiers();
+  const subEl=document.getElementById('bonus-submitted'), tierEl=document.getElementById('bonus-tier'),
+        earnEl=document.getElementById('bonus-earned'), nextEl=document.getElementById('bonus-next'),
+        tbody=document.getElementById('bonus-deals-tbody');
+  let deals=[];
+  if(sb && currentUserId){
+    try{
+      const now=new Date();
+      const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString();
+      const r=await sb.from('deals').select('client,product,premium,created_at,status').eq('agent_id',currentUserId).gte('created_at',monthStart).order('created_at',{ascending:true});
+      if(r&&!r.error&&r.data) deals=r.data;
+    }catch(e){ console.warn('loadBonus',e); }
+  }
+  let running=0,totalBonus=0;
+  const rows=deals.map(d=>{
+    const ap=parseFloat(d.premium)||0; running+=ap;
+    const pct=bonusTierFor(running); const bonus=ap*pct/100; totalBonus+=bonus;
+    return `<tr><td>${d.client||'—'}</td><td style="color:var(--muted);font-size:0.7rem">${d.product||'—'}</td><td style="color:var(--gold)">$${ap.toLocaleString()}</td><td style="color:var(--muted)">$${running.toLocaleString()}</td><td>${pct}%</td><td style="color:var(--gold)">$${bonus.toLocaleString(undefined,{maximumFractionDigits:2})}</td></tr>`;
+  });
+  const total=running, curPct=bonusTierFor(total), nt=nextBonusTier(total);
+  if(subEl) subEl.textContent='$'+total.toLocaleString();
+  if(tierEl) tierEl.textContent=curPct+'%';
+  if(earnEl) earnEl.textContent='$'+totalBonus.toLocaleString(undefined,{maximumFractionDigits:2});
+  if(nextEl) nextEl.textContent = nt ? ('$'+(nt.min-total).toLocaleString()+' to '+nt.pct+'%') : 'Top tier';
+  if(tbody) tbody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:1rem">No submitted deals yet this month.</td></tr>';
+}
+
 // ============ CALCULATOR ============
 const productMap = {};
 carrierData.forEach(c => { productMap[c.name] = c.products; });
@@ -1171,41 +1097,48 @@ function calculateComm() {
   const carrier = document.getElementById('calc-carrier').value;
   const productName = document.getElementById('calc-product').value;
   const premium = parseFloat(document.getElementById('calc-premium').value);
-  const level = document.getElementById('calc-level').value;
-  if (!carrier || !productName || !premium || !level) { alert('Please fill in all fields.'); return; }
-  const li = LEVELS.indexOf(level);
+  if (!carrier || !productName || !premium) { alert('Please fill in all fields.'); return; }
   const c = carrierData.find(x=>x.name===carrier);
   const p = c ? c.products.find(x=>x.name===productName) : null;
   if (!p) return;
-  const rate = p.rates[li];
-  const earned = (premium * rate / 100).toFixed(2);
-  document.getElementById('result-details').innerHTML = `<strong>${carrier}</strong> · ${productName} · <strong>${level}</strong> level`;
-  document.getElementById('result-amount').textContent = '$' + parseFloat(earned).toLocaleString();
-  document.getElementById('result-pct').textContent = rate + '% commission rate';
+  const rate = p.comp;
+  const commission = premium * rate / 100;
+  const advance = commission * 0.65;
+  const trail = commission * 0.35;
+  const tierPct = bonusTierFor(premium);
+  const bonus = premium * tierPct / 100;
+  const money = v => '$' + v.toLocaleString(undefined,{maximumFractionDigits:2});
+  document.getElementById('result-details').innerHTML =
+    `<strong>${carrier}</strong> · ${productName} · ${rate}% comp`
+    + `<div style="margin-top:8px;font-size:0.7rem;line-height:1.7;color:var(--muted)">`
+    + `Advance (65%, next week): <span style="color:var(--gold)">${money(advance)}</span><br>`
+    + `Trail (35%, months 9-11): <span style="color:var(--text)">${money(trail)}</span><br>`
+    + `Bonus on this AP alone (${tierPct}% tier): <span style="color:var(--gold)">${money(bonus)}</span> `
+    + `<span style="opacity:.6">— real tier depends on your monthly total</span>`
+    + `</div>`;
+  document.getElementById('result-amount').textContent = money(commission);
+  document.getElementById('result-pct').textContent = rate + '% commission';
   document.getElementById('calc-result').classList.add('show');
 }
 
 // ============ CARRIER ACCORDION ============
 function buildCarrierAccordion() {
-  const li = LEVELS.indexOf(agentConfig.level);
   const container = document.getElementById('carrier-accordion');
   container.innerHTML = carrierData.map((c,ci) => {
-    const bestRate = Math.max(...c.products.map(p=>p.rates[li]));
     const rows = c.products.map(p => {
-      const cells = LEVELS.map((l,i) => `<td class="${i===li?'my-rate-cell':''}">${p.rates[i]}%</td>`).join('');
-      return `<tr><td style="color:var(--muted);font-size:0.7rem">${p.name}</td>${cells}</tr>`;
+      const adv = (p.comp * 0.65).toFixed(1);
+      return `<tr><td style="color:var(--muted);font-size:0.7rem">${p.name}</td><td class="my-rate-cell">${p.comp}%</td><td style="color:var(--gold)">${adv}%</td></tr>`;
     }).join('');
-    const headers = LEVELS.map((l,i)=>`<th style="${i===li?'color:var(--gold)':''}">${l}</th>`).join('');
     return `<div class="carrier-row" id="crow-${ci}">
       <div class="carrier-row-header" onclick="toggleCarrier(${ci})">
         <div><span class="carrier-name">${c.name}</span><span class="carrier-cat">${c.cat}</span></div>
         <div style="display:flex;align-items:center;gap:1rem">
-          <div style="text-align:right"><div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px">My Rate</div><div class="carrier-my-rate">${bestRate}%</div></div>
+          <div style="text-align:right"><div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px">Comp</div><div class="carrier-my-rate">${c.products[0].comp}%</div></div>
           <span class="carrier-chevron" id="chev-${ci}">▼</span>
         </div>
       </div>
       <div class="carrier-products" id="cprod-${ci}">
-        <table><thead><tr><th>Product</th>${headers}</tr></thead><tbody>${rows}</tbody></table>
+        <table><thead><tr><th>Product</th><th>Comp %</th><th>Advance (65%)</th></tr></thead><tbody>${rows}</tbody></table>
       </div>
     </div>`;
   }).join('');
