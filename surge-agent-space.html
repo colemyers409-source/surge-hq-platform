@@ -68,6 +68,80 @@ body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(
 .policy-status-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2rem; }
 .status-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; }
 .status-card:hover { border-color: var(--gold-b); }
+
+/* ============ RITZ PREVIEW LAYER ============ */
+/* Atmosphere — gold light + film grain (ported from dialer) */
+body::before { content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background: radial-gradient(110% 70% at 60% -12%, rgba(168,152,80,0.09), transparent 58%),
+              radial-gradient(80% 60% at 10% 115%, rgba(168,152,80,0.05), transparent 55%); }
+body::after { content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.45;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E"); }
+.main { position:relative; z-index:1; }
+/* Ambient gold embers (WebGL) */
+#gold-dust { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+/* Page transitions — fade + rise on every page switch */
+@keyframes pageIn { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+.page.active { animation: pageIn .5s cubic-bezier(.22,1,.36,1) both; }
+
+/* Staggered card entrance */
+@keyframes cardIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+.page.active .kpi-card, .page.active .status-card, .page.active .pod { animation: cardIn .55s cubic-bezier(.22,1,.36,1) both; }
+.page.active .kpi-card:nth-child(2), .page.active .status-card:nth-child(2), .page.active .pod:nth-child(2) { animation-delay:.07s; }
+.page.active .kpi-card:nth-child(3), .page.active .status-card:nth-child(3), .page.active .pod:nth-child(3) { animation-delay:.14s; }
+.page.active .kpi-card:nth-child(4), .page.active .status-card:nth-child(4), .page.active .pod:nth-child(4) { animation-delay:.21s; }
+.page.active .status-card:nth-child(5) { animation-delay:.28s; }
+
+/* Gold as light — card hover lift + glow */
+.kpi-card { transition: transform .25s cubic-bezier(.22,1,.36,1), border-color .25s, box-shadow .25s;
+  background-image: linear-gradient(180deg, rgba(168,152,80,0.04), transparent 40%); }
+.kpi-card:hover { transform:translateY(-3px); border-color:var(--gold-b);
+  box-shadow: 0 12px 32px -14px rgba(0,0,0,.9), 0 0 22px -6px rgba(168,152,80,0.28); }
+.status-card:hover { transform:translateY(-2px); box-shadow: 0 0 18px -6px rgba(168,152,80,0.25); }
+.table-section, .pod { transition: border-color .25s, box-shadow .25s; }
+tbody tr { transition: background .18s; }
+tbody tr:hover { background: var(--gold-dim); }
+
+/* Level badge — slow shimmer sweep */
+.level-badge { position:relative; overflow:hidden; }
+@keyframes sheen { 0%{ transform:translateX(-130%) skewX(-18deg);} 55%,100%{ transform:translateX(230%) skewX(-18deg);} }
+.level-badge::after { content:""; position:absolute; top:0; bottom:0; width:38%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  animation: sheen 3.4s ease-in-out infinite; }
+
+/* Buttons — press feedback */
+button { transition: transform .12s, border-color .2s, background .2s, color .2s, box-shadow .2s; }
+button:active { transform: scale(.97); }
+
+/* Dropdowns — no more stock-browser selects */
+select, .calc-select { appearance:none; -webkit-appearance:none; background-color:var(--bg3) !important;
+  color:var(--text); border:1px solid var(--border-s); border-radius:4px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23A89850' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 9px center; padding-right:26px !important; cursor:pointer;
+  transition: border-color .2s, box-shadow .2s; }
+select:hover { border-color: var(--gold-b); }
+select:focus, input:focus, textarea:focus { outline:none; border-color:var(--gold-b) !important;
+  box-shadow: 0 0 0 3px rgba(168,152,80,0.12); }
+:focus-visible { outline:1px solid var(--gold-b); outline-offset:2px; }
+
+/* Custom scrollbars */
+::-webkit-scrollbar { width:9px; height:9px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(168,152,80,0.22); border-radius:6px; border:2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background:rgba(168,152,80,0.4); }
+* { scrollbar-width:thin; scrollbar-color:rgba(168,152,80,0.28) transparent; }
+
+/* Skeleton shimmer loaders */
+@keyframes sk { from { background-position:200% 0; } to { background-position:-200% 0; } }
+.sk { display:inline-block; height:.85em; border-radius:4px; color:transparent !important;
+  background:linear-gradient(90deg, #101010 30%, rgba(168,152,80,0.14) 50%, #101010 70%);
+  background-size:200% 100%; animation: sk 1.15s linear infinite; }
+.sk-row td { padding:1rem 1.2rem; }
+
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation:none !important; transition:none !important; }
+}
 .status-card.active-filter { border-color: var(--gold-b); background: var(--gold-dim); }
 .status-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
 .status-count { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; margin-bottom: 0.2rem; }
@@ -1278,6 +1352,106 @@ init();
 
 async function buildMonthlyChart(){return;}
 async function buildAnalytics(){var pa=document.getElementById('page-analytics');if(!pa)return;if(!sb||!currentUserId)return;var r=await sb.from('deals').select('*').eq('agent_id',currentUserId);var rows=(r.data||[]);var total=rows.length,active=0,pending=0,declined=0,cancelled=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='active')active++;else if(s==='pending')pending++;else if(s==='declined')declined++;else if(s==='cancelled')cancelled++;});function setId(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}setId('an-total',String(total));setId('an-active',String(active));setId('an-pending',String(pending));setId('an-declined',String(declined+cancelled));var now=new Date();var months=[];for(var i=5;i>=0;i--){var dt=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({y:dt.getFullYear(),m:dt.getMonth(),label:dt.toLocaleString('default',{month:'short'}),count:0});}rows.forEach(function(d){var dt=new Date(d.created_at);months.forEach(function(mo){if(dt.getFullYear()===mo.y&&dt.getMonth()===mo.m)mo.count++;});});var maxC=1;months.forEach(function(mo){if(mo.count>maxC)maxC=mo.count;});var mEl=document.getElementById('an-monthly');if(mEl){if(!total){mEl.innerHTML='<div style="color:var(--muted);padding:1rem">No deals yet.</div>';}else{mEl.innerHTML=months.map(function(mo){var h=Math.round(mo.count/maxC*140);return '<div style="flex:1;text-align:center"><div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px">'+mo.count+'</div><div style="background:var(--gold);height:'+h+'px;border-radius:4px 4px 0 0;min-height:2px"></div><div style="font-size:0.65rem;color:var(--muted);margin-top:6px">'+mo.label+'</div></div>';}).join('');}}function barList(map,colorVar){var keys=Object.keys(map);if(!keys.length||!total)return '<div style="color:var(--muted);padding:0.5rem">No data yet.</div>';keys.sort(function(a,b){return map[b]-map[a];});return keys.map(function(k){var pct=Math.round(map[k]/total*100);return '<div style="display:flex;align-items:center;gap:10px;margin:8px 0"><div style="width:150px;font-size:0.75rem">'+k+'</div><div style="flex:1;background:var(--bg3);border-radius:6px;overflow:hidden;height:10px"><div style="width:'+pct+'%;height:100%;background:'+colorVar+'"></div></div><div style="width:42px;text-align:right;font-size:0.75rem;font-weight:700">'+pct+'%</div></div>';}).join('');}var cmap={};rows.forEach(function(d){var c=d.carrier||'Other';cmap[c]=(cmap[c]||0)+1;});var cEl=document.getElementById('an-carriers');if(cEl)cEl.innerHTML=barList(cmap,'var(--gold)');var rmap={};rows.forEach(function(d){var rc=d.rate_class||'Unspecified';rmap[rc]=(rmap[rc]||0)+1;});var rcEl=document.getElementById('an-rateclass');if(rcEl)rcEl.innerHTML=barList(rmap,'var(--gold-1)');var smap={};rows.forEach(function(d){var s=d.status||'Pending';smap[s]=(smap[s]||0)+1;});var sEl=document.getElementById('an-status');if(sEl)sEl.innerHTML=barList(smap,'var(--green)');}
+</script>
+<canvas id="gold-dust"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ============ AMBIENT GOLD EMBERS ============ */
+(function(){
+  var cv=document.getElementById('gold-dust');
+  if(!cv||!window.THREE)return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){cv.remove();return;}
+
+  var small=window.innerWidth<700;
+  var N=small?140:260;
+  var renderer=new THREE.WebGLRenderer({canvas:cv,antialias:false,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  var scene=new THREE.Scene();
+  var camera=new THREE.PerspectiveCamera(60,1,0.1,100);
+  camera.position.z=14;
+
+  var pos=new Float32Array(N*3), col=new Float32Array(N*3);
+  var seed=[];
+  var golds=[new THREE.Color(0x6b5f33),new THREE.Color(0xA89850),new THREE.Color(0xD8CB8F)];
+  for(var i=0;i<N;i++){
+    pos[i*3]=(Math.random()-0.5)*34;
+    pos[i*3+1]=(Math.random()-0.5)*20;
+    pos[i*3+2]=(Math.random()-0.5)*10;
+    var c=golds[(Math.random()*3)|0];
+    var f=0.35+Math.random()*0.65;
+    col[i*3]=c.r*f;col[i*3+1]=c.g*f;col[i*3+2]=c.b*f;
+    seed.push({vy:0.0018+Math.random()*0.004, ph:Math.random()*6.28, amp:0.15+Math.random()*0.5, sp:0.2+Math.random()*0.5});
+  }
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+
+  var c2=document.createElement('canvas');c2.width=c2.height=64;
+  var ctx=c2.getContext('2d');
+  var g=ctx.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(0.35,'rgba(255,255,255,0.4)');g.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,64,64);
+
+  var mat=new THREE.PointsMaterial({size:0.16,map:new THREE.CanvasTexture(c2),vertexColors:true,
+    transparent:true,opacity:0.55,depthWrite:false,blending:THREE.AdditiveBlending,sizeAttenuation:true});
+  scene.add(new THREE.Points(geo,mat));
+
+  function resize(){renderer.setSize(window.innerWidth,window.innerHeight,false);
+    camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();}
+  resize();window.addEventListener('resize',resize);
+
+  var running=true,t=0;
+  document.addEventListener('visibilitychange',function(){running=!document.hidden;});
+
+  function tick(){
+    requestAnimationFrame(tick);
+    if(!running)return;
+    t+=0.01;
+    var p=geo.attributes.position.array;
+    for(var i=0;i<N;i++){
+      var s=seed[i];
+      p[i*3+1]+=s.vy;                                  /* slow rise */
+      p[i*3]+=Math.sin(t*s.sp+s.ph)*0.004*s.amp;        /* lazy sway */
+      if(p[i*3+1]>10.5){p[i*3+1]=-10.5;p[i*3]=(Math.random()-0.5)*34;}
+    }
+    geo.attributes.position.needsUpdate=true;
+    renderer.render(scene,camera);
+  }
+  tick();
+})();
+</script>
+<script>
+/* ============ RITZ LAYER — COUNT-UPS + SKELETONS ============ */
+(function(){
+  /* Count-up animation — preserves $, commas, % */
+  function countUp(el){
+    var t=(el.textContent||'').trim();
+    var m=t.match(/^(\$?)([\d,]+)(%?)$/); if(!m)return;
+    var target=parseInt(m[2].replace(/,/g,''),10); if(!target||el._counted===t)return;
+    el._counted=t;
+    var pre=m[1],suf=m[3],start=performance.now(),dur=950;
+    function frame(now){
+      var p=Math.min((now-start)/dur,1), e=1-Math.pow(1-p,4);
+      el.textContent=pre+Math.round(target*e).toLocaleString()+suf;
+      if(p<1)requestAnimationFrame(frame); else el.textContent=t;
+    }
+    requestAnimationFrame(frame);
+  }
+  function countUpAll(){
+    document.querySelectorAll('.page.active .kpi-num, .page.active .pod-val, .page.active .status-count, #book-total, #book-count').forEach(countUp);
+  }
+  window.__countUpAll=countUpAll;
+
+  /* Skeleton loaders while data loads */
+  function skRows(id,cols){var el=document.getElementById(id);if(!el)return;var r='';for(var i=0;i<4;i++){r+='<tr class="sk-row">'+Array(cols).fill('<td><span class="sk" style="width:'+(55+((i*17)%40))+'%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>').join('')+'</tr>';}el.innerHTML=r;}
+  skRows('book-tbody',7);skRows('lb-tbody',4);skRows('policy-tbody',6);skRows('policy-tbody-2',6);skRows('pers-tbody',5);skRows('comm-history-tbody',5);
+  document.querySelectorAll('.kpi-num').forEach(function(n){n.innerHTML='<span class="sk" style="width:70px">&nbsp;</span>';});
+
+  /* Re-run count-ups on page switches and after initial data loads */
+  var _origShow=window.showPage;
+  window.showPage=function(id,el){_origShow(id,el);setTimeout(countUpAll,180);};
+  [900,1800,3000].forEach(function(t){setTimeout(countUpAll,t);});
+})();
 </script>
 </body>
 </html>
