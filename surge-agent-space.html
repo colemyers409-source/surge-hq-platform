@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+Page_DownPage_DownPage_DownPage_DownPage_DownPage_DownPage_Down<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -326,6 +326,22 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .lb-del{background:transparent;border:1px solid var(--border);color:var(--red);font-size:0.65rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:inherit;}
 .lb-stat{display:inline-block;margin-right:1.5rem;}
 .lb-stat b{color:var(--gold);font-size:1.1rem;}
+
+/* ======= CALL TRACKER ======= */
+.ct-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.75rem;margin-bottom:0.75rem;}
+.ct-btn{position:relative;background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--muted);border-radius:4px;color:var(--text);font-family:'Montserrat',sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:0.06em;padding:1.1rem 0.75rem;cursor:pointer;text-align:center;transition:transform .06s ease,border-color .2s;}
+.ct-btn:hover{border-color:var(--gold-b);}
+.ct-btn:active{transform:scale(0.96);}
+.ct-btn .ct-count{position:absolute;top:6px;right:8px;font-size:0.62rem;font-weight:700;color:var(--muted);background:var(--bg3);border-radius:999px;padding:2px 8px;min-width:22px;}
+.ct-btn.ct-sold{grid-column:1/-1;background:linear-gradient(135deg,var(--gold-l),var(--gold));color:#000;border:none;font-size:0.95rem;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;padding:1.25rem 0.75rem;box-shadow:0 0 24px var(--gold-dim);}
+.ct-btn.ct-sold .ct-count{background:rgba(0,0,0,0.22);color:#000;}
+.ct-undo{background:none;border:none;color:var(--muted);font-family:inherit;font-size:0.7rem;font-weight:600;text-decoration:underline;cursor:pointer;display:none;margin:0.25rem auto 0;}
+.ct-undo.show{display:block;}
+.ct-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--gold-b);color:var(--text);padding:0.6rem 1.4rem;border-radius:999px;font-size:0.75rem;font-weight:600;opacity:0;transition:all .25s ease;z-index:400;pointer-events:none;max-width:90vw;text-align:center;}
+.ct-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.ct-report-pre{font-family:'Montserrat',sans-serif;font-size:0.75rem;line-height:1.8;white-space:pre-wrap;padding:1.25rem 1.5rem;color:var(--text);}
+@media(max-width:600px){.ct-grid{grid-template-columns:1fr 1fr;}}
+
 </style>
 </head>
 <body>
@@ -395,6 +411,10 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     <div class="nav-item" onclick="window.open('https://leads.surgelifegroup.com','_blank')">
       <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
       Marketplace
+    </div>
+    <div class="nav-item" onclick="showPage('calls', this)">
+      <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/><polyline points="15 3 21 3 21 9"/></svg>
+      Call Tracker
     </div>
     <div class="nav-item" onclick="window.open('https://dialer.surgelifegroup.com','_blank')">
       <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
@@ -792,6 +812,46 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   <!-- ======= AI MESSAGING ======= -->
   <div class="page" id="page-ai"><div class="comm-wrap"><div class="page-header"><div class="page-title">AI <em>Messaging</em></div><div class="page-sub">Automated client messaging.</div></div><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5rem 2rem;text-align:center"><div style="font-size:3rem;margin-bottom:1rem">🚀</div><div style="font-size:1.6rem;font-weight:700;color:var(--gold);letter-spacing:0.12em;font-family:'Cormorant Garamond',serif">Coming Soon</div><div style="color:var(--muted);margin-top:0.75rem;max-width:440px">Automated SMS &amp; email to your clients is on the way.</div></div></div></div>
 
+
+<!-- ======= CALL TRACKER ======= -->
+<div class="page" id="page-calls"><div class="comm-wrap">
+  <div class="page-header"><div class="page-title">Call <em>Tracker</em></div><div class="page-sub">Tap a result after every dial — your numbers build automatically and never reset.</div></div>
+
+  <div class="lb-podium" style="justify-content:flex-start;flex-wrap:wrap">
+    <div class="pod pod-gold" style="transform:none;box-shadow:0 0 24px var(--gold-dim)"><div class="pod-rank">DIALS TODAY</div><div class="pod-val" id="ct-today-dials">0</div></div>
+    <div class="pod"><div class="pod-rank">APPTS TODAY</div><div class="pod-val" id="ct-today-appts">0</div></div>
+    <div class="pod"><div class="pod-rank">SOLD TODAY</div><div class="pod-val" id="ct-today-sold">0</div></div>
+  </div>
+
+  <div class="table-section" style="margin-top:1.25rem">
+    <div class="table-header"><div class="table-title">Log a Call</div><span style="font-size:0.65rem;color:var(--muted)">One tap per dial</span></div>
+    <div style="padding:1.25rem 1.5rem">
+      <div class="ct-grid" id="ct-grid"></div>
+      <button class="ct-undo" id="ct-undo" onclick="ctUndo()">Undo last tap</button>
+    </div>
+  </div>
+
+  <div class="lb-controls" style="margin-top:0.5rem">
+    <span style="font-size:0.7rem;color:var(--muted);font-weight:600">SHOW</span>
+    <div class="lb-seg"><button class="lb-range-btn active" data-cs="me" onclick="ctSetScope('me')">My Numbers</button><button class="lb-range-btn" data-cs="team" onclick="ctSetScope('team')">Team</button></div>
+    <span style="font-size:0.7rem;color:var(--muted);font-weight:600;margin-left:1rem">PERIOD</span>
+    <div class="lb-seg"><button class="lb-range-btn active" data-ct="today" onclick="ctSetRange('today')">Today</button><button class="lb-range-btn" data-ct="week" onclick="ctSetRange('week')">7 Days</button><button class="lb-range-btn" data-ct="month" onclick="ctSetRange('month')">30 Days</button><button class="lb-range-btn" data-ct="m3" onclick="ctSetRange('m3')">3 Mo</button><button class="lb-range-btn" data-ct="m6" onclick="ctSetRange('m6')">6 Mo</button><button class="lb-range-btn" data-ct="m9" onclick="ctSetRange('m9')">9 Mo</button><button class="lb-range-btn" data-ct="year" onclick="ctSetRange('year')">1 Year</button></div>
+  </div>
+
+  <div class="lb-podium" id="ct-loa" style="justify-content:flex-start;flex-wrap:wrap;margin-top:1rem"></div>
+
+  <div class="table-section" style="margin-top:0.5rem">
+    <div class="table-header"><div class="table-title">Disposition Tally</div><span style="font-size:0.65rem;color:var(--muted)" id="ct-tally-label">Today</span></div>
+    <table><tbody id="ct-tally"></tbody></table>
+  </div>
+
+  <div class="table-section">
+    <div class="table-header"><div class="table-title">Daily Report</div><button class="calc-btn" onclick="ctCopyReport()">Copy Report</button></div>
+    <div class="ct-report-pre" id="ct-report">Loading…</div>
+  </div>
+</div></div>
+<div class="ct-toast" id="ct-toast"></div>
+
 </div>
 
 <script>
@@ -1052,9 +1112,130 @@ async function loadCommissions(){var pc=document.getElementById('page-commission
 function statusSelect(d){var opts=['Pending','Active','Declined','Cancelled'];return '<select class="calc-select" data-deal="'+d.id+'" style="padding:3px 6px;font-size:0.7rem;width:auto;min-width:115px">'+opts.map(function(o){return '<option'+(String(d.status)===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select>';}
 async function updateDealStatus(id,status){if(!sb)return;var r=await sb.from('deals').update({status:status}).eq('id',id);if(r&&r.error){alert('Could not update: '+r.error.message);return;}refreshAll();}
 async function loadPersistency(){var tb=document.getElementById('pers-tbody');if(!tb)return;if(!sb||!currentUserId)return;var r=await sb.from('deals').select('*').eq('agent_id',currentUserId).order('created_at',{ascending:false});var rows=(r.data||[]);var total=rows.length,active=0,declined=0,pending=0,cancelled=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='active')active++;else if(s==='declined')declined++;else if(s==='pending')pending++;else if(s==='cancelled')cancelled++;});var placed=active+cancelled;function st(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}st('pers-placement',total>0?Math.round(placed/total*100)+'%':'—');st('pers-persistency',placed>0?Math.round(active/placed*100)+'%':'—');st('pers-active',String(active));st('pers-lapsed',String(cancelled));if(!rows.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">No policies yet. Log deals in your Book of Business.</td></tr>';return;}tb.innerHTML=rows.map(function(d){return '<tr><td>'+escapeHtml(d.client)+'</td><td>'+escapeHtml(d.product||'-')+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td style="color:var(--muted)">'+new Date(d.created_at).toLocaleDateString()+'</td><td>'+statusSelect(d)+'</td></tr>';}).join('');tb.querySelectorAll('select[data-deal]').forEach(function(s){s.onchange=function(){updateDealStatus(s.getAttribute('data-deal'),s.value);};});}
+
+// ============ CALL TRACKER ============
+var CT_DISPOS = [
+  {key:'No Answer', color:'var(--muted)'},
+  {key:'Not Interested', color:'var(--red)'},
+  {key:'Call Back', color:'var(--orange)'},
+  {key:'Appt', color:'var(--green)'},
+  {key:'Spanish', color:'#5E8FC9'},
+  {key:'Bad Number', color:'var(--muted)'},
+  {key:'SOLD', color:'var(--gold)', sold:true}
+];
+var CT_RANGES = ['today','week','month','m3','m6','m9','year'];
+var CT_LABELS = {today:'Today',week:'Last 7 Days',month:'Last 30 Days',m3:'Last 3 Months',m6:'Last 6 Months',m9:'Last 9 Months',year:'Last 12 Months'};
+var ctScope='me', ctRange='today', ctRows=[], ctLastId=null, ctUndoTimer=null, ctBuilt=false;
+
+function ctBuildButtons(){
+  var g=document.getElementById('ct-grid'); if(!g||ctBuilt) return; ctBuilt=true;
+  CT_DISPOS.forEach(function(d){
+    var b=document.createElement('button');
+    b.className='ct-btn'+(d.sold?' ct-sold':'');
+    b.style.borderLeftColor=d.sold?'transparent':d.color;
+    b.innerHTML=(d.sold?'\u2605 ':'')+d.key+(d.sold?' \u2605':'')+'<span class="ct-count" id="ct-cnt-'+ctId(d.key)+'">0</span>';
+    b.onclick=function(){ctLog(d.key);};
+    g.appendChild(b);
+  });
+}
+function ctId(s){return s.toLowerCase().replace(/[^a-z]/g,'');}
+function ctToast(msg){
+  var t=document.getElementById('ct-toast'); if(!t) return;
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm=setTimeout(function(){t.classList.remove('show');},1800);
+}
+async function ctLog(dispo){
+  if(!sb||!currentUserId){ctToast('Log in at HQ first');return;}
+  try{
+    var r=await sb.from('call_logs').insert({agent_id:currentUserId, agent_name:agentConfig.name, dispo:dispo}).select();
+    if(r.error) throw r.error;
+    ctLastId=(r.data&&r.data[0])?r.data[0].id:null;
+    ctToast(dispo==='SOLD'?'SOLD! Log the deal in Book of Business \ud83c\udfc6':dispo+' logged');
+    var u=document.getElementById('ct-undo'); if(u){u.classList.add('show');clearTimeout(ctUndoTimer);ctUndoTimer=setTimeout(function(){u.classList.remove('show');},8000);}
+    ctBump(dispo);
+  }catch(e){console.error(e);ctToast("Couldn't save \u2014 check connection");}
+}
+function ctBump(dispo){
+  var row=null; for(var i=0;i<ctRows.length;i++){if(ctRows[i].dispo===dispo){row=ctRows[i];break;}}
+  if(row){CT_RANGES.forEach(function(k){row[k]=Number(row[k]||0)+1;});}
+  else{row={dispo:dispo};CT_RANGES.forEach(function(k){row[k]=1;});ctRows.push(row);}
+  ctRender();
+}
+async function ctUndo(){
+  if(!ctLastId||!sb) return;
+  var r=await sb.from('call_logs').delete().eq('id',ctLastId);
+  if(r.error){ctToast('Undo failed');return;}
+  ctLastId=null;
+  var u=document.getElementById('ct-undo'); if(u)u.classList.remove('show');
+  ctToast('Undone'); ctRefresh();
+}
+async function ctRefresh(){
+  if(!sb||!currentUserId){
+    var tb=document.getElementById('ct-tally');
+    if(tb)tb.innerHTML='<tr><td style="text-align:center;color:var(--muted);padding:2rem">Please log in at HQ to track your calls.</td></tr>';
+    return;
+  }
+  try{
+    var r=await sb.rpc('get_call_stats',{p_agent_id: ctScope==='me'?currentUserId:null});
+    if(r.error) throw r.error;
+    ctRows=r.data||[];
+    ctRender();
+  }catch(e){console.error(e);ctToast("Couldn't load stats");}
+}
+function ctGet(dispo,tf){for(var i=0;i<ctRows.length;i++){if(ctRows[i].dispo===dispo)return Number(ctRows[i][tf]||0);}return 0;}
+function ctTotal(tf){var s=0;for(var i=0;i<ctRows.length;i++){s+=Number(ctRows[i][tf]||0);}return s;}
+function ctRender(){
+  var tf=ctRange, total=ctTotal(tf), sold=ctGet('SOLD',tf), appts=ctGet('Appt',tf);
+  var contacts=Math.max(total-ctGet('No Answer',tf)-ctGet('Bad Number',tf),0);
+  function ratio(n,d){return d>0?(n/d).toFixed(1):'\u2014';}
+  function pct(n,d){return d>0?Math.round(n/d*100)+'%':'\u2014';}
+  // Today pods + button badges (always today, always current scope)
+  var el;
+  el=document.getElementById('ct-today-dials'); if(el)el.textContent=ctTotal('today');
+  el=document.getElementById('ct-today-appts'); if(el)el.textContent=ctGet('Appt','today');
+  el=document.getElementById('ct-today-sold'); if(el)el.textContent=ctGet('SOLD','today');
+  CT_DISPOS.forEach(function(d){var c=document.getElementById('ct-cnt-'+ctId(d.key));if(c)c.textContent=ctGet(d.key,'today');});
+  // Law of averages pods
+  var loa=document.getElementById('ct-loa');
+  if(loa){loa.innerHTML=
+    '<div class="pod"><div class="pod-rank">TOTAL DIALS</div><div class="pod-val">'+total+'</div></div>'+
+    '<div class="pod"><div class="pod-rank">CONTACT RATE</div><div class="pod-val">'+pct(contacts,total)+'</div></div>'+
+    '<div class="pod"><div class="pod-rank">DIALS PER APPT</div><div class="pod-val">'+ratio(total,appts)+'</div></div>'+
+    '<div class="pod"><div class="pod-rank">DIALS PER SALE</div><div class="pod-val">'+ratio(total,sold)+'</div></div>'+
+    '<div class="pod pod-gold" style="transform:none;box-shadow:0 0 24px var(--gold-dim)"><div class="pod-rank">APPTS PER SALE</div><div class="pod-val">'+ratio(appts,sold)+'</div></div>';}
+  // Tally table
+  var tb=document.getElementById('ct-tally');
+  if(tb){
+    var rows=CT_DISPOS.map(function(d){
+      return '<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+d.color+';margin-right:9px;vertical-align:middle"></span>'+d.key+'</td><td style="text-align:right;font-weight:700;padding-right:1.5rem">'+ctGet(d.key,tf)+'</td></tr>';
+    }).join('');
+    rows+='<tr><td style="font-weight:800;color:var(--gold)">Total Dials</td><td style="text-align:right;font-weight:800;color:var(--gold);padding-right:1.5rem">'+total+'</td></tr>';
+    tb.innerHTML=rows;
+  }
+  var lbl=document.getElementById('ct-tally-label'); if(lbl)lbl.textContent=CT_LABELS[tf]+(ctScope==='team'?' \u2014 Team':'');
+  ctBuildReport();
+}
+function ctBuildReport(){
+  var el=document.getElementById('ct-report'); if(!el) return;
+  var d=new Date();
+  var ds=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  var total=ctTotal('today');
+  var na=ctGet('No Answer','today'),ni=ctGet('Not Interested','today'),cb=ctGet('Call Back','today'),ap=ctGet('Appt','today'),sp=ctGet('Spanish','today'),bn=ctGet('Bad Number','today'),so=ctGet('SOLD','today');
+  var contacts=Math.max(total-na-bn,0);
+  var pr=total>0?Math.round(contacts/total*100)+'%':'\u2014';
+  el.textContent='DAILY CALL REPORT \u2014 '+agentConfig.name+'\n'+ds+'\n\nTotal Dials: '+total+'\nContacts: '+contacts+' ('+pr+' contact rate)\n\nNo Answer: '+na+'\nNot Interested: '+ni+'\nCall Back: '+cb+'\nAppointments Set: '+ap+'\nSpanish: '+sp+'\nBad Number: '+bn+'\nSOLD: '+so+'\n\n\u2014 Surge Life Group';
+}
+function ctCopyReport(){
+  var el=document.getElementById('ct-report'); if(!el) return;
+  navigator.clipboard.writeText(el.textContent).then(function(){ctToast('Report copied \u2014 send it to your supervisor');}).catch(function(){ctToast('Copy failed \u2014 long-press to select');});
+}
+function ctSetScope(s){ctScope=s;document.querySelectorAll('[data-cs]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-cs')===s);});ctRefresh();}
+function ctSetRange(r){ctRange=r;document.querySelectorAll('[data-ct]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-ct')===r);});ctRender();}
+function loadCallTracker(){ctBuildButtons();ctRefresh();}
+
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();}
+  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();} if(id==='calls'){loadCallTracker();}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if (el) el.classList.add('active');
 }
