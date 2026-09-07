@@ -1,0 +1,6 @@
+# Agent Space lives inside the HQ domain so the installed app never leaves its own site
+https://agent.surgelifegroup.com/*  https://hq.surgelifegroup.com/agent  301!
+/agent   /surge-agent-space.html  200
+/agent/  /surge-agent-space.html  200
+/admin   /surge-admin.html        200
+/dialer  /surge-dialer.html       200

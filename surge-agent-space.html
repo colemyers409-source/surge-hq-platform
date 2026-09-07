@@ -2,7 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<meta name="theme-color" content="#050505">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Surge">
+
 <title>Surge Partners — Agent Space</title>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,600;1,700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
@@ -914,6 +924,7 @@ async function initSupabase() {
     } else {
       document.getElementById('sb-name').textContent = 'Not signed in';
       document.getElementById('sb-level').textContent = 'Please log in at HQ';
+      window.location.replace('/');
     }
   } catch(e) {
     console.error('Supabase init error:', e);
@@ -1082,7 +1093,7 @@ async function signOutAgent() {
   if (sb) await sb.auth.signOut();
   localStorage.removeItem('surge_access_token');
   localStorage.removeItem('surge_refresh_token');
-  window.location.href = 'https://hq.surgelifegroup.com';
+  window.location.href = '/';
 }
 
 // ============ PAGE NAV ============
@@ -1635,5 +1646,6 @@ async function buildAnalytics(){var pa=document.getElementById('page-analytics')
   [900,1800,3000].forEach(function(t){setTimeout(countUpAll,t);});
 })();
 </script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}</script>
 </body>
 </html>

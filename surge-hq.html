@@ -2,7 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<meta name="theme-color" content="#050505">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Surge">
+
 <title>Surge Partners</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,600;1,700&display=swap" rel="stylesheet">
@@ -269,7 +279,7 @@ nav.scrolled { padding:.6rem 3rem; background:rgba(5,5,5,0.97); border-bottom-co
   <h2 class="platform-title">Your Whole Book, One <em>Place</em></h2>
   <p class="platform-sub">Your book, your commissions, and every carrier portal — in one command center.</p>
   <div class="platform-grid">
-    <a class="platform-card" href="https://agent.surgelifegroup.com" target="_blank">
+    <a class="platform-card" href="/agent">
       <div class="card-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
       <div class="card-tag">Agent Space</div>
       <div class="card-title">Your <em>Command Center</em></div>
@@ -425,7 +435,7 @@ async function doSignup() {
   if (isApproved) {
     switchTab('pending');
     document.getElementById('form-pending').innerHTML = `<div class="pending-notice" style="background:rgba(39,174,96,0.1);border-color:rgba(39,174,96,0.3);color:#27ae60">
-      ✅ Account created and approved! You can now log in at <strong>hq.surgelifegroup.com</strong> and <strong>agent.surgelifegroup.com</strong> with your email and password.
+      ✅ Account created and approved! You can now log in at <strong>hq.surgelifegroup.com</strong> with your email and password.
     </div>`;
   } else {
     switchTab('pending');
@@ -450,11 +460,8 @@ function storeSession(session) {
 function goToAgentSpace() {
   const access = localStorage.getItem('surge_access_token');
   const refresh = localStorage.getItem('surge_refresh_token');
-  if (access && refresh) {
-    window.open('https://agent.surgelifegroup.com?at=' + encodeURIComponent(access) + '&rt=' + encodeURIComponent(refresh), '_blank');
-  } else {
-    window.open('https://agent.surgelifegroup.com', '_blank');
-  }
+  // Same site as HQ now, so the login carries over and the installed app stays in its own window
+  window.location.href = (access && refresh) ? '/agent' : '/';
 }
 
 async function signOut() {
@@ -615,5 +622,6 @@ checkSession();
   tick();
 })();
 </script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}</script>
 </body>
 </html>
