@@ -91,6 +91,24 @@ body::before { content:""; position:fixed; inset:0; z-index:0; pointer-events:no
 body::after { content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.45;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E"); }
 .main { position:relative; z-index:1; }
+/* ===== Collapsible sidebar ===== */
+.sidebar { transition: transform .28s cubic-bezier(.4,0,.2,1); }
+.main { transition: margin-left .28s cubic-bezier(.4,0,.2,1); }
+.sb-toggle { width:36px; height:36px; border:1px solid var(--border-s); border-radius:8px; background:transparent; color:var(--gold-l); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; margin-right:.9rem; flex-shrink:0; }
+.sb-toggle:hover { background: var(--gold-dim); }
+.sb-toggle svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; }
+.topbar-left { display:flex; align-items:center; min-width:0; }
+.sb-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:45; opacity:0; pointer-events:none; transition:opacity .25s; }
+body.sb-collapsed .sidebar { transform: translateX(-100%); }
+body.sb-collapsed .main { margin-left: 0; }
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); box-shadow: 0 0 40px rgba(0,0,0,.6); }
+  .main { margin-left: 0 !important; }
+  body.sb-open .sidebar { transform: none; }
+  body.sb-open .sb-backdrop { opacity:1; pointer-events:auto; }
+  .topbar { padding: 0 1rem; }
+}
+
 /* Ambient gold embers (WebGL) */
 #gold-dust { position:fixed; inset:0; z-index:0; pointer-events:none; }
 
@@ -361,6 +379,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 <body>
 
 <!-- SIDEBAR -->
+<div class="sb-backdrop" onclick="toggleSidebar(false)"></div>
 <div class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-main"><span class="wordmark"><span class="s">S</span>urge Partners</span></div>
@@ -449,7 +468,10 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div class="topbar-title">Agent Space</div>
+    <div class="topbar-left">
+      <button class="sb-toggle" type="button" aria-label="Toggle menu" onclick="toggleSidebar()"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar-title">Agent Space</div>
+    </div>
     <div class="topbar-right">
       <span class="level-badge" id="top-level-badge">SP</span>
     </div>
@@ -1243,7 +1265,17 @@ function ctSetScope(s){ctScope=s;document.querySelectorAll('[data-cs]').forEach(
 function ctSetRange(r){ctRange=r;document.querySelectorAll('[data-ct]').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-ct')===r);});ctRender();}
 function loadCallTracker(){ctBuildButtons();ctRefresh();}
 
+function toggleSidebar(force) {
+  const mobile = window.matchMedia('(max-width: 900px)').matches;
+  const cls = mobile ? 'sb-open' : 'sb-collapsed';
+  const on = (typeof force === 'boolean') ? (mobile ? force : !force) : !document.body.classList.contains(cls);
+  document.body.classList.toggle(cls, on);
+  if (!mobile) { try { localStorage.setItem('surge_sb_collapsed', on ? '1' : '0'); } catch(e) {} }
+}
+try { if (localStorage.getItem('surge_sb_collapsed') === '1' && !window.matchMedia('(max-width: 900px)').matches) document.body.classList.add('sb-collapsed'); } catch(e) {}
+window.addEventListener('resize', () => { document.body.classList.remove('sb-open'); });
 function showPage(id, el) {
+  if (window.matchMedia('(max-width: 900px)').matches) document.body.classList.remove('sb-open');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();} if(id==='calls'){loadCallTracker();}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
