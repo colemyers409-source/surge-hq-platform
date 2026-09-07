@@ -374,6 +374,37 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .ct-report-pre{font-family:'Montserrat',sans-serif;font-size:0.75rem;line-height:1.8;white-space:pre-wrap;padding:1.25rem 1.5rem;color:var(--text);}
 @media(max-width:600px){.ct-grid{grid-template-columns:1fr 1fr;}}
 
+
+/* ===== Phone layout & notch safe area ===== */
+.topbar { padding-top: env(safe-area-inset-top); height: calc(56px + env(safe-area-inset-top)); }
+.sidebar { padding-top: calc(1.5rem + env(safe-area-inset-top)); }
+.sb-backdrop { top: 0; }
+@media (max-width: 900px) {
+  html, body { overflow-x: hidden; }
+  .main { max-width: 100vw; overflow-x: hidden; }
+  .dash-wrap { padding: 1.25rem 1rem calc(2rem + env(safe-area-inset-bottom)); }
+  .page-header { margin-bottom: 1.25rem; }
+  .page-title { font-size: 1.6rem; }
+  .topbar-right { gap: .5rem; }
+  .kpi-grid, .analytics-grid { grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.25rem; }
+  .policy-status-row { grid-template-columns: repeat(3, 1fr); gap: .6rem; margin-bottom: 1.25rem; }
+  .metrics-row, .chart-row, .toolkit-grid, .persist-grid, .ai-grid, .calc-grid { grid-template-columns: 1fr; gap: .75rem; margin-bottom: 1.25rem; }
+  .dash-wrap [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  .table-section { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .table-section table { min-width: 560px; }
+  .table-header { padding: .85rem 1rem; }
+  .table-actions { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+  .table-actions .tbl-btn { flex-shrink: 0; }
+  .pod { min-width: 0; }
+  .comm-wrap { padding: 1.25rem 1rem calc(2rem + env(safe-area-inset-bottom)); }
+  .comm-wrap [style*="float:right"] { float: none !important; display: block; width: 100%; margin-top: .75rem; }
+  .table-section { clear: both; }
+  .modal-box { width: calc(100vw - 2rem) !important; max-width: none !important; max-height: 85vh; overflow-y: auto; }
+  .comm-calc, [style*="max-width:700px"], [style*="max-width:400px"] { max-width: none !important; }
+}
+@media (max-width: 420px) {
+  .topbar-title { font-size: .58rem; }
+}
 </style>
 </head>
 <body>
