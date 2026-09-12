@@ -340,8 +340,8 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .modal-title{font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--gold);}
 .lb-controls{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;align-items:center;}
 .lb-seg{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
-.lb-metric-btn,.lb-range-btn{background:transparent;color:var(--muted);border:none;padding:0.4rem 0.8rem;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit;}
-.lb-metric-btn.active,.lb-range-btn.active{background:var(--gold-dim);color:var(--gold);}
+.lb-metric-btn,.lb-range-btn,.ag-range-btn{background:transparent;color:var(--muted);border:none;padding:0.4rem 0.8rem;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit;}
+.lb-metric-btn.active,.lb-range-btn.active,.ag-range-btn.active{background:var(--gold-dim);color:var(--gold);}
 .lb-podium{display:flex;justify-content:center;align-items:flex-end;gap:1rem;margin:1.5rem 0;flex-wrap:wrap;}
 .pod{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center;min-width:120px;}
 .pod-gold{border-color:var(--gold);transform:translateY(-12px);box-shadow:0 0 24px var(--gold-dim);}
@@ -431,6 +431,14 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     <div class="nav-item" onclick="showPage('persistency', this)">
       <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Persistency
+    </div>
+  </div>
+
+  <div class="sidebar-section" id="nav-agency" style="display:none">
+    <div class="sidebar-section-label">Owner</div>
+    <div class="nav-item" onclick="showPage('agency', this)">
+      <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+      Agency Overview
     </div>
   </div>
 
@@ -743,7 +751,26 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   <!-- ======= EXPECTED EARNINGS ======= -->
   
 <div class="page" id="page-leaderboard"><div class="comm-wrap"><div class="page-header"><div class="page-title">Leader<em>board</em></div><div class="page-sub">Log your deals and see how you stack up against the team.</div></div><div class="lb-controls"><span style="font-size:0.7rem;color:var(--muted);font-weight:600">RANK BY</span><div class="lb-seg"><button class="lb-metric-btn active" data-m="premium" onclick="setLbMetric('premium')">Premium $</button><button class="lb-metric-btn" data-m="deals" onclick="setLbMetric('deals')"># of Deals</button></div><span style="font-size:0.7rem;color:var(--muted);font-weight:600;margin-left:1rem">PERIOD</span><div class="lb-seg"><button class="lb-range-btn" data-r="day" onclick="setLbRange('day')">Day</button><button class="lb-range-btn" data-r="week" onclick="setLbRange('week')">Week</button><button class="lb-range-btn active" data-r="month" onclick="setLbRange('month')">This Month</button><button class="lb-range-btn" data-r="lastmonth" onclick="setLbRange('lastmonth')">Last Month</button><button class="lb-range-btn" data-r="all" onclick="setLbRange('all')">All Time</button></div></div><div class="lb-podium" id="lb-podium"></div><div class="lb-totals" id="lb-totals"></div><div class="table-section"><div class="table-header"><div class="table-title">Full Rankings</div></div><table><thead><tr><th>Rank</th><th>Agent</th><th>Premium</th><th>Deals</th></tr></thead><tbody id="lb-tbody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
-<div class="page" id="page-book"><div class="comm-wrap"><div class="page-header"><div class="page-title">Book of <em>Business</em></div><div class="page-sub">Every deal you log lives here.</div></div><div style="margin-bottom:1rem"><span class="lb-stat">Total Premium <b id="book-total">$0</b></span><span class="lb-stat">Deals <b id="book-count">0</b></span><button class="calc-btn" onclick="openDealModal()" style="float:right">+ Log a Deal</button></div><div class="table-section"><table><thead><tr><th>Client</th><th>Carrier</th><th>Product</th><th>Premium</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody id="book-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
+<div class="page" id="page-agency"><div class="comm-wrap">
+<div class="page-header"><div class="page-title">Agency <em>Overview</em></div><div class="page-sub">Every deal across the agency, each agent's placement and persistency, and your comp settings. Owner only.</div></div>
+<div class="lb-controls"><span style="font-size:0.7rem;color:var(--muted);font-weight:600">PERIOD</span><div class="lb-seg"><button class="ag-range-btn" data-r="week" onclick="setAgRange('week')">Week</button><button class="ag-range-btn active" data-r="month" onclick="setAgRange('month')">This Month</button><button class="ag-range-btn" data-r="lastmonth" onclick="setAgRange('lastmonth')">Last Month</button><button class="ag-range-btn" data-r="ytd" onclick="setAgRange('ytd')">YTD</button><button class="ag-range-btn" data-r="all" onclick="setAgRange('all')">All Time</button></div><span style="font-size:0.7rem;color:var(--muted);font-weight:600;margin-left:1rem">AGENT</span><select class="calc-select" id="ag-agent" style="width:auto;min-width:160px;padding:0.35rem 0.6rem" onchange="loadAgency()"><option value="">All agents</option></select></div>
+<div class="lb-totals" id="ag-totals"></div>
+<div class="table-section"><div class="table-header"><div class="table-title">Agents — Placement &amp; Persistency</div><span style="font-size:0.65rem;color:var(--muted)">Placement = (active + lapsed) ÷ all · Persistency = active ÷ (active + lapsed)</span></div><table><thead><tr><th>Agent</th><th>Level</th><th>Deals</th><th>Submitted AP</th><th>In Force</th><th>Pending</th><th>Declined</th><th>Lapsed</th><th>Placement</th><th>Persistency</th><th>Bonus (est.)</th></tr></thead><tbody id="ag-agents-tbody"><tr><td colspan="11" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div>
+<div class="table-section"><div class="table-header"><div class="table-title">All Deals</div><span style="font-size:0.65rem;color:var(--muted)" id="ag-deals-count"></span></div><table><thead><tr><th>Date</th><th>Agent</th><th>Client</th><th>Carrier</th><th>Product</th><th>Premium</th><th>Status</th><th></th></tr></thead><tbody id="ag-deals-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div>
+<div class="table-section" id="ag-earnings-card"><div class="table-header"><div class="table-title">Your Agency Earnings (estimate)</div><span style="font-size:0.65rem;color:var(--muted)">Based on the Comp Settings below — excludes your own personal production</span></div><div class="lb-totals" id="ag-earnings" style="margin:1rem"></div></div>
+<div class="table-section"><div class="table-header"><div class="table-title">Comp Settings</div><span style="font-size:0.65rem;color:var(--muted)">Saved to Supabase — every agent's Bonus, Calculator and Expected Earnings pages update instantly</span></div>
+<div style="padding:1rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem">
+  <div><div class="calc-label" style="font-size:0.65rem;color:var(--muted);margin-bottom:4px">Product comp % (all AIL products)</div><input class="calc-input" id="cc-comp" type="number" step="0.5" style="width:100%"></div>
+  <div><div class="calc-label" style="font-size:0.65rem;color:var(--muted);margin-bottom:4px">Advance % (paid next week)</div><input class="calc-input" id="cc-advance" type="number" step="1" style="width:100%"></div>
+  <div><div class="calc-label" style="font-size:0.65rem;color:var(--muted);margin-bottom:4px">Your override spread % on agents' production</div><input class="calc-input" id="cc-spread" type="number" step="0.5" style="width:100%"></div>
+  <div><div class="calc-label" style="font-size:0.65rem;color:var(--muted);margin-bottom:4px">Your match % on agents' bonuses</div><input class="calc-input" id="cc-match" type="number" step="1" style="width:100%"></div>
+</div>
+<div style="padding:0 1rem"><div class="calc-label" style="font-size:0.65rem;color:var(--muted);margin-bottom:6px">Monthly production bonus tiers (submitted AP → bonus %). Leave "To" blank on the top tier.</div>
+<table style="max-width:520px"><thead><tr><th>From $</th><th>To $</th><th>Bonus %</th><th></th></tr></thead><tbody id="cc-tiers"></tbody></table>
+<div style="display:flex;gap:0.6rem;margin:0.8rem 0 1rem"><button class="lb-range-btn" style="border:1px solid var(--border)" onclick="ccAddTier()">+ Add tier</button><button class="calc-btn" id="cc-save" onclick="saveCompConfig()">Save Comp Settings</button><span id="cc-msg" style="font-size:0.7rem;color:var(--muted);align-self:center"></span></div></div>
+</div>
+</div></div>
+<div class="page" id="page-book"><div class="comm-wrap"><div class="page-header"><div class="page-title">Book of <em>Business</em></div><div class="page-sub">Every deal you log lives here.</div></div><div style="margin-bottom:1rem"><span class="lb-stat">Total Premium <b id="book-total">$0</b></span><span class="lb-stat">Deals <b id="book-count">0</b></span><button class="calc-btn" onclick="openDealModal()" style="float:right">+ Log a Deal</button></div><div class="table-section"><table><thead><tr><th>Client</th><th>Carrier</th><th>Product</th><th>Premium</th><th>Status</th><th>Date</th></tr></thead><tbody id="book-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
 <div class="modal" id="deal-modal"><div class="modal-box"><div class="modal-title">Log a Deal</div><div class="calc-field"><label class="calc-label">Client Name</label><input class="calc-input" id="d-client" placeholder="John Smith"></div><div class="calc-field"><label class="calc-label">Carrier</label><select class="calc-select" id="d-carrier"><option value="">Select Carrier</option><option>AIL</option></select></div><div class="calc-field"><label class="calc-label">Product</label><select class="calc-select" id="d-product"><option value="">Select Product</option><option>4 Year Renewable & Convertible Term</option><option>10 Year Renewable & Convertible Term</option><option>15 Year Decreasing Term</option><option>20 Year Level Term</option><option>30 Year Decreasing Term</option><option>Whole Life</option><option>Preferred Life</option><option>Executive Life</option><option>Select Life</option><option>LPU 65</option><option>Senior Graded Whole Life</option></select></div><div class="calc-field"><label class="calc-label">Rate Class</label><select class="calc-select" id="d-rateclass"><option>Preferred</option><option>Standard</option><option>Graded</option><option>Modified</option></select></div><div class="calc-field"><label class="calc-label">Annual Premium ($)</label><input class="calc-input" type="number" id="d-premium" placeholder="e.g. 540" min="1"></div><div class="calc-field"><label class="calc-label">Status</label><select class="calc-select" id="d-status"><option>Pending</option><option>Active</option><option>Declined</option><option>Cancelled</option></select></div><div style="display:flex;gap:0.5rem;margin-top:1rem"><button class="calc-btn" id="d-submit" onclick="submitDeal()">Add Deal</button><button class="lb-del" style="color:var(--muted)" onclick="closeDealModal()">Cancel</button></div></div></div>
 <div class="page" id="page-expected"><div class="comm-wrap"><div class="page-header"><div class="page-title">Expected <em>Earnings</em></div><div class="page-sub">Your whole book at a glance — total premium and projected Year 1 payout at your level.</div></div><div class="lb-podium" style="justify-content:flex-start;flex-wrap:wrap"><div class="pod"><div class="pod-rank">TOTAL PREMIUM</div><div class="pod-val" id="exp-total-premium">$0</div></div><div class="pod pod-gold" style="transform:none;box-shadow:0 0 24px var(--gold-dim)"><div class="pod-rank">PROJECTED YEAR 1 PAYOUT</div><div class="pod-val" id="exp-payout">$0</div></div><div class="pod"><div class="pod-rank">ACTIVE PREMIUM</div><div class="pod-val" id="exp-active-premium">$0</div></div><div class="pod"><div class="pod-rank">PENDING PREMIUM</div><div class="pod-val" id="exp-pending-premium">$0</div></div><div class="pod"><div class="pod-rank">DEALS</div><div class="pod-val" id="exp-deal-count">0</div></div></div><div class="page-sub" style="margin-top:1.25rem">Payout is an estimate based on your commission level and each carrier's Year 1 rate. For a single-deal breakdown, use the Commissions calculator.</div></div></div>
 
@@ -922,7 +949,8 @@ const SUPA_URL = 'https://szdzbycppkavfwuzlljh.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6ZHpieWNwcGthdmZ3dXpsbGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODIxNzgsImV4cCI6MjA5NTE1ODE3OH0.Jw21eHChMDHlskSs2PegmBXLYNIQkjl8GByOIApadhA';
 let sb = null;
 let currentUserId = null;
-let agentConfig = { name: 'Agent', level: 'GA', levelFull: 'General Agent' };
+let agentConfig = { name: 'Agent', level: 'GA', levelFull: 'General Agent', role: 'agent' };
+function isOwner(){ return agentConfig.role === 'owner' || agentConfig.role === 'admin'; }
 async function initSupabase() {
   if (!window.supabase) return;
   sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -952,7 +980,10 @@ async function initSupabase() {
       document.getElementById('sb-name').textContent = emailName;
       document.getElementById('sb-avatar').textContent = emailName.slice(0,2).toUpperCase();
       document.getElementById('dash-first-name').textContent = emailName;
-      const { data: profile } = await sb.from('profiles').select('first_name,last_name,commission_level').eq('id', session.user.id).single();
+      const { data: profile } = await sb.from('profiles').select('first_name,last_name,commission_level,role').eq('id', session.user.id).single();
+      agentConfig.role = (profile && profile.role) || 'agent';
+      if (isOwner()) { var agNav = document.getElementById('nav-agency'); if (agNav) agNav.style.display = ''; }
+      loadCompConfig();
       const firstName = profile?.first_name || '';
       const lastName = profile?.last_name || '';
       const fullName = (firstName + ' ' + lastName).trim() || emailName;
@@ -1156,8 +1187,8 @@ function escapeHtml(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').repla
 function openDealModal(){var m=document.getElementById('deal-modal');if(m)m.classList.add('active');}
 function closeDealModal(){var m=document.getElementById('deal-modal');if(m)m.classList.remove('active');}
 async function submitDeal(){if(!sb||!currentUserId){alert('Please sign in from HQ first.');return;}var client=document.getElementById('d-client').value.trim();var carrier=document.getElementById('d-carrier').value;var product=document.getElementById('d-product').value.trim();var rate=document.getElementById('d-rateclass').value;var prem=parseFloat(document.getElementById('d-premium').value);var status=document.getElementById('d-status').value;if(!client||!carrier||!prem){alert('Please enter client, carrier, and premium.');return;}var btn=document.getElementById('d-submit');if(btn){btn.disabled=true;btn.textContent='Saving...';}var ins=await sb.from('deals').insert({agent_id:currentUserId,agent_name:agentConfig.name,client:client,carrier:carrier,product:product,rate_class:rate,premium:prem,status:status});if(btn){btn.disabled=false;btn.textContent='Add Deal';}if(ins.error){alert('Could not save: '+ins.error.message);return;}document.getElementById('d-client').value='';document.getElementById('d-product').value='';document.getElementById('d-premium').value='';closeDealModal();loadBook();loadLeaderboard();}
-async function deleteDeal(id){if(!sb)return;if(!confirm('Remove this deal from your book?'))return;var r=await sb.from('deals').delete().eq('id',id);if(r.error){alert('Could not remove: '+r.error.message);return;}loadBook();loadLeaderboard();}
-async function loadBook(){var tb=document.getElementById('book-tbody');if(!tb)return;if(!sb||!currentUserId){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Sign in from HQ to see your book.</td></tr>';return;}var r=await sb.from('deals').select('*').eq('agent_id',currentUserId).order('created_at',{ascending:false});var rows=(r.data||[]);syncDashboard(rows);var tot=rows.reduce(function(a,d){return a+(parseFloat(d.premium)||0);},0);var bt=document.getElementById('book-total');if(bt)bt.textContent='$'+tot.toLocaleString();var bc=document.getElementById('book-count');if(bc)bc.textContent=rows.length;if(!rows.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No deals logged yet. Tap + Log a Deal to start your book.</td></tr>';return;}tb.innerHTML=rows.map(function(d){return '<tr><td>'+escapeHtml(d.client)+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td>'+escapeHtml(d.product||'-')+'</td><td style="color:var(--gold)">$'+(parseFloat(d.premium)||0).toLocaleString()+'</td><td>'+statusSelect(d)+'</td><td style="color:var(--muted)">'+new Date(d.created_at).toLocaleDateString()+'</td><td><button class="lb-del" data-del="'+d.id+'">Remove</button></td></tr>';}).join('');tb.querySelectorAll('button[data-del]').forEach(function(b){b.onclick=function(){deleteDeal(b.getAttribute('data-del'));};});tb.querySelectorAll('select[data-deal]').forEach(function(s){s.onchange=function(){updateDealStatus(s.getAttribute('data-deal'),s.value);};});}
+// Deal deletion removed for agents — only the agency owner can remove a deal (Agency page). DB policy enforces this too.
+async function loadBook(){var tb=document.getElementById('book-tbody');if(!tb)return;if(!sb||!currentUserId){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Sign in from HQ to see your book.</td></tr>';return;}var r=await sb.from('deals').select('*').eq('agent_id',currentUserId).order('created_at',{ascending:false});var rows=(r.data||[]);syncDashboard(rows);var tot=rows.reduce(function(a,d){return a+(parseFloat(d.premium)||0);},0);var bt=document.getElementById('book-total');if(bt)bt.textContent='$'+tot.toLocaleString();var bc=document.getElementById('book-count');if(bc)bc.textContent=rows.length;if(!rows.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">No deals logged yet. Tap + Log a Deal to start your book.</td></tr>';return;}tb.innerHTML=rows.map(function(d){return '<tr><td>'+escapeHtml(d.client)+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td>'+escapeHtml(d.product||'-')+'</td><td style="color:var(--gold)">$'+(parseFloat(d.premium)||0).toLocaleString()+'</td><td>'+statusSelect(d)+'</td><td style="color:var(--muted)">'+new Date(d.created_at).toLocaleDateString()+'</td></tr>';}).join('');tb.querySelectorAll('select[data-deal]').forEach(function(s){s.onchange=function(){updateDealStatus(s.getAttribute('data-deal'),s.value);};});}
 function lbRangeStart(){var n=new Date();var s=new Date();if(LB_RANGE==='day'){s.setHours(0,0,0,0);}else if(LB_RANGE==='week'){var day=(n.getDay()+6)%7;s.setDate(n.getDate()-day);s.setHours(0,0,0,0);}else if(LB_RANGE==='month'){s=new Date(n.getFullYear(),n.getMonth(),1);}else if(LB_RANGE==='lastmonth'){s=new Date(n.getFullYear(),n.getMonth()-1,1);}else{s=new Date(2000,0,1);}return s;}
 function lbRangeEnd(){var n=new Date();if(LB_RANGE==='lastmonth'){return new Date(n.getFullYear(),n.getMonth(),1);}return new Date(2999,0,1);}
 function setLbMetric(m){LB_METRIC=m;document.querySelectorAll('.lb-metric-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-m')===m);});loadLeaderboard();}
@@ -1175,6 +1206,66 @@ async function loadCommissions(){var pc=document.getElementById('page-commission
 function statusSelect(d){var opts=['Pending','Active','Declined','Cancelled'];return '<select class="calc-select" data-deal="'+d.id+'" style="padding:3px 6px;font-size:0.7rem;width:auto;min-width:115px">'+opts.map(function(o){return '<option'+(String(d.status)===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select>';}
 async function updateDealStatus(id,status){if(!sb)return;var r=await sb.from('deals').update({status:status}).eq('id',id);if(r&&r.error){alert('Could not update: '+r.error.message);return;}refreshAll();}
 async function loadPersistency(){var tb=document.getElementById('pers-tbody');if(!tb)return;if(!sb||!currentUserId)return;var r=await sb.from('deals').select('*').eq('agent_id',currentUserId).order('created_at',{ascending:false});var rows=(r.data||[]);var total=rows.length,active=0,declined=0,pending=0,cancelled=0;rows.forEach(function(d){var s=String(d.status||'').toLowerCase();if(s==='active')active++;else if(s==='declined')declined++;else if(s==='pending')pending++;else if(s==='cancelled')cancelled++;});var placed=active+cancelled;function st(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}st('pers-placement',total>0?Math.round(placed/total*100)+'%':'—');st('pers-persistency',placed>0?Math.round(active/placed*100)+'%':'—');st('pers-active',String(active));st('pers-lapsed',String(cancelled));if(!rows.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:2rem">No policies yet. Log deals in your Book of Business.</td></tr>';return;}tb.innerHTML=rows.map(function(d){return '<tr><td>'+escapeHtml(d.client)+'</td><td>'+escapeHtml(d.product||'-')+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td style="color:var(--muted)">'+new Date(d.created_at).toLocaleDateString()+'</td><td>'+statusSelect(d)+'</td></tr>';}).join('');tb.querySelectorAll('select[data-deal]').forEach(function(s){s.onchange=function(){updateDealStatus(s.getAttribute('data-deal'),s.value);};});}
+
+
+// ============ AGENCY (owner only) ============
+var AG_RANGE='month';
+function setAgRange(r){AG_RANGE=r;document.querySelectorAll('.ag-range-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-r')===r);});loadAgency();}
+function agRange(){var n=new Date(),s,e=new Date(2999,0,1);if(AG_RANGE==='week'){var day=(n.getDay()+6)%7;s=new Date(n.getFullYear(),n.getMonth(),n.getDate()-day);}else if(AG_RANGE==='month'){s=new Date(n.getFullYear(),n.getMonth(),1);}else if(AG_RANGE==='lastmonth'){s=new Date(n.getFullYear(),n.getMonth()-1,1);e=new Date(n.getFullYear(),n.getMonth(),1);}else if(AG_RANGE==='ytd'){s=new Date(n.getFullYear(),0,1);}else{s=new Date(2000,0,1);}return [s,e];}
+function agPct(a,b){return b>0?Math.round(a/b*100)+'%':'—';}
+function agMoney(v){return '$'+Math.round(v||0).toLocaleString();}
+var AG_PROFILES={};
+async function loadAgency(){
+  if(!sb||!currentUserId||!isOwner())return;
+  var atb=document.getElementById('ag-agents-tbody'),dtb=document.getElementById('ag-deals-tbody');
+  var rg=agRange();
+  var q=sb.from('deals').select('*').gte('created_at',rg[0].toISOString()).lt('created_at',rg[1].toISOString()).order('created_at',{ascending:false});
+  var filt=document.getElementById('ag-agent').value; if(filt) q=q.eq('agent_id',filt);
+  var pr=await sb.from('profiles').select('id,first_name,last_name,email,commission_level,role');
+  (pr.data||[]).forEach(function(p){AG_PROFILES[p.id]=p;});
+  var r=await q; if(r.error){atb.innerHTML='<tr><td colspan="11" style="color:var(--red);padding:1rem">'+escapeHtml(r.error.message)+'</td></tr>';return;}
+  var rows=r.data||[];
+  // agent dropdown (all agents with a profile or a deal)
+  var sel=document.getElementById('ag-agent'); if(sel.options.length<=1){var names={};(pr.data||[]).forEach(function(p){names[p.id]=((p.first_name||'')+' '+(p.last_name||'')).trim()||p.email;});rows.forEach(function(d){if(d.agent_id&&!names[d.agent_id])names[d.agent_id]=d.agent_name||'Agent';});Object.keys(names).sort(function(a,b){return names[a].localeCompare(names[b]);}).forEach(function(id){var o=document.createElement('option');o.value=id;o.textContent=names[id];sel.appendChild(o);});}
+  // per-agent stats
+  var map={},T={deals:0,prem:0,active:0,pending:0,declined:0,cancelled:0};
+  rows.forEach(function(d){var k=d.agent_id||d.agent_name;var p=AG_PROFILES[d.agent_id];if(!map[k])map[k]={id:d.agent_id,name:p?(((p.first_name||'')+' '+(p.last_name||'')).trim()||p.email):(d.agent_name||'Agent'),level:p?(p.commission_level||''):'',deals:0,prem:0,active:0,pending:0,declined:0,cancelled:0,list:[]};var a=map[k];var s=String(d.status||'').toLowerCase();var ap=parseFloat(d.premium)||0;a.deals++;a.prem+=ap;T.deals++;T.prem+=ap;if(s==='active'){a.active++;T.active++;}else if(s==='pending'){a.pending++;T.pending++;}else if(s==='declined'){a.declined++;T.declined++;}else if(s==='cancelled'){a.cancelled++;T.cancelled++;}a.list.push(d);});
+  var arr=Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return b.prem-a.prem;});
+  // bonus per agent: locked-tier per calendar month
+  var teamBonus=0,teamPremExMe=0;
+  arr.forEach(function(a){var byMonth={};a.list.slice().sort(function(x,y){return new Date(x.created_at)-new Date(y.created_at);}).forEach(function(d){var m=d.created_at.slice(0,7);(byMonth[m]=byMonth[m]||[]).push(d);});a.bonus=0;Object.keys(byMonth).forEach(function(m){a.bonus+=bonusOnDeals(byMonth[m]);});if(a.id!==currentUserId){teamBonus+=a.bonus;teamPremExMe+=a.prem;}});
+  var tp=T.active+T.cancelled;
+  document.getElementById('ag-totals').innerHTML=[['Agency Premium',agMoney(T.prem),true],['Deals',T.deals],['Agents Who Sold',arr.length],['In Force',T.active],['Pending',T.pending],['Placement',agPct(tp,T.deals)],['Persistency',agPct(T.active,tp)]].map(function(x){return '<div class="lb-tot"><div class="lb-tot-lbl">'+x[0]+'</div><div class="lb-tot-val'+(x[2]?'':' plain')+'">'+x[1]+'</div></div>';}).join('');
+  atb.innerHTML=arr.length?arr.map(function(a){var ap=a.active+a.cancelled;return '<tr><td>'+escapeHtml(a.name)+(a.id===currentUserId?' <span style="color:var(--gold);font-size:0.6rem">(you)</span>':'')+'</td><td style="color:var(--muted)">'+escapeHtml(a.level)+'</td><td>'+a.deals+'</td><td style="color:var(--gold)">'+agMoney(a.prem)+'</td><td>'+a.active+'</td><td>'+a.pending+'</td><td>'+a.declined+'</td><td>'+a.cancelled+'</td><td>'+agPct(ap,a.deals)+'</td><td>'+agPct(a.active,ap)+'</td><td style="color:var(--gold)">'+agMoney(a.bonus)+'</td></tr>';}).join(''):'<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:2rem">No deals in this period.</td></tr>';
+  document.getElementById('ag-deals-count').textContent=rows.length+' deal'+(rows.length===1?'':'s');
+  dtb.innerHTML=rows.length?rows.map(function(d){var p=AG_PROFILES[d.agent_id];var nm=p?(((p.first_name||'')+' '+(p.last_name||'')).trim()||p.email):(d.agent_name||'Agent');return '<tr><td style="color:var(--muted)">'+new Date(d.created_at).toLocaleDateString()+'</td><td>'+escapeHtml(nm)+'</td><td>'+escapeHtml(d.client)+'</td><td style="color:var(--muted)">'+escapeHtml(d.carrier)+'</td><td>'+escapeHtml(d.product||'-')+'</td><td style="color:var(--gold)">'+agMoney(parseFloat(d.premium))+'</td><td>'+statusSelect(d)+'</td><td><button class="lb-del" data-del="'+d.id+'">Remove</button></td></tr>';}).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">No deals in this period.</td></tr>';
+  dtb.querySelectorAll('select[data-deal]').forEach(function(s){s.onchange=async function(){var u=await sb.from('deals').update({status:s.value}).eq('id',s.getAttribute('data-deal'));if(u.error){alert('Could not update: '+u.error.message);}loadAgency();};});
+  dtb.querySelectorAll('button[data-del]').forEach(function(b){b.onclick=async function(){if(!confirm('Remove this deal from the agency book? This cannot be undone.'))return;var u=await sb.from('deals').delete().eq('id',b.getAttribute('data-del'));if(u.error){alert('Could not remove: '+u.error.message);return;}loadAgency();};});
+  // earnings estimate
+  var spread=teamPremExMe*(+AGENCY_COMP.override_spread_pct||0)/100,match=teamBonus*(+AGENCY_COMP.bonus_match_pct||0)/100,adv=spread*(+AGENCY_COMP.advance_pct||0)/100;
+  document.getElementById('ag-earnings').innerHTML=[['Agents\' Premium',agMoney(teamPremExMe)],['Override ('+AGENCY_COMP.override_spread_pct+'% spread)',agMoney(spread),true],['Advanced ('+AGENCY_COMP.advance_pct+'%)',agMoney(adv)],['As-earned remainder',agMoney(spread-adv)],['Agents\' Bonuses',agMoney(teamBonus)],['Your Bonus Match ('+AGENCY_COMP.bonus_match_pct+'%)',agMoney(match),true],['Total (est.)',agMoney(spread+match),true]].map(function(x){return '<div class="lb-tot"><div class="lb-tot-lbl">'+x[0]+'</div><div class="lb-tot-val'+(x[2]?'':' plain')+'">'+x[1]+'</div></div>';}).join('');
+  renderCompForm();
+}
+function renderCompForm(){
+  var set=function(id,v){var e=document.getElementById(id);if(e&&document.activeElement!==e)e.value=v;};
+  set('cc-comp',COMP.comp_pct);set('cc-advance',COMP.advance_pct);set('cc-spread',AGENCY_COMP.override_spread_pct);set('cc-match',AGENCY_COMP.bonus_match_pct);
+  var tb=document.getElementById('cc-tiers');if(!tb||tb.getAttribute('data-dirty'))return;
+  tb.innerHTML=BONUS_TIERS.map(function(t){return ccTierRow(t.min,t.max===Infinity?'':t.max,t.pct);}).join('');
+}
+function ccTierRow(min,max,p){return '<tr><td><input class="calc-input" type="number" value="'+min+'" data-f="min" style="width:110px;padding:4px 6px"></td><td><input class="calc-input" type="number" value="'+max+'" data-f="max" placeholder="and up" style="width:110px;padding:4px 6px"></td><td><input class="calc-input" type="number" step="0.5" value="'+p+'" data-f="pct" style="width:80px;padding:4px 6px"></td><td><button class="lb-del" onclick="this.closest(\'tr\').remove();document.getElementById(\'cc-tiers\').setAttribute(\'data-dirty\',\'1\')">×</button></td></tr>';}
+function ccAddTier(){var tb=document.getElementById('cc-tiers');tb.setAttribute('data-dirty','1');tb.insertAdjacentHTML('beforeend',ccTierRow('','',''));}
+async function saveCompConfig(){
+  if(!sb||!isOwner())return;var msg=document.getElementById('cc-msg');msg.textContent='Saving...';
+  var tiers=[];document.querySelectorAll('#cc-tiers tr').forEach(function(tr){var g=function(f){var e=tr.querySelector('[data-f="'+f+'"]');return e?e.value.trim():'';};if(g('min')==='')return;tiers.push({min:+g('min'),max:g('max')===''?null:+g('max'),pct:+g('pct')||0});});
+  tiers.sort(function(a,b){return a.min-b.min;});
+  var comp={comp_pct:+document.getElementById('cc-comp').value||0,advance_pct:+document.getElementById('cc-advance').value||0};comp.trail_pct=100-comp.advance_pct;
+  var agency={override_spread_pct:+document.getElementById('cc-spread').value||0,bonus_match_pct:+document.getElementById('cc-match').value||0,advance_pct:comp.advance_pct};
+  var now=new Date().toISOString();
+  var r=await sb.from('comp_config').upsert([{key:'bonus_tiers',value:tiers,updated_at:now},{key:'comp',value:comp,updated_at:now},{key:'agency',value:agency,updated_at:now}]);
+  if(r.error){msg.textContent='Error: '+r.error.message;msg.style.color='var(--red)';return;}
+  document.getElementById('cc-tiers').removeAttribute('data-dirty');msg.style.color='var(--green,#2ecc71)';msg.textContent='Saved ✓';
+  await loadCompConfig();loadAgency();
+}
 
 // ============ CALL TRACKER ============
 var CT_DISPOS = [
@@ -1308,7 +1399,7 @@ window.addEventListener('resize', () => { document.body.classList.remove('sb-ope
 function showPage(id, el) {
   if (window.matchMedia('(max-width: 900px)').matches) document.body.classList.remove('sb-open');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();} if(id==='calls'){loadCallTracker();}
+  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();} if(id==='calls'){loadCallTracker();} if(id==='agency'){loadAgency();}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if (el) el.classList.add('active');
 }
@@ -1334,7 +1425,8 @@ function renderPolicies(filter){filter=filter||'all';var list=(typeof policies!=
 function filterPolicies(f) { renderPolicies(f); }
 
 // ============ BONUS ============
-const BONUS_TIERS = [
+// Defaults — overridden by the comp_config table in Supabase (edit on Agency → Comp Settings)
+let BONUS_TIERS = [
   { min:0,     max:2499,     pct:0  },
   { min:2500,  max:4249,     pct:10 },
   { min:4250,  max:10250,    pct:19 },
@@ -1342,6 +1434,25 @@ const BONUS_TIERS = [
   { min:20251, max:30250,    pct:23 },
   { min:30251, max:Infinity, pct:29 }
 ];
+let COMP = { comp_pct:60, advance_pct:65, trail_pct:35 };
+let AGENCY_COMP = { override_spread_pct:5, bonus_match_pct:50, advance_pct:65 };
+function applyCompPct(){ carrierData.forEach(c => c.products.forEach(p => { p.comp = COMP.comp_pct; p.rates = Array(12).fill(p.comp); })); }
+async function loadCompConfig(){
+  if(!sb) return;
+  try{
+    const r = await sb.from('comp_config').select('key,value');
+    if(r.error || !r.data) return;
+    r.data.forEach(row => {
+      if(row.key==='bonus_tiers' && Array.isArray(row.value) && row.value.length){ BONUS_TIERS = row.value.map(t=>({min:+t.min||0, max:(t.max==null||t.max==='')?Infinity:+t.max, pct:+t.pct||0})).sort((a,b)=>a.min-b.min); }
+      if(row.key==='comp' && row.value){ COMP = Object.assign({}, COMP, row.value); COMP.trail_pct = 100 - (+COMP.advance_pct||0); applyCompPct(); }
+      if(row.key==='agency' && row.value){ AGENCY_COMP = Object.assign({}, AGENCY_COMP, row.value); }
+    });
+    renderBonusTiers(); if(typeof buildCarrierAccordion==='function' && document.getElementById('carrier-accordion')) buildCarrierAccordion();
+  }catch(e){ console.warn('comp_config', e); }
+}
+function bonusOnDeals(deals){ // deals sorted by created_at asc, same month → locked-tier bonus total
+  let run=0,tot=0; deals.forEach(d=>{ const ap=parseFloat(d.premium)||0; run+=ap; tot+=ap*bonusTierFor(run)/100; }); return tot;
+}
 function bonusTierFor(total){ const t=BONUS_TIERS.find(t=>total>=t.min&&total<=t.max); return t?t.pct:0; }
 function nextBonusTier(total){ return BONUS_TIERS.find(t=>t.min>total)||null; }
 function renderBonusTiers(){
@@ -1408,16 +1519,16 @@ function calculateComm() {
   if (!p) return;
   const rate = p.comp;
   const commission = premium * rate / 100;
-  const advance = commission * 0.65;
-  const trail = commission * 0.35;
+  const advance = commission * (COMP.advance_pct/100);
+  const trail = commission * (COMP.trail_pct/100);
   const tierPct = bonusTierFor(premium);
   const bonus = premium * tierPct / 100;
   const money = v => '$' + v.toLocaleString(undefined,{maximumFractionDigits:2});
   document.getElementById('result-details').innerHTML =
     `<strong>${carrier}</strong> · ${productName} · ${rate}% comp`
     + `<div style="margin-top:8px;font-size:0.7rem;line-height:1.7;color:var(--muted)">`
-    + `Advance (65%, next week): <span style="color:var(--gold)">${money(advance)}</span><br>`
-    + `Trail (35%, months 9-11): <span style="color:var(--text)">${money(trail)}</span><br>`
+    + `Advance (${COMP.advance_pct}%, next week): <span style="color:var(--gold)">${money(advance)}</span><br>`
+    + `Trail (${COMP.trail_pct}%, months 9-11): <span style="color:var(--text)">${money(trail)}</span><br>`
     + `Bonus on this AP alone (${tierPct}% tier): <span style="color:var(--gold)">${money(bonus)}</span> `
     + `<span style="opacity:.6">— real tier depends on your monthly total</span>`
     + `</div>`;
@@ -1431,7 +1542,7 @@ function buildCarrierAccordion() {
   const container = document.getElementById('carrier-accordion');
   container.innerHTML = carrierData.map((c,ci) => {
     const rows = c.products.map(p => {
-      const adv = (p.comp * 0.65).toFixed(1);
+      const adv = (p.comp * COMP.advance_pct/100).toFixed(1);
       return `<tr><td style="color:var(--muted);font-size:0.7rem">${p.name}</td><td class="my-rate-cell">${p.comp}%</td><td style="color:var(--gold)">${adv}%</td></tr>`;
     }).join('');
     return `<div class="carrier-row" id="crow-${ci}">
@@ -1443,7 +1554,7 @@ function buildCarrierAccordion() {
         </div>
       </div>
       <div class="carrier-products" id="cprod-${ci}">
-        <table><thead><tr><th>Product</th><th>Comp %</th><th>Advance (65%)</th></tr></thead><tbody>${rows}</tbody></table>
+        <table><thead><tr><th>Product</th><th>Comp %</th><th>Advance (${COMP.advance_pct}%)</th></tr></thead><tbody>${rows}</tbody></table>
       </div>
     </div>`;
   }).join('');
