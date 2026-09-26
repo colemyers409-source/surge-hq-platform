@@ -11,10 +11,11 @@
 html{scroll-behavior:smooth;scroll-padding-top:104px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 body{background:var(--bg);color:var(--tx);font:15px/1.6 Montserrat,system-ui,sans-serif;margin:0;padding-inline:16px;
- background-image:radial-gradient(ellipse 80% 420px at 90% 0,rgba(228,211,158,.16),transparent 70%),radial-gradient(ellipse 70% 500px at 0 55%,rgba(150,122,70,.10),transparent 70%);background-attachment:fixed}
+}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;transform:translateZ(0);background:radial-gradient(ellipse 80% 420px at 90% 0,rgba(228,211,158,.16),transparent 70%),radial-gradient(ellipse 70% 500px at 0 55%,rgba(150,122,70,.10),transparent 70%)}
 main{max-width:720px;margin:0 auto;padding-bottom:40px}
 .g,.gt{background:linear-gradient(180deg,var(--g1),var(--g2) 55%,var(--g3));-webkit-background-clip:text;background-clip:text;color:transparent}
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin-inline:-16px;padding:10px 16px 0;background:rgba(10,10,10,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin-inline:-16px;padding:10px 16px 0;background:#0A0A0A;border-bottom:1px solid var(--line)}
 .mark{font:400 20px Anton,Impact,sans-serif;letter-spacing:1px;color:#fff;text-decoration:none;display:inline-block;max-width:720px}
 .mark i{font:italic 400 24px "Playfair Display",Georgia,serif;color:var(--g2)}
 nav{display:flex;gap:6px;overflow-x:auto;padding:8px 0 10px;scrollbar-width:none;max-width:720px;margin:0 auto}
@@ -211,8 +212,12 @@ footer p{font:400 20px Anton,Impact,sans-serif;letter-spacing:1px;margin:10px 0 
   c.addEventListener('change',function(){try{localStorage.setItem('sg-'+c.id,c.checked?'1':'0')}catch(e){}})});
  // nav highlight
  var links=[].slice.call(document.querySelectorAll('nav a')), secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
- function hl(){var y=scrollY+130,cur=-1;secs.forEach(function(s,i){if(s.offsetTop<=y)cur=i});
-  links.forEach(function(a,i){var on=i===cur;if(on&&!a.classList.contains('on'))a.scrollIntoView({block:'nearest',inline:'center'});a.classList.toggle('on',on)})}
- addEventListener('scroll',hl,{passive:true});hl();
+ var nav=document.getElementById('nav'),cur=-1,tick=false;
+ function setOn(i){if(i===cur)return;cur=i;links.forEach(function(a,j){a.classList.toggle('on',j===i)});
+  if(i>=0){var a=links[i];nav.scrollTo({left:a.offsetLeft-(nav.clientWidth-a.offsetWidth)/2,behavior:'auto'})}}
+ var tops=[];function measure(){tops=secs.map(function(s){return s.getBoundingClientRect().top+scrollY})}
+ function hl(){tick=false;var y=scrollY+130,c=-1;for(var i=0;i<tops.length;i++){if(tops[i]<=y)c=i}setOn(c)}
+ measure();addEventListener('resize',function(){measure();hl()});addEventListener('load',function(){measure();hl()});
+ addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(hl)}},{passive:true});hl();
 })();
 </script></body></html>
