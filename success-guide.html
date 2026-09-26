@@ -192,10 +192,6 @@ footer p{font:400 20px Anton,Impact,sans-serif;letter-spacing:1px;margin:10px 0 
 </main>
 <script>
 (function(){
- // soft gate: on the Surge domain, send signed-out visitors to HQ login
- try{ if(/surgelifegroup\.com$/.test(location.hostname)){ var ok=false;
-   for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i); if(k==='surge_access_token'||/^sb-.*auth-token/.test(k)){ok=true;break}}
-   if(!ok){location.replace('/');return} } }catch(e){}
  var push=[0,2,6,9,11], m=new Date().getMonth(), isPush=push.indexOf(m)>=0;
  var names=["January","February","March","April","May","June","July","August","September","October","November","December"];
  document.getElementById('now').innerHTML='<b>'+names[m]+' is a '+(isPush?'push':'non-push')+' month</b><br>'+(isPush?'Dial 8:00 AM–12:00 PM and 2:00 PM–10:00 PM CST.':'Dial 8:00 AM–12:00 PM and 4:00 PM–8:00 PM CST.');
