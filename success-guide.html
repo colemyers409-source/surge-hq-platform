@@ -131,12 +131,32 @@ td:first-child{font-weight:700;white-space:nowrap} td:nth-child(2){color:var(--g
 .tier.silver{border-color:#B9BDC4}.tier.silver b{color:#CDD1D8}
 .tier.bronze{border-color:#B07A4A}.tier.bronze b{color:#C98E5A}
 .step h5{margin-top:14px}
+.ws{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.wsc{display:flex;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.wsd{flex:none;width:92px;display:grid;place-content:center;text-align:center;background:linear-gradient(180deg,var(--g1),var(--g2) 55%,var(--g3));color:#0A0A0A}
+.wsd b{font:400 30px/1 Anton,Impact,sans-serif}
+.wsd span{font-size:9px;font-weight:700;letter-spacing:2px;margin-top:4px}
+.wsb{padding:14px 16px;display:grid;gap:2px}
+.wsb b{font:400 26px/1.1 Anton,Impact,sans-serif;color:#fff;letter-spacing:.5px}
+.wsb b i{font-style:normal;color:var(--g1)}
+.wsb .tp{color:var(--g1);font-weight:600;font-size:14px}
+.wsb small{color:var(--mu);font-size:12px}
+.dc{display:block;text-decoration:none;color:var(--tx);border:1px solid var(--g3);background:linear-gradient(90deg,rgba(150,122,70,.28),rgba(150,122,70,.05));border-radius:14px;padding:16px}
+.dc-row{display:flex;align-items:center;gap:14px}
+.dc svg{flex:none}
+.dc b{display:block;font:400 22px Anton,Impact,sans-serif;letter-spacing:.8px;color:#fff;text-transform:uppercase}
+.dc small{display:block;color:var(--mu);font-size:13px}
+.dc .go{flex:none;margin-left:auto;font:700 12px Montserrat,system-ui,sans-serif;letter-spacing:1px;color:#0A0A0A;background:var(--g2);border-radius:999px;padding:10px 18px}
+.dc:hover .go{background:var(--g1)}
+.dc:focus-visible{outline:2px solid var(--g1);outline-offset:2px}
+.dcl{margin-top:12px}
+.dcl ul{margin-top:8px}
 footer{text-align:center;padding:56px 0 20px}
 
 footer p{font:400 20px Anton,Impact,sans-serif;letter-spacing:1px;margin:10px 0 0}
 </style></head>
 <body>
-<header class="top"><a href="#top" class="mark" aria-label="Back to top"><i>S</i>URGE</a><nav id="nav"><a href="#ethos">Ethos</a><a href="#expectations">Expectations</a><a href="#schedule">Schedule</a><a href="#training">10-Day</a><a href="#script">Scripts</a><a href="#rebuttals">Rebuttals</a><a href="#books">Books</a><a href="#mindset">8 Steps</a><a href="#contacts">Contacts</a></nav></header>
+<header class="top"><a href="#top" class="mark" aria-label="Back to top"><i>S</i>URGE</a><nav id="nav"><a href="#ethos">Ethos</a><a href="#expectations">Expectations</a><a href="#schedule">Schedule</a><a href="#workshops">Workshops</a><a href="#training">10-Day</a><a href="#script">Scripts</a><a href="#rebuttals">Rebuttals</a><a href="#books">Books</a><a href="#mindset">8 Steps</a><a href="#contacts">Contacts</a><a href="#discord">Discord</a></nav></header>
 <main id="top">
 <div class="hero"><div class="wm" aria-label="Surge Partners"><div class="wm1"><i>S</i>URGE</div><div class="wm2">PARTNERS</div><div class="wm3"><span></span><b>⚡</b><span></span></div></div><h1>Success <span class="g">Guide</span></h1>
 <p>Our ethos, our expectations, your schedule, your first 10 days, the Globe script and every rebuttal. Keep this open on the phones.</p></div>
@@ -170,6 +190,12 @@ footer p{font:400 20px Anton,Impact,sans-serif;letter-spacing:1px;margin:10px 0 
  <tr><td>Tue – Fri</td><td>2:00 PM</td><td>Surge x Spartans Kick Off</td></tr><tr><td>Sat / Sun</td><td>—</td><td>No calls</td></tr></table></div>
 </div>
 <p class="fine">Dialing times are for Globe leads and veteran leads. All times Central.</p></section>
+<section id="workshops"><div class="eb">Every week · All agents</div><h2>Weekly <span class="g">Workshops</span></h2><p class="sub">Two live trainings a week. Block them off and show up ready to work.</p>
+<div class="ws">
+<div class="wsc"><div class="wsd"><b>MON</b><span>MONDAY</span></div><div class="wsb"><b>12:00 PM <i>CT</i></b><small>1 PM ET · 11 AM MT · 10 AM PT</small></div></div>
+<div class="wsc"><div class="wsd"><b>WED</b><span>WEDNESDAY</span></div><div class="wsb"><b>12:00 PM <i>CT</i></b><small>1 PM ET · 11 AM MT · 10 AM PT</small></div></div>
+</div>
+<p class="fine">Cameras on. Be 5 minutes early. Workshop links and updates go out in the <a href="#discord" style="color:var(--g1)">Surge Discord</a>.</p></section>
 <section id="training"><div class="eb">Your first 10 days</div><h2>10-Day <span class="g">Training</span></h2><p class="sub">Week 1 you watch and learn. Week 2 you do it yourself.</p>
 <div class="rule-box"><b>Every weekday</b> Apex training at <strong>2:00 PM CST</strong> and the team recap at <strong>8:00 PM CST</strong> in Matt's Zoom. You are in both, every day of the 10-day window. No exceptions.</div>
 <ol class="tl"><li class=""><span class="dn">1</span><div><small>Mon · 2:00 PM Apex → Matt's Zoom</small>Listen to live closes all day</div></li><li class=""><span class="dn">2</span><div><small>Tue · 2:00 PM Apex → Matt's Zoom</small>Listen to live closes all day</div></li><li class=""><span class="dn">3</span><div><small>Wed · 2:00 PM Apex → Matt's Zoom</small>Listen to live closes all day</div></li><li class=""><span class="dn">4</span><div><small>Thu · 2:00 PM Apex → Matt's Zoom</small>Test runs: EAPP, HP PRO, needs analysis</div></li><li class=""><span class="dn">5</span><div><small>Fri · 2:00 PM Apex → Matt's Zoom</small>Test runs: EAPP, HP PRO, needs analysis</div></li><li class="we"><span class="dn">—</span><div><small>Sat/Sun</small>Personal training time</div></li><li class=""><span class="dn">6</span><div><small>Mon · 2:00 PM Apex → Matt's Zoom</small>Dial &amp; set appointments</div></li><li class=""><span class="dn">7</span><div><small>Tue · 2:00 PM Apex → Matt's Zoom</small>Dial &amp; set appointments</div></li><li class=""><span class="dn">8</span><div><small>Wed · 2:00 PM Apex → Matt's Zoom</small>Dial &amp; set appointments</div></li><li class=""><span class="dn">9</span><div><small>Thu · 2:00 PM Apex → Matt's Zoom</small>Dial &amp; set appointments</div></li><li class=""><span class="dn">10</span><div><small>Fri · 2:00 PM Apex → Matt's Zoom</small><b class="gt">Test-out.</b> Pass and you're live.</div></li></ol>
@@ -205,6 +231,8 @@ footer p{font:400 20px Anton,Impact,sans-serif;letter-spacing:1px;margin:10px 0 
 <div class="cp"><div><small>Cole Myers</small><b>479-225-5008</b></div><button type="button" data-copy="479-225-5008">Copy</button></div>
 <div class="cp"><div><small>Joey Scariano</small><b>504-508-0886</b></div><button type="button" data-copy="504-508-0886">Copy</button></div>
 </div></section>
+<section id="discord"><div class="eb">Where the team lives</div><h2>Join the <span class="g">Discord</span></h2><p class="sub">Team updates and workshop links run through Discord. Join on Day 1 and keep notifications on.</p>
+<a class="dc" href="https://discord.gg/fjKppfCEa" target="_blank" rel="noopener"><span class="dc-row"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#D4BE7F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"></path><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"></path></svg><span><b>Surge Discord</b><small>discord.gg/fjKppfCEa</small></span><span class="go">JOIN</span></span></a></section>
 <footer><div class="wm" aria-label="Surge Partners"><div class="wm1"><i>S</i>URGE</div><div class="wm2">PARTNERS</div><div class="wm3"><span></span><b>⚡</b><span></span></div></div><p>Ten days. Then you're on the phones. Let's go.</p></footer>
 </main>
 <script>
