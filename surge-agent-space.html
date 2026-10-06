@@ -358,6 +358,25 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .lb-youtag{background:var(--gold);color:#000;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;}
 .lb-del{background:transparent;border:1px solid var(--border);color:var(--red);font-size:0.65rem;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:inherit;}.ag-toolbar{display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;padding:0.75rem 1rem;border-bottom:1px solid var(--border);}.ag-search{flex:1;min-width:200px;position:relative;}.ag-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;}.ag-search input{width:100%;background:var(--bg,#0a0a0a);border:1px solid var(--border);border-radius:6px;color:inherit;font-family:inherit;font-size:0.8rem;padding:0.5rem 0.75rem 0.5rem 2rem;outline:none;}.ag-search input:focus{border-color:var(--gold);}.ag-row{cursor:pointer;}.ag-row:hover td{background:rgba(168,152,80,0.07);}.ag-badge{display:inline-block;font-size:0.62rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);}.ag-badge.active{color:var(--green);border-color:rgba(39,174,96,0.4);}.ag-badge.pending{color:var(--gold);border-color:rgba(168,152,80,0.4);}.ag-badge.declined,.ag-badge.cancelled{color:var(--red);border-color:rgba(231,76,60,0.4);}.ag-pager{display:flex;justify-content:space-between;align-items:center;gap:0.6rem;padding:0.7rem 1rem;border-top:1px solid var(--border);font-size:0.7rem;color:var(--muted);flex-wrap:wrap;}.ag-pager .lb-seg{margin:0;}.dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem 1rem;margin-bottom:1rem;}.dd-item{background:var(--bg,#0a0a0a);border:1px solid var(--border);border-radius:6px;padding:0.6rem 0.75rem;}.dd-item.wide{grid-column:1/-1;}.dd-lbl{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:3px;}.dd-val{font-size:0.9rem;font-weight:600;word-break:break-word;}.dd-val a{color:var(--gold);text-decoration:none;}.dd-val.gold{color:var(--gold);font-size:1.15rem;font-weight:800;}.dd-actions{display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-top:0.5rem;}@media(max-width:520px){.dd-grid{grid-template-columns:1fr;}}
 .lb-stat{display:inline-block;margin-right:1.5rem;}
+.lic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;}
+.lic-st{font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.04em;padding:0.55rem 0.2rem;text-align:center;border-radius:4px;border:1px solid var(--border-s);background:var(--bg3);color:var(--muted);cursor:pointer;line-height:1.2;}
+.lic-st:hover{border-color:var(--gold-b);color:var(--text);}
+.lic-st.on{background:var(--gold);border-color:var(--gold);color:#000;}
+.lic-st .n{display:block;font-size:0.6rem;font-weight:600;opacity:0.8;}
+.lic-st.c0{background:rgba(231,76,60,0.1);border-color:rgba(231,76,60,0.35);color:#f08a7e;}
+.lic-st.c1{background:var(--gold-dim);border-color:var(--gold-b);color:var(--gold-l);}
+.lic-st.c2{background:rgba(168,152,80,0.28);border-color:var(--gold-b);color:var(--text);}
+.lic-st.c3{background:var(--gold);border-color:var(--gold);color:#000;}
+.lic-st.sel{outline:2px solid var(--text);outline-offset:1px;}
+.lic-pad{padding:1rem;}
+.lic-legend{display:flex;flex-wrap:wrap;gap:1rem;font-size:0.65rem;color:var(--muted);margin-top:0.8rem;}
+.lic-legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px;}
+.lic-who{font-size:0.78rem;margin-top:0.8rem;min-height:1.2em;}
+.lic-chips{display:flex;flex-wrap:wrap;gap:4px;}
+.lic-chip{font-size:0.62rem;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold-l);}
+.lic-chip.new{background:var(--gold);color:#000;border-color:var(--gold);}
+.lic-row{cursor:pointer;}.lic-row:hover td{background:var(--bg3);}
+
 .lb-stat b{color:var(--gold);font-size:1.1rem;}
 
 /* ======= CALL TRACKER ======= */
@@ -456,6 +475,10 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     <div class="nav-item" onclick="showPage('bonus', this)">
       <svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
       Bonus
+    </div>
+    <div class="nav-item" onclick="showPage('licenses', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/><polyline points="9 12 11 14 15 10"/></svg>
+      My Licenses
     </div>
     <div class="nav-item" onclick="showPage('carrier', this)">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -762,6 +785,19 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 </div>
 <div class="table-section"><div class="table-header"><div class="table-title">All Deals</div><span style="font-size:0.65rem;color:var(--muted)" id="ag-deals-count"></span></div><div class="ag-toolbar"><div class="ag-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16" y2="16"/></svg><input id="ag-search" type="search" placeholder="Search by client name, phone, or email…" autocomplete="off" oninput="AG_PAGE=1;renderAgDeals()"></div><select class="calc-select" id="ag-status" style="width:auto;padding:0.45rem 0.6rem;font-size:0.75rem" onchange="AG_PAGE=1;renderAgDeals()"><option value="">All statuses</option><option>Pending</option><option>Active</option><option>Declined</option><option>Cancelled</option></select><select class="calc-select" id="ag-per" style="width:auto;padding:0.45rem 0.6rem;font-size:0.75rem" onchange="AG_PER=+this.value;AG_PAGE=1;renderAgDeals()"><option value="10">Show 10</option><option value="25">Show 25</option><option value="50">Show 50</option><option value="100">Show 100</option></select><span style="font-size:0.65rem;color:var(--muted)">Click a deal to view details</span></div><table><thead><tr><th>Date</th><th>Agent</th><th>Client</th><th>Product</th><th>Premium</th><th>Status</th></tr></thead><tbody id="ag-deals-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table><div class="ag-pager" id="ag-pager"></div></div>
 </div></div>
+<div class="page" id="page-licenses"><div class="comm-wrap">
+<div class="page-header"><div class="page-title">My <em>Licenses</em></div><div class="page-sub">Tap every state you're licensed and appointed in, then save. Leads are split twice a week by these states, so update this the day a new license comes through.</div></div>
+<div class="table-section"><div class="table-header"><div class="table-title">Your States</div><span style="font-size:0.65rem;color:var(--muted)" id="lic-me-meta"></span></div>
+<div class="lic-pad"><div class="lic-grid" id="lic-me-grid"></div>
+<div style="display:flex;gap:0.8rem;align-items:center;margin-top:1rem;flex-wrap:wrap"><button class="calc-btn" id="lic-save" onclick="saveMyLicenses()">Save My States</button><span id="lic-msg" style="font-size:0.7rem;color:var(--muted)"></span></div></div></div>
+<div class="table-section"><div class="table-header"><div class="table-title">Team Coverage</div><span style="font-size:0.65rem;color:var(--muted)">Number = agents who can write that state</span></div>
+<div class="lic-pad"><div class="lb-totals" id="lic-totals"></div><div class="lic-grid" id="lic-cov"></div>
+<div class="lic-legend"><span><i style="background:rgba(231,76,60,0.25)"></i>Nobody</span><span><i style="background:var(--gold-dim);border:1px solid var(--gold-b)"></i>1 agent</span><span><i style="background:rgba(168,152,80,0.4)"></i>2–3</span><span><i style="background:var(--gold)"></i>4+</span></div>
+<div class="lic-who" id="lic-who"></div></div></div>
+<div class="table-section" id="lic-roster-card" style="display:none"><div class="table-header"><div class="table-title">Agent Licenses</div><span style="font-size:0.65rem;color:var(--muted)">Owner only · solid chips = added in the last 14 days · click an agent to edit</span></div>
+<table><thead><tr><th>Agent</th><th>States</th><th>#</th><th>Updated</th></tr></thead><tbody id="lic-roster"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div>
+</div></div>
+<div class="modal" id="lic-modal"><div class="modal-box" style="max-width:620px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem"><div class="modal-title" id="lic-modal-title">Edit States</div><button class="lb-del" style="color:var(--muted)" onclick="closeLicModal()">✕</button></div><div class="lic-grid" id="lic-modal-grid"></div><div style="display:flex;gap:0.8rem;align-items:center;margin-top:1rem"><button class="calc-btn" onclick="saveLicModal()">Save</button><span id="lic-modal-msg" style="font-size:0.7rem;color:var(--muted)"></span></div></div></div>
 <div class="page" id="page-book"><div class="comm-wrap"><div class="page-header"><div class="page-title">Book of <em>Business</em></div><div class="page-sub">Every deal you log lives here.</div></div><div style="margin-bottom:1rem"><span class="lb-stat">Total Premium <b id="book-total">$0</b></span><span class="lb-stat">Deals <b id="book-count">0</b></span><button class="calc-btn" onclick="openDealModal()" style="float:right">+ Log a Deal</button></div><div class="table-section"><table><thead><tr><th>Client</th><th>State</th><th>Carrier</th><th>Product</th><th>Premium</th><th>Status</th><th>Date</th></tr></thead><tbody id="book-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div></div>
 <div class="modal" id="deal-detail"><div class="modal-box" style="max-width:560px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem"><div><div class="modal-title" style="margin-bottom:2px" id="dd-title">Deal</div><div style="font-size:0.65rem;color:var(--muted);margin-bottom:1rem" id="dd-sub"></div></div><button class="lb-del" style="color:var(--muted)" onclick="closeDealDetail()">✕</button></div><div class="dd-grid" id="dd-grid"></div><div class="dd-actions" id="dd-actions"></div></div></div><div class="modal" id="deal-modal"><div class="modal-box"><div class="modal-title">Log a Deal</div><div class="calc-field"><label class="calc-label">Client Name</label><input class="calc-input" id="d-client" placeholder="John Smith"></div><div class="calc-field"><label class="calc-label">Client Email</label><input class="calc-input" type="email" id="d-email" placeholder="client@email.com" autocomplete="off"></div><div class="calc-field"><label class="calc-label">Client Phone</label><input class="calc-input" type="tel" id="d-phone" placeholder="(479) 555-0123" autocomplete="off"></div><div class="calc-field"><label class="calc-label">Client State</label><select class="calc-select" id="d-state"><option value="">Select State</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>DC</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div><div class="calc-field"><label class="calc-label">Carrier</label><select class="calc-select" id="d-carrier"><option value="">Select Carrier</option><option>AIL</option></select></div><div class="calc-field"><label class="calc-label">Product</label><select class="calc-select" id="d-product"><option value="">Select Product</option><option>4 Year Renewable & Convertible Term</option><option>10 Year Renewable & Convertible Term</option><option>15 Year Decreasing Term</option><option>20 Year Level Term</option><option>30 Year Decreasing Term</option><option>Whole Life</option><option>Preferred Life</option><option>Executive Life</option><option>Select Life</option><option>LPU 65</option><option>Senior Graded Whole Life</option></select></div><div class="calc-field"><label class="calc-label">Rate Class</label><select class="calc-select" id="d-rateclass"><option>Preferred</option><option>Standard</option><option>Graded</option><option>Modified</option></select></div><div class="calc-field"><label class="calc-label">Annual Premium ($)</label><input class="calc-input" type="number" id="d-premium" placeholder="e.g. 540" min="1"></div><div class="calc-field"><label class="calc-label">Status</label><select class="calc-select" id="d-status"><option>Pending</option><option>Active</option><option>Declined</option><option>Cancelled</option></select></div><div style="display:flex;gap:0.5rem;margin-top:1rem"><button class="calc-btn" id="d-submit" onclick="submitDeal()">Add Deal</button><button class="lb-del" style="color:var(--muted)" onclick="closeDealModal()">Cancel</button></div></div></div>
 <div class="page" id="page-expected"><div class="comm-wrap"><div class="page-header"><div class="page-title">Expected <em>Earnings</em></div><div class="page-sub">Your whole book at a glance — total premium and projected Year 1 payout at your level.</div></div><div class="lb-podium" style="justify-content:flex-start;flex-wrap:wrap"><div class="pod"><div class="pod-rank">GROSS PREMIUM</div><div class="pod-val" id="exp-total-premium">$0</div></div><div class="pod"><div class="pod-rank">NET PREMIUM</div><div class="pod-val" id="exp-net-premium">$0</div></div><div class="pod pod-gold" style="transform:none;box-shadow:0 0 24px var(--gold-dim)"><div class="pod-rank">PROJECTED YEAR 1 PAYOUT (NET)</div><div class="pod-val" id="exp-payout">$0</div></div><div class="pod"><div class="pod-rank">ACTIVE PREMIUM</div><div class="pod-val" id="exp-active-premium">$0</div></div><div class="pod"><div class="pod-rank">PENDING PREMIUM</div><div class="pod-val" id="exp-pending-premium">$0</div></div><div class="pod"><div class="pod-rank">DEALS</div><div class="pod-val" id="exp-deal-count">0</div></div></div><div class="page-sub" style="margin-top:1.25rem">Payout is an estimate on net business (declined and cancelled deals excluded), based on your commission level and each carrier's Year 1 rate. For a single-deal breakdown, use the Commissions calculator.</div></div></div>
@@ -1323,10 +1359,69 @@ window.addEventListener('resize', () => { document.body.classList.remove('sb-ope
 function showPage(id, el) {
   if (window.matchMedia('(max-width: 900px)').matches) document.body.classList.remove('sb-open');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();} if(id==='calls'){loadCallTracker();} if(id==='agency'){loadAgency();}
+  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();} if(id==='calls'){loadCallTracker();} if(id==='agency'){loadAgency();} if(id==='licenses'){loadLicenses();}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if (el) el.classList.add('active');
 }
+
+
+// ============ LICENSES ============
+var LIC_STATES=["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+var LIC_ROWS=[],LIC_MINE=new Set(),LIC_SEL=null,LIC_PROFILES={},LIC_EDIT=null,LIC_EDIT_SET=new Set();
+function licName(id){var p=LIC_PROFILES[id];return p?(((p.first_name||'')+' '+(p.last_name||'')).trim()||p.email||'Agent'):'Agent';}
+function licDate(t){if(!t)return '—';var d=new Date(t);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});}
+function licIsNew(row,st){var t=row.added&&row.added[st];return t&&(Date.now()-new Date(t).getTime())<14*864e5;}
+function licPicker(elId,set){var g=document.getElementById(elId);g.innerHTML=LIC_STATES.map(function(st){return '<button type="button" class="lic-st'+(set.has(st)?' on':'')+'" data-st="'+st+'" aria-pressed="'+set.has(st)+'">'+st+'</button>';}).join('');
+  g.onclick=function(e){var b=e.target.closest('[data-st]');if(!b)return;var st=b.dataset.st;if(set.has(st))set.delete(st);else set.add(st);b.classList.toggle('on');b.setAttribute('aria-pressed',set.has(st));};}
+async function loadLicenses(){
+  if(!sb||!currentUserId)return;
+  var r=await sb.from('agent_licenses').select('*');
+  if(r.error){document.getElementById('lic-msg').textContent='Could not load licenses: '+r.error.message;return;}
+  LIC_ROWS=r.data||[];
+  var mine=LIC_ROWS.find(function(x){return x.user_id===currentUserId;});
+  LIC_MINE=new Set(mine?mine.states:[]);
+  document.getElementById('lic-me-meta').textContent=mine?(mine.states.length+' states · updated '+licDate(mine.updated_at)):'Not set yet';
+  licPicker('lic-me-grid',LIC_MINE);
+  if(isOwner()){var pr=await sb.from('profiles').select('id,first_name,last_name,email');(pr.data||[]).forEach(function(p){LIC_PROFILES[p.id]=p;});document.getElementById('lic-roster-card').style.display='';}
+  renderLicCoverage();
+}
+function licRowToSave(uid,set){var prev=LIC_ROWS.find(function(x){return x.user_id===uid;});var added=Object.assign({},prev&&prev.added||{});var old=new Set(prev?prev.states:[]);var now=new Date().toISOString();
+  set.forEach(function(st){if(!old.has(st))added[st]=now;});Object.keys(added).forEach(function(st){if(!set.has(st))delete added[st];});
+  return {user_id:uid,states:Array.from(set).sort(),added:added,updated_at:now};}
+async function saveMyLicenses(){var m=document.getElementById('lic-msg');m.textContent='Saving…';
+  var r=await sb.from('agent_licenses').upsert(licRowToSave(currentUserId,LIC_MINE));
+  if(r.error){m.textContent='Did not save: '+r.error.message;return;}
+  m.textContent='Saved.';loadLicenses();}
+function renderLicCoverage(){
+  var c={};LIC_STATES.forEach(function(st){c[st]=[];});
+  LIC_ROWS.forEach(function(row){(row.states||[]).forEach(function(st){if(c[st])c[st].push(row.user_id);});});
+  var covered=LIC_STATES.filter(function(st){return c[st].length;}).length;
+  var withStates=LIC_ROWS.filter(function(x){return (x.states||[]).length;}).length;
+  document.getElementById('lic-totals').innerHTML=[['Agents On File',withStates],['States Covered',covered],['No Coverage',LIC_STATES.length-covered]].map(function(x,i){return '<div class="lb-tot"><div class="lb-tot-lbl">'+x[0]+'</div><div class="lb-tot-val'+(i===0?' plain':'')+'">'+x[1]+'</div></div>';}).join('');
+  var g=document.getElementById('lic-cov');
+  g.innerHTML=LIC_STATES.map(function(st){var n=c[st].length,k=n===0?0:n===1?1:n<=3?2:3;return '<button type="button" class="lic-st c'+k+(LIC_SEL===st?' sel':'')+'" data-st="'+st+'">'+st+'<span class="n">'+n+'</span></button>';}).join('');
+  g.onclick=function(e){var b=e.target.closest('[data-st]');if(!b)return;LIC_SEL=LIC_SEL===b.dataset.st?null:b.dataset.st;renderLicCoverage();};
+  var who=document.getElementById('lic-who');
+  if(!LIC_SEL){who.innerHTML='';}
+  else if(!c[LIC_SEL].length){who.innerHTML='<b>'+LIC_SEL+':</b> <span style="color:var(--red)">nobody can write this state yet</span>';}
+  else if(isOwner()){who.innerHTML='<b>'+LIC_SEL+':</b> '+c[LIC_SEL].map(function(id){return escapeHtml(licName(id));}).join(', ');}
+  else{who.innerHTML='<b>'+LIC_SEL+':</b> '+c[LIC_SEL].length+' agent'+(c[LIC_SEL].length>1?'s':'')+(LIC_MINE.has(LIC_SEL)?' (including you)':'');}
+  if(isOwner()){var rows=LIC_ROWS.slice().sort(function(a,b){return licName(a.user_id).localeCompare(licName(b.user_id));});
+    var have=new Set(rows.map(function(x){return x.user_id;}));
+    var missing=Object.keys(LIC_PROFILES).filter(function(id){return !have.has(id);}).sort(function(a,b){return licName(a).localeCompare(licName(b));});
+    var html=rows.map(function(row){return '<tr class="lic-row" data-uid="'+row.user_id+'"><td>'+escapeHtml(licName(row.user_id))+(row.user_id===currentUserId?' <span style="color:var(--gold);font-size:0.6rem">(you)</span>':'')+'</td><td><div class="lic-chips">'+((row.states||[]).map(function(st){return '<span class="lic-chip'+(licIsNew(row,st)?' new':'')+'">'+st+'</span>';}).join('')||'<span style="color:var(--muted)">None</span>')+'</div></td><td>'+(row.states||[]).length+'</td><td style="color:var(--muted)">'+licDate(row.updated_at)+'</td></tr>';}).join('');
+    html+=missing.map(function(id){return '<tr class="lic-row" data-uid="'+id+'"><td>'+escapeHtml(licName(id))+'</td><td style="color:var(--orange)">Hasn\'t entered states yet</td><td>0</td><td style="color:var(--muted)">—</td></tr>';}).join('');
+    var tb=document.getElementById('lic-roster');tb.innerHTML=html||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem">No agents yet.</td></tr>';
+    tb.onclick=function(e){var tr=e.target.closest('[data-uid]');if(tr)openLicModal(tr.dataset.uid);};}
+}
+function openLicModal(uid){LIC_EDIT=uid;var row=LIC_ROWS.find(function(x){return x.user_id===uid;});LIC_EDIT_SET=new Set(row?row.states:[]);
+  document.getElementById('lic-modal-title').textContent=licName(uid)+' — States';document.getElementById('lic-modal-msg').textContent='';
+  licPicker('lic-modal-grid',LIC_EDIT_SET);document.getElementById('lic-modal').classList.add('active');}
+function closeLicModal(){document.getElementById('lic-modal').classList.remove('active');}
+async function saveLicModal(){var m=document.getElementById('lic-modal-msg');m.textContent='Saving…';
+  var r=await sb.from('agent_licenses').upsert(licRowToSave(LIC_EDIT,LIC_EDIT_SET));
+  if(r.error){m.textContent='Did not save: '+r.error.message;return;}
+  closeLicModal();loadLicenses();}
 
 // ============ POLICIES ============
 function badgeClass(s) {
