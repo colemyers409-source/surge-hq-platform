@@ -1382,7 +1382,7 @@ async function loadLicenses(){
   LIC_MINE=new Set(mine?mine.states:[]);
   document.getElementById('lic-me-meta').textContent=mine?(mine.states.length+' states · updated '+licDate(mine.updated_at)):'Not set yet';
   licPicker('lic-me-grid',LIC_MINE);
-  if(isOwner()){var pr=await sb.from('profiles').select('id,first_name,last_name,email');(pr.data||[]).forEach(function(p){LIC_PROFILES[p.id]=p;});document.getElementById('lic-roster-card').style.display='';}
+  if(isOwner()){var pr=await sb.from('profiles').select('id,first_name,last_name,email,blocked');LIC_PROFILES={};(pr.data||[]).forEach(function(p){if(!p.blocked)LIC_PROFILES[p.id]=p;});LIC_ROWS=LIC_ROWS.filter(function(x){return LIC_PROFILES[x.user_id];});document.getElementById('lic-roster-card').style.display='';}
   renderLicCoverage();
 }
 function licRowToSave(uid,set){var prev=LIC_ROWS.find(function(x){return x.user_id===uid;});var added=Object.assign({},prev&&prev.added||{});var old=new Set(prev?prev.states:[]);var now=new Date().toISOString();
