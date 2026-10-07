@@ -395,6 +395,45 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 @media(max-width:600px){.ct-grid{grid-template-columns:1fr 1fr;}}
 
 
+/* ===== APPOINTMENTS ===== */
+.ap-navbadge{margin-left:auto;background:var(--gold);color:#000;font-size:0.55rem;font-weight:800;padding:1px 6px;border-radius:999px;display:none;}
+.ap-navbadge.show{display:inline-block;}
+.ap-top{display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem;}
+.ap-top .spacer{flex:1;}
+.ap-week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:1rem;}
+.ap-day{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:0.55rem 0.3rem;text-align:center;cursor:pointer;transition:all .18s;position:relative;}
+.ap-day:hover{border-color:var(--gold-b);}
+.ap-day.sel{border-color:var(--gold);background:var(--gold-dim);}
+.ap-day.today .ap-dnum{color:var(--gold);}
+.ap-dname{font-size:0.52rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:700;}
+.ap-dnum{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;line-height:1.1;}
+.ap-dcount{font-size:0.58rem;color:var(--gold);font-weight:700;min-height:0.8rem;}
+.ap-list{display:flex;flex-direction:column;gap:0.6rem;}
+.ap-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:8px;padding:0.9rem 1rem;display:grid;grid-template-columns:auto 1fr auto;gap:0.9rem;align-items:start;}
+.ap-card.past{opacity:0.85;}
+.ap-card.s-sale{border-left-color:var(--green);} .ap-card.s-no_sale{border-left-color:var(--orange);} .ap-card.s-no_show{border-left-color:var(--red);} .ap-card.s-cancelled,.ap-card.s-rescheduled{border-left-color:var(--muted);}
+.ap-time{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;color:var(--gold);line-height:1;min-width:64px;}
+.ap-time small{display:block;font-family:'Montserrat',sans-serif;font-size:0.55rem;color:var(--muted);letter-spacing:0.08em;margin-top:3px;}
+.ap-name{font-weight:700;font-size:0.9rem;}
+.ap-meta{font-size:0.68rem;color:var(--muted);margin-top:2px;}
+.ap-meta a{color:var(--gold);text-decoration:none;}
+.ap-notes{font-size:0.7rem;color:var(--text);opacity:0.8;margin-top:4px;white-space:pre-wrap;}
+.ap-badge{display:inline-block;font-size:0.56rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);}
+.ap-badge.scheduled{color:var(--gold);border-color:var(--gold-b);} .ap-badge.sale{color:var(--green);border-color:rgba(39,174,96,0.4);} .ap-badge.no_sale{color:var(--orange);border-color:rgba(230,126,34,0.4);} .ap-badge.no_show{color:var(--red);border-color:rgba(231,76,60,0.4);}
+.ap-actions{display:flex;flex-wrap:wrap;gap:0.4rem;grid-column:1/-1;margin-top:0.25rem;}
+.ap-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:0.62rem;font-weight:700;padding:0.35rem 0.7rem;border-radius:6px;cursor:pointer;letter-spacing:0.04em;}
+.ap-btn:hover{border-color:var(--gold-b);color:var(--text);}
+.ap-btn.sale{color:var(--green);border-color:rgba(39,174,96,0.4);} .ap-btn.nosale{color:var(--orange);border-color:rgba(230,126,34,0.4);} .ap-btn.noshow{color:var(--red);border-color:rgba(231,76,60,0.4);}
+.ap-empty{text-align:center;color:var(--muted);padding:2rem;font-size:0.75rem;border:1px dashed var(--border);border-radius:8px;}
+.ap-agent{font-size:0.6rem;color:var(--gold);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;}
+.ap-remind{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:0.7rem 1rem;display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;margin-bottom:1rem;font-size:0.72rem;}
+.ap-remind.on{border-color:rgba(39,174,96,0.35);}
+.ap-remind .dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;} .ap-remind.on .dot{background:var(--green);}
+.ap-form{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;}
+.ap-form .wide{grid-column:1/-1;}
+.ap-form textarea{min-height:64px;resize:vertical;}
+@media(max-width:600px){.ap-card{grid-template-columns:auto 1fr;} .ap-card .ap-status{grid-column:1/-1;} .ap-form{grid-template-columns:1fr;} .ap-dnum{font-size:1.1rem;}}
+
 /* ===== Phone layout & notch safe area ===== */
 .topbar { padding-top: env(safe-area-inset-top); height: calc(56px + env(safe-area-inset-top)); }
 .sidebar { padding-top: calc(1.5rem + env(safe-area-inset-top)); }
@@ -488,6 +527,10 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 
   <div class="sidebar-section">
     <div class="sidebar-section-label">Tools</div>
+    <div class="nav-item" onclick="showPage('appointments', this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="16" r="1.5"/></svg>
+      Appointments<span class="ap-navbadge" id="ap-navbadge"></span>
+    </div>
     <div class="nav-item" onclick="showPage('ai', this)">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       AI Messaging
@@ -785,6 +828,35 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 </div>
 <div class="table-section"><div class="table-header"><div class="table-title">All Deals</div><span style="font-size:0.65rem;color:var(--muted)" id="ag-deals-count"></span></div><div class="ag-toolbar"><div class="ag-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16" y2="16"/></svg><input id="ag-search" type="search" placeholder="Search by client name, phone, or email…" autocomplete="off" oninput="AG_PAGE=1;renderAgDeals()"></div><select class="calc-select" id="ag-status" style="width:auto;padding:0.45rem 0.6rem;font-size:0.75rem" onchange="AG_PAGE=1;renderAgDeals()"><option value="">All statuses</option><option>Pending</option><option>Active</option><option>Declined</option><option>Cancelled</option></select><select class="calc-select" id="ag-per" style="width:auto;padding:0.45rem 0.6rem;font-size:0.75rem" onchange="AG_PER=+this.value;AG_PAGE=1;renderAgDeals()"><option value="10">Show 10</option><option value="25">Show 25</option><option value="50">Show 50</option><option value="100">Show 100</option></select><span style="font-size:0.65rem;color:var(--muted)">Click a deal to view details</span></div><table><thead><tr><th>Date</th><th>Agent</th><th>Client</th><th>Product</th><th>Premium</th><th>Status</th></tr></thead><tbody id="ag-deals-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table><div class="ag-pager" id="ag-pager"></div></div>
 </div></div>
+<div class="page" id="page-appointments"><div class="comm-wrap">
+<div class="page-header"><div class="page-title">Appoint<em>ments</em></div><div class="page-sub">Book every appointment here, get reminded before it starts, and dispo it after so you know your show rate and close rate.</div></div>
+<div class="ap-remind" id="ap-remind"><span class="dot"></span><span id="ap-remind-txt">Reminders are off on this device.</span><button class="ap-btn" id="ap-remind-btn" onclick="apEnableReminders()">Turn on reminders</button></div>
+<div class="lb-totals" id="ap-stats"></div>
+<div class="ap-top">
+  <div class="lb-seg"><button class="lb-range-btn" onclick="apShiftWeek(-1)">‹</button><button class="lb-range-btn" onclick="apGoToday()">Today</button><button class="lb-range-btn" onclick="apShiftWeek(1)">›</button></div>
+  <span style="font-size:0.78rem;color:var(--gold);font-weight:600" id="ap-weeklbl"></span>
+  <div class="spacer"></div>
+  <div class="lb-seg" id="ap-scope" style="display:none"><button class="lb-range-btn active" data-as="me" onclick="apSetScope('me')">Mine</button><button class="lb-range-btn" data-as="team" onclick="apSetScope('team')">Team</button></div>
+  <button class="calc-btn" onclick="openApptModal()">+ New Appointment</button>
+</div>
+<div class="ap-week" id="ap-week"></div>
+<div class="ap-list" id="ap-list"><div class="ap-empty">Loading…</div></div>
+</div></div>
+<div class="modal" id="ap-modal"><div class="modal-box" style="max-width:560px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem"><div class="modal-title" id="ap-modal-title">New Appointment</div><button class="lb-del" style="color:var(--muted)" onclick="closeApptModal()">✕</button></div>
+<div class="ap-form">
+<div class="calc-field wide"><label class="calc-label">Client Name</label><input class="calc-input" id="ap-f-name" placeholder="John Smith"></div>
+<div class="calc-field"><label class="calc-label">Phone</label><input class="calc-input" type="tel" id="ap-f-phone" placeholder="(479) 555-0123" autocomplete="off"></div>
+<div class="calc-field"><label class="calc-label">Type</label><select class="calc-select" id="ap-f-type"><option>Presentation</option><option>Follow-up</option><option>Callback</option><option>Delivery</option><option>Other</option></select></div>
+<div class="calc-field"><label class="calc-label">Date</label><input class="calc-input" type="date" id="ap-f-date" style="color-scheme:dark"></div>
+<div class="calc-field"><label class="calc-label">Time</label><input class="calc-input" type="time" id="ap-f-time" step="300" style="color-scheme:dark"></div>
+<div class="calc-field"><label class="calc-label">Length</label><select class="calc-select" id="ap-f-dur"><option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option></select></div>
+<div class="calc-field"><label class="calc-label">Remind me</label><select class="calc-select" id="ap-f-rem"><option value="15">15 min before</option><option value="30" selected>30 min before</option><option value="60">1 hour before</option><option value="120">2 hours before</option><option value="1440">1 day before</option></select></div>
+<div class="calc-field wide"><label class="calc-label">Notes</label><textarea class="calc-input" id="ap-f-notes" placeholder="Spouse's name, what they're looking for, address…"></textarea></div>
+</div>
+<div style="display:flex;gap:0.5rem;margin-top:1rem;align-items:center;flex-wrap:wrap"><button class="calc-btn" id="ap-f-submit" onclick="saveAppt()">Save Appointment</button><button class="lb-del" style="color:var(--muted)" onclick="closeApptModal()">Cancel</button><span id="ap-f-msg" style="font-size:0.7rem;color:var(--muted)"></span></div></div></div>
+<div class="modal" id="ap-dispo"><div class="modal-box" style="max-width:420px"><div class="modal-title" id="ap-dispo-title">Dispo</div><div style="font-size:0.72rem;color:var(--muted);margin-bottom:0.8rem" id="ap-dispo-sub"></div>
+<div class="calc-field"><label class="calc-label">Quick note (optional)</label><textarea class="calc-input" id="ap-dispo-note" style="min-height:56px" placeholder="What happened?"></textarea></div>
+<div style="display:flex;gap:0.5rem;margin-top:1rem;flex-wrap:wrap"><button class="calc-btn" id="ap-dispo-save" onclick="apSaveDispo()">Save</button><button class="lb-del" style="color:var(--muted)" onclick="document.getElementById('ap-dispo').classList.remove('active')">Cancel</button></div></div></div>
 <div class="page" id="page-licenses"><div class="comm-wrap">
 <div class="page-header"><div class="page-title">My <em>Licenses</em></div><div class="page-sub">Tap every state you're licensed and appointed in, then save. Leads are split twice a week by these states, so update this the day a new license comes through.</div></div>
 <div class="table-section"><div class="table-header"><div class="table-title">Your States</div><span style="font-size:0.65rem;color:var(--muted)" id="lic-me-meta"></span></div>
@@ -894,6 +966,8 @@ async function initSupabase() {
       agentConfig.role = (profile && profile.role) || 'agent';
       if (isOwner()) { var agNav = document.getElementById('nav-agency'); if (agNav) agNav.style.display = ''; }
       loadCompConfig();
+      setTimeout(apInAppCheck,1500);
+      try{var _pg=new URLSearchParams(window.location.search).get('page');if(_pg){var _nav=Array.prototype.find.call(document.querySelectorAll('.nav-item'),function(n){return (n.getAttribute('onclick')||'').indexOf("'"+_pg+"'")>=0;});if(_nav){showPage(_pg,_nav);window.history.replaceState({}, '', window.location.pathname);}}}catch(e){}
       const firstName = profile?.first_name || '';
       const lastName = profile?.last_name || '';
       const fullName = (firstName + ' ' + lastName).trim() || emailName;
@@ -1356,10 +1430,126 @@ function toggleSidebar(force) {
 }
 try { if (localStorage.getItem('surge_sb_collapsed') === '1' && !window.matchMedia('(max-width: 900px)').matches) document.body.classList.add('sb-collapsed'); } catch(e) {}
 window.addEventListener('resize', () => { document.body.classList.remove('sb-open'); });
+
+/* ================= APPOINTMENTS ================= */
+const VAPID_PUBLIC_KEY='BD0KCOFsinBu5FNjs64Q_nES8s91RXT5EympBuF961ZU4pgQgXEA8G2ySuG7aGUPzkHO52rF6zsxroIiLFhnFVs';
+let AP_ROWS=[],AP_PROFILES={},AP_SCOPE='me',AP_WEEKSTART=null,AP_SEL=null,AP_EDIT=null,AP_DISPO=null,AP_LOADED=false;
+const AP_STATUS={scheduled:'Scheduled',sale:'Sale',no_sale:'No Sale',no_show:'No Show',rescheduled:'Rescheduled',cancelled:'Cancelled'};
+function apDay0(d){var x=new Date(d);x.setHours(0,0,0,0);return x;}
+function apKey(d){var x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
+function apFmtTime(d){return new Date(d).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
+function apFmtDate(d){return new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+function apName(id){var p=AP_PROFILES[id];return p?((p.first_name||'')+' '+(p.last_name||'')).trim()||p.email:'Agent';}
+function apGoToday(){var n=new Date();AP_WEEKSTART=apDay0(n);AP_WEEKSTART.setDate(n.getDate()-n.getDay());AP_SEL=apKey(n);renderAppointments();}
+function apShiftWeek(n){AP_WEEKSTART.setDate(AP_WEEKSTART.getDate()+7*n);AP_SEL=apKey(AP_WEEKSTART);renderAppointments();}
+function apSetScope(sc){AP_SCOPE=sc;document.querySelectorAll('#ap-scope .lb-range-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-as')===sc);});renderAppointments();}
+async function loadAppointments(){
+  if(!sb||!currentUserId){document.getElementById('ap-list').innerHTML='<div class="ap-empty">Log in at HQ first.</div>';return;}
+  if(!AP_WEEKSTART)apGoToday();
+  var q=sb.from('appointments').select('*').order('starts_at');
+  var r=await q; if(r.error){document.getElementById('ap-list').innerHTML='<div class="ap-empty">Could not load: '+escapeHtml(r.error.message)+'</div>';return;}
+  AP_ROWS=r.data||[];
+  if(isOwner()){document.getElementById('ap-scope').style.display='';if(!Object.keys(AP_PROFILES).length){var pr=await sb.from('profiles').select('id,first_name,last_name,email');(pr.data||[]).forEach(function(p){AP_PROFILES[p.id]=p;});}}
+  AP_LOADED=true; apRefreshReminderUI(); renderAppointments(); apUpdateNavBadge();
+}
+function apVisible(){return AP_ROWS.filter(function(a){return AP_SCOPE==='team'?true:a.agent_id===currentUserId;});}
+function renderAppointments(){
+  var rows=apVisible(); var now=new Date();
+  var mine=rows, done=mine.filter(function(a){return ['sale','no_sale','no_show'].indexOf(a.status)>=0;});
+  var showed=done.filter(function(a){return a.status!=='no_show';}).length, sales=done.filter(function(a){return a.status==='sale';}).length;
+  var up=mine.filter(function(a){return a.status==='scheduled'&&new Date(a.starts_at)>=now;}).length;
+  var todayK=apKey(now), today=mine.filter(function(a){return a.status==='scheduled'&&apKey(a.starts_at)===todayK;}).length;
+  document.getElementById('ap-stats').innerHTML=
+    '<div class="lb-tot"><div class="lb-tot-lbl">Today</div><div class="lb-tot-val plain">'+today+'</div></div>'+
+    '<div class="lb-tot"><div class="lb-tot-lbl">Upcoming</div><div class="lb-tot-val plain">'+up+'</div></div>'+
+    '<div class="lb-tot"><div class="lb-tot-lbl">Show Rate</div><div class="lb-tot-val">'+(done.length?Math.round(showed/done.length*100)+'%':'—')+'</div><div style="font-size:0.6rem;color:var(--muted)">'+showed+' of '+done.length+' showed</div></div>'+
+    '<div class="lb-tot"><div class="lb-tot-lbl">Close Rate</div><div class="lb-tot-val">'+(showed?Math.round(sales/showed*100)+'%':'—')+'</div><div style="font-size:0.6rem;color:var(--muted)">'+sales+' sale'+(sales===1?'':'s')+' from '+showed+' sat</div></div>';
+  var ws=AP_WEEKSTART, we=new Date(ws);we.setDate(ws.getDate()+6);
+  document.getElementById('ap-weeklbl').textContent=ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+we.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  var html='';for(var i=0;i<7;i++){var d=new Date(ws);d.setDate(ws.getDate()+i);var k=apKey(d);var c=rows.filter(function(a){return apKey(a.starts_at)===k&&a.status!=='cancelled';}).length;
+    html+='<div class="ap-day'+(k===AP_SEL?' sel':'')+(k===todayK?' today':'')+'" onclick="AP_SEL=\''+k+'\';renderAppointments()"><div class="ap-dname">'+d.toLocaleDateString('en-US',{weekday:'short'})+'</div><div class="ap-dnum">'+d.getDate()+'</div><div class="ap-dcount">'+(c?c+(c===1?' appt':' appts'):'')+'</div></div>';}
+  document.getElementById('ap-week').innerHTML=html;
+  var day=rows.filter(function(a){return apKey(a.starts_at)===AP_SEL;});
+  var list=document.getElementById('ap-list');
+  if(!day.length){list.innerHTML='<div class="ap-empty">Nothing booked for '+apFmtDate(AP_SEL+'T12:00:00')+'. <a href="#" onclick="openApptModal(null,\''+AP_SEL+'\');return false" style="color:var(--gold)">Add one</a>.</div>';return;}
+  list.innerHTML=day.map(function(a){
+    var st=new Date(a.starts_at), past=st<now, mineRow=a.agent_id===currentUserId;
+    var h='<div class="ap-card s-'+a.status+(past?' past':'')+'">';
+    h+='<div class="ap-time">'+apFmtTime(st)+'<small>'+a.duration_min+' MIN</small></div>';
+    h+='<div><div class="ap-name">'+escapeHtml(a.client_name)+'</div><div class="ap-meta">'+escapeHtml(a.appt_type)+(a.client_phone?' · <a href="tel:'+escapeHtml(a.client_phone)+'">'+escapeHtml(a.client_phone)+'</a>':'')+(AP_SCOPE==='team'?' · <span class="ap-agent">'+escapeHtml(apName(a.agent_id))+'</span>':'')+'</div>'+(a.notes?'<div class="ap-notes">'+escapeHtml(a.notes)+'</div>':'')+(a.dispo_note?'<div class="ap-notes" style="color:var(--muted)">Dispo: '+escapeHtml(a.dispo_note)+'</div>':'')+'</div>';
+    h+='<div class="ap-status"><span class="ap-badge '+a.status+'">'+AP_STATUS[a.status]+'</span></div>';
+    if(mineRow||isOwner()){h+='<div class="ap-actions">';
+      if(a.status==='scheduled'){h+='<button class="ap-btn sale" onclick="apDispo(\''+a.id+'\',\'sale\')">✓ Sale</button><button class="ap-btn nosale" onclick="apDispo(\''+a.id+'\',\'no_sale\')">Presented · No Sale</button><button class="ap-btn noshow" onclick="apDispo(\''+a.id+'\',\'no_show\')">No Show</button><button class="ap-btn" onclick="apReschedule(\''+a.id+'\')">Reschedule</button>';}
+      else{h+='<button class="ap-btn" onclick="apDispo(\''+a.id+'\',\'scheduled\')">Undo dispo</button>';}
+      h+='<button class="ap-btn" onclick="openApptModal(\''+a.id+'\')">Edit</button><button class="ap-btn" onclick="apIcs(\''+a.id+'\')">Add to calendar</button>';
+      if(a.status==='scheduled')h+='<button class="ap-btn" onclick="apCancel(\''+a.id+'\')">Cancel</button>';
+      h+='</div>';}
+    return h+'</div>';}).join('');
+}
+function openApptModal(id,dateKey){AP_EDIT=id||null;var a=id?AP_ROWS.find(function(x){return x.id===id;}):null;
+  document.getElementById('ap-modal-title').textContent=a?'Edit Appointment':'New Appointment';
+  document.getElementById('ap-f-name').value=a?a.client_name:'';document.getElementById('ap-f-phone').value=a?(a.client_phone||''):'';
+  document.getElementById('ap-f-type').value=a?a.appt_type:'Presentation';document.getElementById('ap-f-dur').value=a?String(a.duration_min):'60';document.getElementById('ap-f-rem').value=a?String(a.reminder_min):'30';
+  document.getElementById('ap-f-notes').value=a?(a.notes||''):'';
+  var st=a?new Date(a.starts_at):null;document.getElementById('ap-f-date').value=a?apKey(st):(dateKey||AP_SEL||apKey(new Date()));
+  if(a){document.getElementById('ap-f-time').value=String(st.getHours()).padStart(2,'0')+':'+String(st.getMinutes()).padStart(2,'0');}else{var n=new Date();n.setMinutes(0);n.setHours(n.getHours()+1);document.getElementById('ap-f-time').value=String(n.getHours()).padStart(2,'0')+':00';}
+  document.getElementById('ap-f-msg').textContent='';document.getElementById('ap-modal').classList.add('active');setTimeout(function(){document.getElementById('ap-f-name').focus();},50);}
+function closeApptModal(){document.getElementById('ap-modal').classList.remove('active');}
+async function saveAppt(){var m=document.getElementById('ap-f-msg');
+  var name=document.getElementById('ap-f-name').value.trim(),date=document.getElementById('ap-f-date').value,time=document.getElementById('ap-f-time').value;
+  if(!name){m.textContent='Client name is required.';return;} if(!date||!time){m.textContent='Pick a date and time.';return;}
+  var p=date.split('-'),t=time.split(':');var st=new Date(+p[0],+p[1]-1,+p[2],+t[0],+t[1]);
+  var row={agent_id:currentUserId,client_name:name,client_phone:document.getElementById('ap-f-phone').value.trim()||null,appt_type:document.getElementById('ap-f-type').value,starts_at:st.toISOString(),duration_min:+document.getElementById('ap-f-dur').value,reminder_min:+document.getElementById('ap-f-rem').value,notes:document.getElementById('ap-f-notes').value.trim()||null};
+  m.textContent='Saving…';var r;
+  if(AP_EDIT){delete row.agent_id;row.reminder_sent=false;r=await sb.from('appointments').update(row).eq('id',AP_EDIT);}else{r=await sb.from('appointments').insert(row);}
+  if(r.error){m.textContent='Error: '+r.error.message;return;}
+  closeApptModal();ctToast(AP_EDIT?'Appointment updated':'Appointment booked');AP_SEL=apKey(st);AP_WEEKSTART=apDay0(st);AP_WEEKSTART.setDate(st.getDate()-st.getDay());loadAppointments();}
+function apDispo(id,status){AP_DISPO={id:id,status:status};var a=AP_ROWS.find(function(x){return x.id===id;});
+  if(status==='scheduled'){apSaveDispo();return;}
+  document.getElementById('ap-dispo-title').textContent=AP_STATUS[status]+' — '+a.client_name;
+  document.getElementById('ap-dispo-sub').textContent=status==='sale'?'Nice. Save this, then log the deal in Book of Business.':status==='no_show'?'They didn\u2019t show. Want to add a note (left VM, rescheduling, etc)?':'You presented but didn\u2019t close. What was the objection?';
+  document.getElementById('ap-dispo-note').value=a.dispo_note||'';document.getElementById('ap-dispo').classList.add('active');}
+async function apSaveDispo(){var d=AP_DISPO;if(!d)return;var note=document.getElementById('ap-dispo-note').value.trim();
+  var r=await sb.from('appointments').update({status:d.status,dispo_note:d.status==='scheduled'?null:(note||null)}).eq('id',d.id);
+  document.getElementById('ap-dispo').classList.remove('active');if(r.error){ctToast('Could not save: '+r.error.message);return;}
+  var a=AP_ROWS.find(function(x){return x.id===d.id;});
+  if(d.status==='sale'){ctToast('SALE! Logging the deal \ud83c\udfc6');var dn=document.getElementById('d-client'),dp=document.getElementById('d-phone');if(dn)dn.value=a.client_name;if(dp&&a.client_phone)dp.value=a.client_phone;openDealModal();}
+  else ctToast(AP_STATUS[d.status]+' logged');
+  loadAppointments();}
+function apReschedule(id){var a=AP_ROWS.find(function(x){return x.id===id;});sb.from('appointments').update({status:'rescheduled'}).eq('id',id).then(function(){openApptModal(null);document.getElementById('ap-modal-title').textContent='Reschedule — '+a.client_name;document.getElementById('ap-f-name').value=a.client_name;document.getElementById('ap-f-phone').value=a.client_phone||'';document.getElementById('ap-f-type').value=a.appt_type;document.getElementById('ap-f-notes').value=a.notes||'';});}
+async function apCancel(id){var r=await sb.from('appointments').update({status:'cancelled'}).eq('id',id);if(r.error){ctToast('Could not cancel');return;}ctToast('Cancelled');loadAppointments();}
+function apIcs(id){var a=AP_ROWS.find(function(x){return x.id===id;});var st=new Date(a.starts_at),en=new Date(st.getTime()+a.duration_min*60000);
+  function f(d){return d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');}
+  var ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Surge Partners//Agent Space//EN','BEGIN:VEVENT','UID:'+a.id+'@surgelifegroup.com','DTSTAMP:'+f(new Date()),'DTSTART:'+f(st),'DTEND:'+f(en),'SUMMARY:'+a.appt_type+' - '+a.client_name,'DESCRIPTION:'+((a.client_phone?a.client_phone+' ':'')+(a.notes||'')).replace(/\n/g,'\\n'),'BEGIN:VALARM','TRIGGER:-PT'+a.reminder_min+'M','ACTION:DISPLAY','DESCRIPTION:'+a.client_name,'END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  var b=new Blob([ics],{type:'text/calendar'});var u=URL.createObjectURL(b);var l=document.createElement('a');l.href=u;l.download=a.client_name.replace(/[^a-z0-9]/gi,'_')+'.ics';document.body.appendChild(l);l.click();setTimeout(function(){document.body.removeChild(l);URL.revokeObjectURL(u);},500);}
+function apB64ToU8(b){var p='='.repeat((4-b.length%4)%4);var r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));var u=new Uint8Array(r.length);for(var i=0;i<r.length;i++)u[i]=r.charCodeAt(i);return u;}
+async function apRefreshReminderUI(){var box=document.getElementById('ap-remind'),txt=document.getElementById('ap-remind-txt'),btn=document.getElementById('ap-remind-btn');if(!box)return;
+  var standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+  if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window)){box.classList.remove('on');txt.textContent=/iPhone|iPad/.test(navigator.userAgent)&&!standalone?'To get reminders on iPhone, add Surge to your Home Screen first (Share → Add to Home Screen), then open it from there.':'This browser can\u2019t do reminders — use the "Add to calendar" button on each appointment instead.';btn.style.display='none';return;}
+  var reg=await navigator.serviceWorker.getRegistration();var sub=reg?await reg.pushManager.getSubscription():null;
+  if(Notification.permission==='granted'&&sub){box.classList.add('on');txt.textContent='Reminders are on for this device. You\u2019ll get a notification before each appointment.';btn.textContent='Turn off';btn.onclick=apDisableReminders;btn.style.display='';}
+  else if(Notification.permission==='denied'){box.classList.remove('on');txt.textContent='Notifications are blocked for this site in your browser settings. Allow them, then come back here.';btn.style.display='none';}
+  else{box.classList.remove('on');txt.textContent='Reminders are off on this device.';btn.textContent='Turn on reminders';btn.onclick=apEnableReminders;btn.style.display='';}}
+async function apEnableReminders(){try{var perm=await Notification.requestPermission();if(perm!=='granted'){apRefreshReminderUI();return;}
+  var reg=await navigator.serviceWorker.ready;var sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:apB64ToU8(VAPID_PUBLIC_KEY)});
+  var r=await sb.from('push_subscriptions').upsert({user_id:currentUserId,endpoint:sub.endpoint,subscription:sub.toJSON(),user_agent:navigator.userAgent},{onConflict:'endpoint'});
+  if(r.error){ctToast('Could not save: '+r.error.message);return;}
+  ctToast('Reminders on \ud83d\udd14');reg.showNotification('Surge reminders are on',{body:'You\u2019ll get a heads-up before each appointment.',icon:'/icons/icon-192.png',tag:'surge-test'});}
+  catch(e){console.error(e);ctToast('Could not turn on reminders');}apRefreshReminderUI();}
+async function apDisableReminders(){try{var reg=await navigator.serviceWorker.getRegistration();var sub=reg?await reg.pushManager.getSubscription():null;if(sub){await sb.from('push_subscriptions').delete().eq('endpoint',sub.endpoint);await sub.unsubscribe();}}catch(e){}ctToast('Reminders off');apRefreshReminderUI();}
+function apUpdateNavBadge(){var b=document.getElementById('ap-navbadge');if(!b)return;var k=apKey(new Date()),now=new Date();var n=AP_ROWS.filter(function(a){return a.agent_id===currentUserId&&a.status==='scheduled'&&apKey(a.starts_at)===k&&new Date(a.starts_at).getTime()+a.duration_min*60000>now.getTime();}).length;b.textContent=n;b.classList.toggle('show',n>0);}
+async function apInAppCheck(){if(!sb||!currentUserId)return;try{var now=new Date();var r=await sb.from('appointments').select('id,client_name,appt_type,starts_at,reminder_min,duration_min,status,agent_id').eq('agent_id',currentUserId).eq('status','scheduled').gte('starts_at',new Date(now.getTime()-60*60000).toISOString()).lte('starts_at',new Date(now.getTime()+25*60*60000).toISOString());
+  if(r.error)return;var rows=r.data||[];if(!AP_LOADED){AP_ROWS=rows;apUpdateNavBadge();}
+  var seen=JSON.parse(localStorage.getItem('surge_ap_alerted')||'{}');var changed=false;
+  rows.forEach(function(a){var st=new Date(a.starts_at).getTime();if(st-a.reminder_min*60000<=now.getTime()&&st>now.getTime()-5*60000&&!seen[a.id]){seen[a.id]=1;changed=true;var mins=Math.max(0,Math.round((st-now.getTime())/60000));var msg=(mins<=1?'Appointment NOW: ':a.appt_type+' in '+mins+' min: ')+a.client_name+' ('+apFmtTime(st)+')';ctToast('\ud83d\udd14 '+msg);
+    if('Notification' in window&&Notification.permission==='granted'&&!window.matchMedia('(display-mode: standalone)').matches){try{new Notification('Surge — '+a.client_name,{body:msg,tag:'appt-'+a.id,icon:'/icons/icon-192.png'});}catch(e){}}}});
+  if(changed){var keys=Object.keys(seen);if(keys.length>200)keys.slice(0,keys.length-200).forEach(function(k){delete seen[k];});localStorage.setItem('surge_ap_alerted',JSON.stringify(seen));}}catch(e){}}
+setInterval(apInAppCheck,60000);
+
 function showPage(id, el) {
   if (window.matchMedia('(max-width: 900px)').matches) document.body.classList.remove('sb-open');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();} if(id==='calls'){loadCallTracker();} if(id==='agency'){loadAgency();} if(id==='licenses'){loadLicenses();}
+  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();} if(id==='calls'){loadCallTracker();} if(id==='agency'){loadAgency();} if(id==='licenses'){loadLicenses();} if(id==='appointments'){loadAppointments();}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if (el) el.classList.add('active');
 }

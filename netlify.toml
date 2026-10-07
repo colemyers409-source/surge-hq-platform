@@ -1,0 +1,2 @@
+[functions."appt-reminders"]
+  schedule = "*/5 * * * *"
