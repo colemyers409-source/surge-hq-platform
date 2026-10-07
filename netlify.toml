@@ -1,2 +1,6 @@
+[build.environment]
+  # SUPABASE_URL and VAPID_PUBLIC_KEY are public values that live in the HTML on purpose
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL,VAPID_PUBLIC_KEY"
+
 [functions."appt-reminders"]
   schedule = "*/5 * * * *"
