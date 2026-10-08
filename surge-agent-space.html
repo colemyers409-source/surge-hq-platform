@@ -376,6 +376,39 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .lic-chip{font-size:0.62rem;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold-l);}
 .lic-chip.new{background:var(--gold);color:#000;border-color:var(--gold);}
 .lic-row{cursor:pointer;}.lic-row:hover td{background:var(--bg3);}
+.ld-pad{padding:1rem;}
+.ld-tab-btn{background:transparent;border:none;color:var(--muted);font-family:inherit;font-size:0.72rem;font-weight:600;padding:0.5rem 0.9rem;cursor:pointer;letter-spacing:0.03em;}
+.ld-tab-btn.active{background:var(--gold);color:#000;}
+.ld-drop{display:flex;align-items:center;justify-content:center;text-align:center;min-height:84px;border:1px dashed var(--gold-b);border-radius:8px;background:var(--gold-dim);color:var(--text);font-size:0.82rem;padding:1rem;cursor:pointer;position:relative;}
+.ld-drop:hover,.ld-drop.over{border-color:var(--gold);}
+.ld-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+.ld-opts{display:flex;flex-wrap:wrap;gap:0.6rem 1.5rem;align-items:center;margin-top:0.9rem;font-size:0.75rem;color:var(--muted);}
+.ld-check{display:flex;gap:0.45rem;align-items:center;cursor:pointer;}
+.ld-check input{accent-color:var(--gold);width:15px;height:15px;}
+.ld-inline{display:flex;gap:0.5rem;align-items:center;}
+.ld-inline .calc-select{width:auto;padding:0.35rem 0.6rem;font-size:0.75rem;}
+.ld-msg{font-size:0.72rem;color:var(--muted);}
+.ld-msg.err{color:var(--red);}
+.ld-msg.ok{color:var(--green);}
+.ld-actions{display:flex;gap:0.8rem;align-items:center;flex-wrap:wrap;}
+.ld-note{font-size:0.68rem;color:var(--muted);line-height:1.5;padding-top:0;}
+.ld-files{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0.5rem;}
+.ld-file{display:flex;justify-content:space-between;align-items:center;gap:0.5rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:0.55rem 0.75rem;font-size:0.78rem;cursor:pointer;color:var(--text);font-family:inherit;text-align:left;}
+.ld-file:hover{border-color:var(--gold-b);}
+.ld-file b{color:var(--gold);font-variant-numeric:tabular-nums;}
+.ld-pri{font-size:0.6rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--border);color:var(--muted);}
+.ld-pri.top{color:var(--gold);border-color:var(--gold-b);}
+.ld-pri.low{color:var(--orange);border-color:rgba(230,126,34,0.4);}
+.ld-num{font-variant-numeric:tabular-nums;}
+.ld-new{color:var(--gold);font-weight:700;}
+.ld-bar{display:inline-block;height:6px;border-radius:3px;background:var(--gold);vertical-align:middle;margin-right:6px;opacity:0.85;}
+.ld-st{font-size:0.66rem;color:var(--muted);}
+#ld-rot-body select,#ld-rot-body input[type=number]{background:var(--bg,#0a0a0a);border:1px solid var(--border);border-radius:4px;color:inherit;font-family:inherit;font-size:0.75rem;padding:0.3rem 0.4rem;}
+#ld-rot-body input[type=number]{width:64px;}
+#ld-rot-body input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;}
+#ld-rot-body tr.off td{opacity:0.45;}
+.ld-hint{font-size:0.62rem;color:var(--orange);}
+
 
 .lb-stat b{color:var(--gold);font-size:1.1rem;}
 
@@ -498,6 +531,10 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     <div class="nav-item" onclick="showPage('agency', this)">
       <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
       Agency Overview
+    </div>
+    <div class="nav-item" onclick="showPage('leads', this)">
+      <svg viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M21 3l-7 7"/><path d="M8 21H3v-5"/><path d="M3 21l7-7"/><circle cx="12" cy="12" r="2"/></svg>
+      Lead Distribution
     </div>
   </div>
 
@@ -827,6 +864,69 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 <div style="display:flex;gap:0.6rem;margin:0.8rem 0 1rem"><button class="lb-range-btn" style="border:1px solid var(--border)" onclick="ccAddTier()">+ Add tier</button><button class="calc-btn" id="cc-save" onclick="saveCompConfig()">Save Comp Settings</button><span id="cc-msg" style="font-size:0.7rem;color:var(--muted);align-self:center"></span></div></div>
 </div>
 <div class="table-section"><div class="table-header"><div class="table-title">All Deals</div><span style="font-size:0.65rem;color:var(--muted)" id="ag-deals-count"></span></div><div class="ag-toolbar"><div class="ag-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16" y2="16"/></svg><input id="ag-search" type="search" placeholder="Search by client name, phone, or email…" autocomplete="off" oninput="AG_PAGE=1;renderAgDeals()"></div><select class="calc-select" id="ag-status" style="width:auto;padding:0.45rem 0.6rem;font-size:0.75rem" onchange="AG_PAGE=1;renderAgDeals()"><option value="">All statuses</option><option>Pending</option><option>Active</option><option>Declined</option><option>Cancelled</option></select><select class="calc-select" id="ag-per" style="width:auto;padding:0.45rem 0.6rem;font-size:0.75rem" onchange="AG_PER=+this.value;AG_PAGE=1;renderAgDeals()"><option value="10">Show 10</option><option value="25">Show 25</option><option value="50">Show 50</option><option value="100">Show 100</option></select><span style="font-size:0.65rem;color:var(--muted)">Click a deal to view details</span></div><table><thead><tr><th>Date</th><th>Agent</th><th>Client</th><th>Product</th><th>Premium</th><th>Status</th></tr></thead><tbody id="ag-deals-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table><div class="ag-pager" id="ag-pager"></div></div>
+</div></div>
+<div class="page" id="page-leads"><div class="comm-wrap">
+<div class="page-header"><div class="page-title">Lead <em>Distribution</em></div><div class="page-sub">Upload the planetaltig export, preview the split, and download one Mojo-ready CSV per agent. States come from My Licenses. No lead is ever given out twice. Owner only.</div></div>
+<div class="lb-controls"><div class="lb-seg"><button class="ld-tab-btn active" data-t="new" onclick="ldTab('new')">New Batch</button><button class="ld-tab-btn" data-t="rotation" onclick="ldTab('rotation')">Rotation</button><button class="ld-tab-btn" data-t="swap" onclick="ldTab('swap')">Swap Leads</button><button class="ld-tab-btn" data-t="totals" onclick="ldTab('totals')">Totals</button></div></div>
+
+<div class="ld-pane" id="ld-pane-new">
+  <div class="table-section"><div class="table-header"><div class="table-title">1 · Upload the export</div><span style="font-size:0.65rem;color:var(--muted)">The CSV you download from planetaltig</span></div>
+    <div class="ld-pad">
+      <label class="ld-drop" id="ld-drop" for="ld-file"><input type="file" id="ld-file" accept=".csv,text/csv" onchange="ldLoadFile(this.files[0])"><span id="ld-drop-text">Tap to choose the planetaltig CSV, or drop it here</span></label>
+      <div class="ld-opts">
+        <label class="ld-check"><input type="checkbox" id="ld-held" checked onchange="ldPreview()"> Also hand out held leads (leads from past uploads nobody could take yet)</label>
+        <label class="ld-inline">Balance on leads from the last <select class="calc-select" id="ld-window" onchange="ldPreview()"><option value="3">3 days</option><option value="7" selected>7 days</option><option value="14">14 days</option><option value="30">30 days</option><option value="0">All time</option></select></label>
+      </div>
+      <div class="lb-totals" id="ld-file-stats" style="margin-top:1rem"></div>
+      <div id="ld-msg" class="ld-msg"></div>
+    </div>
+  </div>
+  <div class="table-section" id="ld-preview-card" hidden><div class="table-header"><div class="table-title">2 · Preview the split</div><span style="font-size:0.65rem;color:var(--muted)">Nothing is saved until you hit Distribute</span></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Agent</th><th>Priority</th><th>Recent</th><th>New</th><th>Total</th><th>New leads by state</th></tr></thead><tbody id="ld-preview-body"></tbody></table></div>
+    <div class="ld-pad" id="ld-unused"></div>
+    <div class="ld-pad ld-actions"><button class="calc-btn" id="ld-go" onclick="ldDistribute()">Distribute &amp; Save</button><span id="ld-go-msg" class="ld-msg"></span></div>
+  </div>
+  <div class="table-section" id="ld-done-card" hidden><div class="table-header"><div class="table-title">3 · Download for Mojo</div><span style="font-size:0.65rem;color:var(--muted)">One file per agent, new leads only</span></div>
+    <div class="ld-pad"><div class="ld-actions" style="margin-bottom:0.8rem"><button class="calc-btn" onclick="ldDownloadZip()">Download all (.zip)</button></div><div class="ld-files" id="ld-files"></div></div>
+  </div>
+</div>
+
+<div class="ld-pane" id="ld-pane-rotation" hidden>
+  <div class="table-section"><div class="table-header"><div class="table-title">Who gets leads</div><span style="font-size:0.65rem;color:var(--muted)">Blocked agents and agents with no states are skipped automatically</span></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Agent</th><th>In rotation</th><th>Priority</th><th>Bonus</th><th>Also writes the states of</th><th>States</th></tr></thead><tbody id="ld-rot-body"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div>
+    <div class="ld-pad ld-actions"><button class="calc-btn" onclick="ldSaveRotation()">Save Rotation</button><span id="ld-rot-msg" class="ld-msg"></span></div>
+    <div class="ld-pad ld-note">Top gets a bit more than normal, low gets a little over half. Bonus adds extra leads on top of their share. "Also writes the states of" lets someone take leads in another agent's states (for example David on Draisen's).</div>
+  </div>
+</div>
+
+<div class="ld-pane" id="ld-pane-swap" hidden>
+  <div class="table-section"><div class="table-header"><div class="table-title">Swap worked leads</div><span style="font-size:0.65rem;color:var(--muted)">Each lead moves to a different agent licensed in that state who hasn't had it</span></div>
+    <div class="ld-pad">
+      <div class="ld-opts" style="margin-top:0">
+        <label class="ld-inline">Swap leads from <select class="calc-select" id="ld-swap-from"><option value="">Choose agent</option></select></label>
+      </div>
+      <label class="ld-drop" for="ld-swap-file"><input type="file" id="ld-swap-file" accept=".csv,text/csv" onchange="ldSwapFile(this.files[0])"><span id="ld-swap-text">Then upload their worked leads (a Mojo export or any CSV with a phone column)</span></label>
+      <div id="ld-swap-msg" class="ld-msg"></div>
+    </div>
+    <div id="ld-swap-preview" hidden>
+      <div style="overflow-x:auto"><table><thead><tr><th>Goes to</th><th>Leads</th><th>States</th></tr></thead><tbody id="ld-swap-body"></tbody></table></div>
+      <div class="ld-pad ld-actions"><button class="calc-btn" onclick="ldSwapGo()">Swap &amp; Save</button><span id="ld-swap-go-msg" class="ld-msg"></span></div>
+    </div>
+    <div class="ld-pad" id="ld-swap-files"></div>
+    <div class="ld-pad ld-note">After swapping, delete those leads from the first agent's Mojo pack and upload each new file into the matching agent's pack.</div>
+  </div>
+</div>
+
+<div class="ld-pane" id="ld-pane-totals" hidden>
+  <div class="lb-totals" id="ld-tot-cards"></div>
+  <div class="table-section"><div class="table-header"><div class="table-title">Leads per agent</div><span style="font-size:0.65rem;color:var(--muted)" id="ld-tot-sub"></span></div>
+    <div style="overflow-x:auto"><table><thead id="ld-tot-head"></thead><tbody id="ld-tot-body"><tr><td style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div>
+  <div class="table-section"><div class="table-header"><div class="table-title">Held leads — nobody can write these yet</div><span style="font-size:0.65rem;color:var(--muted)">The states worth getting licensed in</span></div>
+    <div class="ld-pad"><div class="lic-chips" id="ld-held-states"></div></div></div>
+  <div class="table-section"><div class="table-header"><div class="table-title">Look up a lead</div></div>
+    <div class="ag-toolbar"><div class="ag-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16" y2="16"/></svg><input id="ld-find" type="search" placeholder="Phone number…" autocomplete="off" onkeydown="if(event.key==='Enter')ldFind()"></div><button class="calc-btn" onclick="ldFind()">Find</button></div>
+    <div class="ld-pad" id="ld-find-out"></div></div>
+</div>
 </div></div>
 <div class="page" id="page-appointments"><div class="comm-wrap">
 <div class="page-header"><div class="page-title">Appoint<em>ments</em></div><div class="page-sub">Book every appointment here, get reminded before it starts, and dispo it after so you know your show rate and close rate.</div></div>
@@ -1549,11 +1649,221 @@ setInterval(apInAppCheck,60000);
 function showPage(id, el) {
   if (window.matchMedia('(max-width: 900px)').matches) document.body.classList.remove('sb-open');
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();} if(id==='calls'){loadCallTracker();} if(id==='agency'){loadAgency();} if(id==='licenses'){loadLicenses();} if(id==='appointments'){loadAppointments();}
+  document.getElementById('page-'+id).classList.add('active'); if(id==='leaderboard'){loadLeaderboard();} if(id==='book'){loadBook();} if(id==='bonus'){loadBonus();} if(id==='dashboard'){refreshAll();} if(id==='expected'){loadExpected();} if(id==='commissions'){loadCommissions();} if(id==='persistency'){loadPersistency();} if(id==='analytics'){buildAnalytics();} if(id==='calls'){loadCallTracker();} if(id==='agency'){loadAgency();} if(id==='licenses'){loadLicenses();} if(id==='appointments'){loadAppointments();} if(id==='leads'){loadLeads();}
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if (el) el.classList.add('active');
 }
 
+
+
+// ============ LEAD DISTRIBUTION (owner) ============
+var LD={agents:[],byId:{},lic:{},rot:{},parsed:null,plan:null,files:{},fileOrder:[],batchName:'',swap:null,swapFiles:{},busy:false};
+var LD_STATE_CODES={'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA','colorado':'CO','connecticut':'CT','delaware':'DE','district of columbia':'DC','florida':'FL','georgia':'GA','hawaii':'HI','idaho':'ID','illinois':'IL','indiana':'IN','iowa':'IA','kansas':'KS','kentucky':'KY','louisiana':'LA','maine':'ME','maryland':'MD','massachusetts':'MA','michigan':'MI','minnesota':'MN','mississippi':'MS','missouri':'MO','montana':'MT','nebraska':'NE','nevada':'NV','new hampshire':'NH','new jersey':'NJ','new mexico':'NM','new york':'NY','north carolina':'NC','north dakota':'ND','ohio':'OH','oklahoma':'OK','oregon':'OR','pennsylvania':'PA','rhode island':'RI','south carolina':'SC','south dakota':'SD','tennessee':'TN','texas':'TX','utah':'UT','vermont':'VT','virginia':'VA','washington':'WA','west virginia':'WV','wisconsin':'WI','wyoming':'WY'};
+var LD_CODES=new Set(Object.values(LD_STATE_CODES));
+var LD_W={top:1.15,normal:1,low:0.6};
+function ldEl(id){return document.getElementById(id);}
+function ldMsg(id,t,cls){var e=ldEl(id);if(!e)return;e.textContent=t||'';e.className='ld-msg'+(cls?' '+cls:'');}
+function ldPhone10(v){var d=String(v==null?'':v).replace(/\D/g,'');return d.length>=10?d.slice(-10):'';}
+function ldFmtPhone(p){return p&&p.length===10?'('+p.slice(0,3)+') '+p.slice(3,6)+'-'+p.slice(6):p;}
+function ldTitle(s){return String(s||'').toLowerCase().replace(/(^|[\s\-'])([a-z])/g,function(m,a,b){return a+b.toUpperCase();}).trim();}
+function ldName(id){var a=LD.byId[id];return a?a.name:'Unknown';}
+function ldLib(src,glob){return new Promise(function(res,rej){if(window[glob])return res(window[glob]);var s=document.createElement('script');s.src=src;s.onload=function(){res(window[glob]);};s.onerror=function(){rej(new Error('Could not load '+glob));};document.head.appendChild(s);});}
+function ldPapa(){return ldLib('https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js','Papa');}
+function ldReadCsv(file){return ldPapa().then(function(P){return new Promise(function(res,rej){P.parse(file,{header:true,skipEmptyLines:true,complete:function(r){res(r);},error:rej});});});}
+function ldTab(t){document.querySelectorAll('.ld-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.t===t);});['new','rotation','swap','totals'].forEach(function(p){ldEl('ld-pane-'+p).hidden=(p!==t);});if(t==='rotation')ldRenderRotation();if(t==='totals')ldLoadTotals();if(t==='swap')ldFillSwapFrom();}
+
+async function ldFetchAll(table,cols,mod){var out=[],from=0,step=1000;for(;;){var q=sb.from(table).select(cols).range(from,from+step-1);if(mod)q=mod(q);var r=await q;if(r.error)throw r.error;out=out.concat(r.data||[]);if(!r.data||r.data.length<step)break;from+=step;}return out;}
+async function loadLeads(){if(!sb||!currentUserId||!isOwner())return;try{await ldLoadBase();}catch(e){ldMsg('ld-msg','Could not load agents: '+e.message,'err');}}
+async function ldLoadBase(){
+  var res=await Promise.all([sb.from('profiles').select('id,first_name,last_name,email,blocked,role'),sb.from('agent_licenses').select('user_id,states'),sb.from('lead_rotation').select('*')]);
+  if(res[0].error)throw res[0].error;
+  LD.lic={};(res[1].data||[]).forEach(function(l){LD.lic[l.user_id]=l.states||[];});
+  LD.rot={};(res[2].data||[]).forEach(function(r){LD.rot[r.user_id]=r;});
+  LD.byId={};LD.agents=(res[0].data||[]).filter(function(p){return !p.blocked;}).map(function(p){var n=((p.first_name||'')+' '+(p.last_name||'')).trim()||p.email||'Agent';var a={id:p.id,name:n,role:p.role};LD.byId[p.id]=a;return a;}).sort(function(a,b){return a.name.localeCompare(b.name);});
+  // disambiguate duplicate names
+  var seen={};LD.agents.forEach(function(a){seen[a.name]=(seen[a.name]||0)+1;});LD.agents.forEach(function(a){if(seen[a.name]>1&&!(LD.lic[a.id]||[]).length)a.name+=' (no states)';});
+}
+function ldRotOf(id){var r=LD.rot[id]||{};return {in_rotation:r.in_rotation!==false,priority:r.priority||'normal',bonus:+r.bonus||0,uses_states_of:r.uses_states_of||null};}
+function ldStatesOf(id){var s=new Set(LD.lic[id]||[]);var r=ldRotOf(id);if(r.uses_states_of)(LD.lic[r.uses_states_of]||[]).forEach(function(x){s.add(x);});return s;}
+function ldActiveAgents(){return LD.agents.filter(function(a){var r=ldRotOf(a.id);return r.in_rotation&&ldStatesOf(a.id).size>0;});}
+
+// ---------- parse planetaltig export ----------
+function ldParseExport(res){
+  var rows=res.data,fields=(res.meta&&res.meta.fields)||[];
+  var cols=fields.filter(function(f){return /^row-fluid( \d+)?$/.test(f)||f==='cursor-pointer';});
+  if(!cols.length||!fields.includes('row-fluid'))throw new Error("This doesn't look like a planetaltig lead export. Download it again from the lead inbox and try that file.");
+  var labels=new Set(['Name:','Phone no:','Group:','DOB :','Email:','Preferred Language:','Address:','Pre-Call Letter:','New Address:','Appointment Status:','Current Time:']);
+  var out=[],seen=new Set(),dupes=0,details=0,noPhone=0;
+  for(var i=0;i<rows.length;i++){var r=rows[i];if(r['row-fluid']!=='Name:')continue;details++;
+    var d={},cur=null;cols.forEach(function(c){var v=r[c];if(v==null||v==='')return;v=String(v).trim();if(labels.has(v)){cur=v;if(!(cur in d))d[cur]='';}else if(cur){d[cur]=(d[cur]+' '+v).trim();}});
+    var phone=ldPhone10(d['Phone no:']);if(!phone){noPhone++;continue;}
+    if(seen.has(phone)){dupes++;continue;}seen.add(phone);
+    var addr=d['Address:']||'',city='',st='',zip='';
+    var m=addr.match(/,\s*([^,]*),\s*([A-Za-z .]+?)\s+(\d{5}(?:-\d{4})?)\s*$/);
+    if(m){var sn=m[2].trim();st=LD_STATE_CODES[sn.toLowerCase()]||(LD_CODES.has(sn.toUpperCase())?sn.toUpperCase():'');city=m[1].trim();zip=m[3];}
+    if(!st){var m2=addr.match(/\b([A-Z]{2})\s+(\d{5}(?:-\d{4})?)\s*$/);if(m2&&LD_CODES.has(m2[1])){st=m2[1];zip=zip||m2[2];}}
+    if(!st&&i>0){var p=rows[i-1];Object.keys(p).forEach(function(k){var v=String(p[k]||'').trim();if(!st&&LD_CODES.has(v))st=v;if(!zip&&/^\d{5}(-\d{4})?$/.test(v))zip=v;});}
+    var nm=d['Name:']||'';if(nm.indexOf(',')>-1){var parts=nm.split(',');nm=parts.slice(1).join(' ')+' '+parts[0];}
+    var em=(d['Email:']||'');em=em.indexOf('@')>-1?em.split(/\s+/).find(function(x){return x.indexOf('@')>-1;}):'';
+    out.push({phone:phone,full_name:ldTitle(nm),email:em,city:ldTitle(city),state:st,zip:zip});
+  }
+  return {leads:out,details:details,dupes:dupes,noPhone:noPhone};
+}
+
+async function ldLoadFile(file){
+  if(!file)return;LD.plan=null;LD.files={};ldEl('ld-preview-card').hidden=true;ldEl('ld-done-card').hidden=true;
+  ldEl('ld-drop-text').textContent=file.name;ldMsg('ld-msg','Reading the file…');
+  try{
+    if(!LD.agents.length)await ldLoadBase();
+    var res=await ldReadCsv(file);var p=ldParseExport(res);
+    if(!p.leads.length)throw new Error('No leads found in this file.');
+    ldMsg('ld-msg','Checking against every lead already handed out…');
+    var phones=p.leads.map(function(l){return l.phone;}),existing={};
+    for(var i=0;i<phones.length;i+=300){var r=await sb.from('lead_pool').select('phone,agent_id,full_name').in('phone',phones.slice(i,i+300));if(r.error)throw r.error;(r.data||[]).forEach(function(x){existing[x.phone]=x;});}
+    var fresh=[],already=[],heldAgain=[];
+    p.leads.forEach(function(l){var e=existing[l.phone];if(!e)fresh.push(l);else if(e.agent_id)already.push(Object.assign({},l,{_backfill:!e.full_name}));else heldAgain.push(l);});
+    LD.parsed={file:file.name,details:p.details,dupes:p.dupes,noPhone:p.noPhone,fresh:fresh,already:already,heldAgain:heldAgain};
+    LD.batchName=new Date().toLocaleDateString(undefined,{month:'short',day:'numeric'})+' export';
+    ldEl('ld-file-stats').innerHTML=[['Leads in file',p.details],['Duplicates removed',p.dupes],['Already handed out',already.length],['New leads',fresh.length+heldAgain.length]].map(function(x,i){return '<div class="lb-tot"><div class="lb-tot-lbl">'+x[0]+'</div><div class="lb-tot-val'+(i===3?'':' plain')+'">'+x[1].toLocaleString()+'</div></div>';}).join('');
+    ldMsg('ld-msg','');await ldPreview();
+  }catch(e){ldMsg('ld-msg',e.message||String(e),'err');}
+}
+
+async function ldPreview(){
+  if(!LD.parsed||LD.busy)return;var P=LD.parsed;
+  try{
+    var cands=P.fresh.concat(P.heldAgain);
+    if(ldEl('ld-held').checked){var inFile=new Set(cands.map(function(l){return l.phone;}));var held=await ldFetchAll('lead_pool','phone,full_name,email,city,state,zip',function(q){return q.is('agent_id',null);});held.forEach(function(h){if(!inFile.has(h.phone))cands.push(Object.assign({_held:true},h));});}
+    var win=+ldEl('ld-window').value,recent={};
+    var rq=await ldFetchAll('lead_pool','agent_id,assigned_at',function(q){q=q.not('agent_id','is',null);if(win>0)q=q.gte('assigned_at',new Date(Date.now()-win*864e5).toISOString());return q;});
+    rq.forEach(function(x){recent[x.agent_id]=(recent[x.agent_id]||0)+1;});
+    LD.plan=ldAllocate(cands,recent);LD.plan.recent=recent;ldRenderPreview();
+  }catch(e){ldMsg('ld-msg','Preview failed: '+(e.message||e),'err');}
+}
+
+function ldAllocate(cands,recent){
+  var ag=ldActiveAgents().map(function(a){var r=ldRotOf(a.id);return {id:a.id,st:ldStatesOf(a.id),w:LD_W[r.priority]||1,b:r.bonus||0};});
+  var c={};ag.forEach(function(a){c[a.id]=recent[a.id]||0;});
+  var A={};ag.forEach(function(a){A[a.id]=a;});
+  function key(id){return (c[id]-A[id].b)/A[id].w;}
+  var seed=7;function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647;}
+  var L=cands.map(function(l){return {l:l,el:ag.filter(function(a){return a.st.has(l.state);}).map(function(a){return a.id;}),to:null,r:rnd()};});
+  var unused=L.filter(function(x){return !x.el.length;}),use=L.filter(function(x){return x.el.length;});
+  use.sort(function(a,b){return a.el.length-b.el.length||a.r-b.r;});
+  use.forEach(function(x){var best=null;x.el.forEach(function(id){if(best===null||key(id)<key(best)-1e-9)best=id;});x.to=best;c[best]++;});
+  for(var pass=0,moved=true;moved&&pass<300;pass++){moved=false;use.forEach(function(x){var o=x.to,ko=key(o);x.el.forEach(function(b){if(b===o)return;var nko=(c[o]-1-A[o].b)/A[o].w,nkb=(c[b]+1-A[b].b)/A[b].w;if(Math.max(nko,nkb)<ko-1e-9&&x.to===o){c[o]--;c[b]++;x.to=b;moved=true;}});});}
+  var by={};use.forEach(function(x){(by[x.to]=by[x.to]||[]).push(x.l);});
+  return {by:by,unused:unused.map(function(x){return x.l;}),agents:ag.map(function(a){return a.id;})};
+}
+
+function ldRenderPreview(){
+  var P=LD.plan,rows=P.agents.map(function(id){var n=(P.by[id]||[]).length,rc=P.recent[id]||0;return {id:id,n:n,rc:rc,t:n+rc};}).sort(function(a,b){return b.t-a.t;});
+  var max=Math.max.apply(null,rows.map(function(r){return r.t;}).concat([1]));
+  ldEl('ld-preview-body').innerHTML=rows.map(function(r){var rt=ldRotOf(r.id),bs={};(P.by[r.id]||[]).forEach(function(l){bs[l.state]=(bs[l.state]||0)+1;});var st=Object.keys(bs).sort(function(a,b){return bs[b]-bs[a];}).map(function(k){return k+' '+bs[k];}).join(' · ');
+    return '<tr><td>'+escapeHtml(ldName(r.id))+'</td><td><span class="ld-pri '+rt.priority+'">'+rt.priority+'</span>'+(rt.bonus?' <span class="ld-st">+'+rt.bonus+'</span>':'')+'</td><td class="ld-num" style="color:var(--muted)">'+r.rc+'</td><td class="ld-num ld-new">'+r.n+'</td><td class="ld-num"><span class="ld-bar" style="width:'+Math.round(60*r.t/max)+'px"></span>'+r.t+'</td><td class="ld-st">'+(st||'—')+'</td></tr>';}).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Nobody is in rotation. Turn agents on in the Rotation tab.</td></tr>';
+  var us={};P.unused.forEach(function(l){us[l.state||'?']=(us[l.state||'?']||0)+1;});
+  var assigned=rows.reduce(function(s,r){return s+r.n;},0);
+  ldEl('ld-unused').innerHTML='<div class="ld-msg"><b style="color:var(--text)">'+assigned.toLocaleString()+'</b> leads go out now. <b style="color:var(--text)">'+P.unused.length.toLocaleString()+'</b> get held because nobody in rotation can write them'+(P.unused.length?': '+Object.keys(us).sort(function(a,b){return us[b]-us[a];}).map(function(k){return k+' '+us[k];}).join(' · '):'')+'. Held leads go out automatically once someone adds the state.</div>'+(LD.parsed.already.length?'<div class="ld-msg" style="margin-top:6px">'+LD.parsed.already.length+' leads in this file were already handed out before, so they were skipped.</div>':'');
+  ldEl('ld-go').disabled=false;ldMsg('ld-go-msg','');ldEl('ld-preview-card').hidden=false;
+}
+
+async function ldDistribute(){
+  if(!LD.plan||LD.busy)return;LD.busy=true;var btn=ldEl('ld-go');btn.disabled=true;ldMsg('ld-go-msg','Saving…');
+  try{
+    var P=LD.plan,now=new Date().toISOString(),assigned=0;Object.keys(P.by).forEach(function(k){assigned+=P.by[k].length;});
+    var b=await sb.from('lead_batches').insert({name:LD.batchName,total_rows:LD.parsed.details,new_leads:LD.parsed.fresh.length+LD.parsed.heldAgain.length,assigned:assigned,created_by:currentUserId}).select().single();if(b.error)throw b.error;
+    var rows=[];function base(l){return {phone:l.phone,full_name:l.full_name||null,email:l.email||null,city:l.city||null,state:l.state||null,zip:l.zip||null};}
+    Object.keys(P.by).forEach(function(id){P.by[id].forEach(function(l){rows.push(Object.assign(base(l),{agent_id:id,batch_id:b.data.id,assigned_at:now,prev_agents:[id]}));});});
+    P.unused.forEach(function(l){if(!l._held)rows.push(Object.assign(base(l),{agent_id:null,batch_id:b.data.id,assigned_at:null,prev_agents:[]}));});
+    for(var i=0;i<rows.length;i+=500){var r=await sb.from('lead_pool').upsert(rows.slice(i,i+500),{onConflict:'phone'});if(r.error)throw r.error;ldMsg('ld-go-msg','Saving… '+Math.min(i+500,rows.length)+' / '+rows.length);}
+    var bf=LD.parsed.already.filter(function(l){return l._backfill;}).map(function(l){return base(l);});
+    for(var j=0;j<bf.length;j+=500){await sb.from('lead_pool').upsert(bf.slice(j,j+500),{onConflict:'phone'});}
+    LD.files={};LD.fileOrder=[];
+    Object.keys(P.by).sort(function(a,b){return ldName(a).localeCompare(ldName(b));}).forEach(function(id){var fn=ldName(id).replace(/[^A-Za-z0-9]+/g,'_')+'_Leads_'+LD.batchName.replace(/[^A-Za-z0-9]+/g,'_').replace(/_export$/,'')+'.csv';LD.files[fn]=ldCsv(P.by[id]);LD.fileOrder.push([fn,id,P.by[id].length]);});
+    ldEl('ld-files').innerHTML=LD.fileOrder.map(function(f){return '<button class="ld-file" onclick="ldDownload(\''+f[0]+'\')"><span>'+escapeHtml(ldName(f[1]))+'</span><b>'+f[2]+'</b></button>';}).join('');
+    ldEl('ld-done-card').hidden=false;ldMsg('ld-go-msg','Saved. '+assigned+' leads handed out in "'+LD.batchName+'".','ok');
+    LD.plan=null;LD.parsed=null;ldEl('ld-done-card').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){ldMsg('ld-go-msg','Did not save: '+(e.message||e),'err');btn.disabled=false;}
+  LD.busy=false;
+}
+function ldCsvCell(v){v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function ldCsv(list){return 'Full Name,Email,Phone,City,State,Zip\n'+list.slice().sort(function(a,b){return (a.state||'').localeCompare(b.state||'')||(a.city||'').localeCompare(b.city||'')||(a.full_name||'').localeCompare(b.full_name||'');}).map(function(l){return [l.full_name,l.email,ldFmtPhone(l.phone),l.city,l.state,l.zip].map(ldCsvCell).join(',');}).join('\n')+'\n';}
+function ldSave(name,text){var blob=new Blob([text],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);}
+function ldDownload(name){if(LD.files[name])ldSave(name,LD.files[name]);else if(LD.swapFiles[name])ldSave(name,LD.swapFiles[name]);}
+async function ldDownloadZip(src){var files=src||LD.files;try{var Z=await ldLib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js','JSZip');var z=new Z();Object.keys(files).forEach(function(n){z.file(n,files[n]);});var blob=await z.generateAsync({type:'blob'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Lead_Packs_'+(LD.batchName||'swap').replace(/[^A-Za-z0-9]+/g,'_')+'.zip';document.body.appendChild(a);a.click();setTimeout(function(){a.remove();},1000);}catch(e){console.error('Zip failed',e);ldMsg('ld-go-msg','Zip download failed. Use the single files instead.','err');}}
+
+// ---------- rotation ----------
+async function ldRenderRotation(){
+  try{await ldLoadBase();}catch(e){ldMsg('ld-rot-msg','Could not load: '+e.message,'err');return;}
+  var opts='<option value="">—</option>'+LD.agents.filter(function(a){return (LD.lic[a.id]||[]).length;}).map(function(a){return '<option value="'+a.id+'">'+escapeHtml(a.name)+'</option>';}).join('');
+  ldEl('ld-rot-body').innerHTML=LD.agents.map(function(a){var r=ldRotOf(a.id),own=(LD.lic[a.id]||[]);var off=!r.in_rotation||!ldStatesOf(a.id).size;
+    return '<tr data-id="'+a.id+'" class="'+(off?'off':'')+'"><td>'+escapeHtml(a.name)+(a.id===currentUserId?' <span style="color:var(--gold);font-size:0.6rem">(you)</span>':'')+'</td><td><input type="checkbox" class="ld-r-in" '+(r.in_rotation?'checked':'')+' onchange="this.closest(\'tr\').classList.toggle(\'off\',!this.checked)"></td><td><select class="ld-r-pri"><option value="top"'+(r.priority==='top'?' selected':'')+'>Top</option><option value="normal"'+(r.priority==='normal'?' selected':'')+'>Normal</option><option value="low"'+(r.priority==='low'?' selected':'')+'>Low</option></select></td><td><input type="number" class="ld-r-bonus" min="0" step="10" value="'+(r.bonus||0)+'"></td><td><select class="ld-r-uses">'+opts.replace('value="'+r.uses_states_of+'"','value="'+r.uses_states_of+'" selected')+'</select></td><td class="ld-st">'+(own.length?own.slice().sort().join(' '):'<span class="ld-hint">No states on My Licenses</span>')+'</td></tr>';}).join('');
+}
+async function ldSaveRotation(){
+  var rows=[].map.call(ldEl('ld-rot-body').querySelectorAll('tr[data-id]'),function(tr){var u=tr.querySelector('.ld-r-uses').value;return {user_id:tr.dataset.id,in_rotation:tr.querySelector('.ld-r-in').checked,priority:tr.querySelector('.ld-r-pri').value,bonus:Math.max(0,parseInt(tr.querySelector('.ld-r-bonus').value,10)||0),uses_states_of:(u&&u!==tr.dataset.id)?u:null,updated_at:new Date().toISOString()};});
+  ldMsg('ld-rot-msg','Saving…');var r=await sb.from('lead_rotation').upsert(rows,{onConflict:'user_id'});
+  if(r.error){ldMsg('ld-rot-msg','Did not save: '+r.error.message,'err');return;}
+  rows.forEach(function(x){LD.rot[x.user_id]=x;});ldMsg('ld-rot-msg','Saved. The next split uses these settings.','ok');if(LD.parsed)ldPreview();
+}
+
+// ---------- swap ----------
+function ldFillSwapFrom(){var s=ldEl('ld-swap-from'),v=s.value;var go=function(){s.innerHTML='<option value="">Choose agent</option>'+LD.agents.map(function(a){return '<option value="'+a.id+'">'+escapeHtml(a.name)+'</option>';}).join('');s.value=v;};if(LD.agents.length)go();else ldLoadBase().then(go);}
+async function ldSwapFile(file){
+  if(!file)return;var from=ldEl('ld-swap-from').value;ldEl('ld-swap-preview').hidden=true;ldEl('ld-swap-files').innerHTML='';
+  if(!from){ldMsg('ld-swap-msg','Choose whose leads these are first, then upload the file again.','err');ldEl('ld-swap-file').value='';return;}
+  ldEl('ld-swap-text').textContent=file.name;ldMsg('ld-swap-msg','Reading…');
+  try{
+    var res=await ldReadCsv(file),f=res.meta.fields||[];
+    var pc=f.find(function(x){return /phone/i.test(x);})||f.find(function(x){return res.data.slice(0,20).filter(function(r){return ldPhone10(r[x]);}).length>10;});
+    if(!pc)throw new Error("Couldn't find a phone number column in this file.");
+    var phones=[...new Set(res.data.map(function(r){return ldPhone10(r[pc]);}).filter(Boolean))],pool=[];
+    for(var i=0;i<phones.length;i+=300){var r=await sb.from('lead_pool').select('*').in('phone',phones.slice(i,i+300));if(r.error)throw r.error;pool=pool.concat(r.data||[]);}
+    var mine=pool.filter(function(x){return x.agent_id===from;}),notMine=pool.length-mine.length,unknown=phones.length-pool.length;
+    var recent={};(await ldFetchAll('lead_pool','agent_id',function(q){return q.not('agent_id','is',null).gte('assigned_at',new Date(Date.now()-7*864e5).toISOString());})).forEach(function(x){recent[x.agent_id]=(recent[x.agent_id]||0)+1;});
+    var ag=ldActiveAgents().filter(function(a){return a.id!==from;}).map(function(a){var r=ldRotOf(a.id);return {id:a.id,st:ldStatesOf(a.id),w:LD_W[r.priority]||1};});
+    var c={};ag.forEach(function(a){c[a.id]=recent[a.id]||0;});
+    var plan={},stuck=0;
+    mine.forEach(function(x){var prev=new Set(x.prev_agents||[]);var el=ag.filter(function(a){return a.st.has(x.state)&&!prev.has(a.id);});if(!el.length){stuck++;return;}el.sort(function(a,b){return c[a.id]/a.w-c[b.id]/b.w;});var to=el[0].id;c[to]++;(plan[to]=plan[to]||[]).push(x);});
+    LD.swap={from:from,plan:plan};
+    ldEl('ld-swap-body').innerHTML=Object.keys(plan).sort(function(a,b){return plan[b].length-plan[a].length;}).map(function(id){var bs={};plan[id].forEach(function(l){bs[l.state]=(bs[l.state]||0)+1;});return '<tr><td>'+escapeHtml(ldName(id))+'</td><td class="ld-num ld-new">'+plan[id].length+'</td><td class="ld-st">'+Object.keys(bs).map(function(k){return k+' '+bs[k];}).join(' · ')+'</td></tr>';}).join('')||'<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:1.5rem">Nobody else can take these leads.</td></tr>';
+    var n=Object.keys(plan).reduce(function(s,k){return s+plan[k].length;},0);
+    ldMsg('ld-swap-msg',n+' of '+ldName(from)+"'s leads can move."+(stuck?' '+stuck+' stay (nobody else licensed in that state who hasn\'t had them).':'')+(notMine?' '+notMine+' in the file belong to someone else, skipped.':'')+(unknown?' '+unknown+" weren't found in the system.":''));
+    ldEl('ld-swap-preview').hidden=!n;
+  }catch(e){ldMsg('ld-swap-msg',e.message||String(e),'err');}
+}
+async function ldSwapGo(){
+  if(!LD.swap||LD.busy)return;LD.busy=true;ldMsg('ld-swap-go-msg','Saving…');
+  try{var now=new Date().toISOString(),rows=[];LD.swapFiles={};var stamp=new Date().toLocaleDateString(undefined,{month:'short',day:'numeric'}).replace(/[^A-Za-z0-9]+/g,'_');
+    Object.keys(LD.swap.plan).forEach(function(id){LD.swap.plan[id].forEach(function(x){rows.push({phone:x.phone,agent_id:id,assigned_at:now,prev_agents:(x.prev_agents||[]).concat([id])});});LD.swapFiles[ldName(id).replace(/[^A-Za-z0-9]+/g,'_')+'_Swap_'+stamp+'.csv']=ldCsv(LD.swap.plan[id]);});
+    for(var i=0;i<rows.length;i+=500){var r=await sb.from('lead_pool').upsert(rows.slice(i,i+500),{onConflict:'phone'});if(r.error)throw r.error;}
+    ldEl('ld-swap-files').innerHTML='<div class="ld-actions" style="margin-bottom:0.8rem"><button class="calc-btn" onclick="ldDownloadZip(LD.swapFiles)">Download all (.zip)</button></div><div class="ld-files">'+Object.keys(LD.swapFiles).map(function(n){return '<button class="ld-file" onclick="ldDownload(\''+n+'\')"><span>'+escapeHtml(n.replace(/_Swap_.*$/,'').replace(/_/g,' '))+'</span><b>'+(LD.swapFiles[n].split('\n').length-2)+'</b></button>';}).join('')+'</div>';
+    ldMsg('ld-swap-go-msg','Swapped '+rows.length+' leads.','ok');ldEl('ld-swap-preview').hidden=true;LD.swap=null;
+  }catch(e){ldMsg('ld-swap-go-msg','Did not save: '+(e.message||e),'err');}
+  LD.busy=false;
+}
+
+// ---------- totals ----------
+async function ldLoadTotals(){
+  try{
+    if(!LD.agents.length)await ldLoadBase();
+    var res=await Promise.all([ldFetchAll('lead_pool','agent_id,state,batch_id,assigned_at'),sb.from('lead_batches').select('id,name,created_at').order('created_at',{ascending:false})]);
+    var pool=res[0],batches=(res[1].data||[]).slice(0,4).reverse();
+    var per={},held={},wk=Date.now()-7*864e5;
+    pool.forEach(function(x){if(!x.agent_id){held[x.state||'?']=(held[x.state||'?']||0)+1;return;}var p=per[x.agent_id]=per[x.agent_id]||{all:0,wk:0,b:{}};p.all++;if(x.assigned_at&&new Date(x.assigned_at).getTime()>=wk)p.wk++;p.b[x.batch_id]=(p.b[x.batch_id]||0)+1;});
+    var out=pool.filter(function(x){return x.agent_id;}).length,hn=pool.length-out;
+    ldEl('ld-tot-cards').innerHTML=[['Leads handed out',out],['Held (no one licensed)',hn],['Agents with leads',Object.keys(per).length],['Uploads',(res[1].data||[]).length]].map(function(x,i){return '<div class="lb-tot"><div class="lb-tot-lbl">'+x[0]+'</div><div class="lb-tot-val'+(i?' plain':'')+'">'+x[1].toLocaleString()+'</div></div>';}).join('');
+    ldEl('ld-tot-head').innerHTML='<tr><th>Agent</th>'+batches.map(function(b){return '<th>'+escapeHtml(b.name)+'</th>';}).join('')+'<th>Last 7 days</th><th>All time</th></tr>';
+    var ids=Object.keys(per).sort(function(a,b){return per[b].all-per[a].all;});
+    ldEl('ld-tot-body').innerHTML=ids.map(function(id){var p=per[id];return '<tr><td>'+escapeHtml(ldName(id))+'</td>'+batches.map(function(b){return '<td class="ld-num" style="color:var(--muted)">'+(p.b[b.id]||'—')+'</td>';}).join('')+'<td class="ld-num">'+p.wk+'</td><td class="ld-num ld-new">'+p.all+'</td></tr>';}).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">No leads handed out yet.</td></tr>';
+    ldEl('ld-tot-sub').textContent='Most recent uploads on the left of the totals';
+    ldEl('ld-held-states').innerHTML=Object.keys(held).sort(function(a,b){return held[b]-held[a];}).map(function(k){return '<span class="lic-chip">'+k+' · '+held[k]+'</span>';}).join('')||'<span class="ld-msg">None. Every lead has someone who can write it.</span>';
+  }catch(e){ldEl('ld-tot-body').innerHTML='<tr><td style="color:var(--red);padding:1rem">'+escapeHtml(e.message||String(e))+'</td></tr>';}
+}
+async function ldFind(){var p=ldPhone10(ldEl('ld-find').value),o=ldEl('ld-find-out');if(!p){o.innerHTML='<span class="ld-msg err">Enter a 10-digit phone number.</span>';return;}
+  if(!LD.agents.length)await ldLoadBase();
+  var r=await sb.from('lead_pool').select('*').eq('phone',p).maybeSingle();if(r.error){o.innerHTML='<span class="ld-msg err">'+escapeHtml(r.error.message)+'</span>';return;}
+  if(!r.data){o.innerHTML='<span class="ld-msg">Not in the system. This lead has never been uploaded.</span>';return;}
+  var x=r.data;o.innerHTML='<div class="dd-grid"><div class="dd-item"><div class="dd-lbl">Lead</div><div class="dd-val">'+escapeHtml(x.full_name||'(name not on file)')+'</div></div><div class="dd-item"><div class="dd-lbl">Phone</div><div class="dd-val">'+ldFmtPhone(x.phone)+'</div></div><div class="dd-item"><div class="dd-lbl">Location</div><div class="dd-val">'+escapeHtml([x.city,x.state,x.zip].filter(Boolean).join(', ')||'—')+'</div></div><div class="dd-item"><div class="dd-lbl">Has it now</div><div class="dd-val gold">'+(x.agent_id?escapeHtml(ldName(x.agent_id)):'Held, nobody yet')+'</div></div><div class="dd-item wide"><div class="dd-lbl">Everyone who has had it</div><div class="dd-val">'+((x.prev_agents||[]).map(function(id){return escapeHtml(ldName(id));}).join(' → ')||'—')+'</div></div></div>';}
 
 // ============ LICENSES ============
 var LIC_STATES=["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
