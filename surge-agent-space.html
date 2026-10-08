@@ -866,7 +866,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 <div class="table-section"><div class="table-header"><div class="table-title">All Deals</div><span style="font-size:0.65rem;color:var(--muted)" id="ag-deals-count"></span></div><div class="ag-toolbar"><div class="ag-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16" y2="16"/></svg><input id="ag-search" type="search" placeholder="Search by client name, phone, or email…" autocomplete="off" oninput="AG_PAGE=1;renderAgDeals()"></div><select class="calc-select" id="ag-status" style="width:auto;padding:0.45rem 0.6rem;font-size:0.75rem" onchange="AG_PAGE=1;renderAgDeals()"><option value="">All statuses</option><option>Pending</option><option>Active</option><option>Declined</option><option>Cancelled</option></select><select class="calc-select" id="ag-per" style="width:auto;padding:0.45rem 0.6rem;font-size:0.75rem" onchange="AG_PER=+this.value;AG_PAGE=1;renderAgDeals()"><option value="10">Show 10</option><option value="25">Show 25</option><option value="50">Show 50</option><option value="100">Show 100</option></select><span style="font-size:0.65rem;color:var(--muted)">Click a deal to view details</span></div><table><thead><tr><th>Date</th><th>Agent</th><th>Client</th><th>Product</th><th>Premium</th><th>Status</th></tr></thead><tbody id="ag-deals-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table><div class="ag-pager" id="ag-pager"></div></div>
 </div></div>
 <div class="page" id="page-leads"><div class="comm-wrap">
-<div class="page-header"><div class="page-title">Lead <em>Distribution</em></div><div class="page-sub">Upload the planetaltig export, preview the split, and download one Mojo-ready CSV per agent. States come from My Licenses. No lead is ever given out twice. Owner only.</div></div>
+<div class="page-header"><div class="page-title">Lead <em>Distribution</em></div><div class="page-sub">Upload the planetaltig export, preview the split, and download one Mojo-ready CSV per agent. States come from My Licenses. No lead is ever given out twice, and a lead is pulled the moment an agent logs a deal on it. Owner only.</div></div>
 <div class="lb-controls"><div class="lb-seg"><button class="ld-tab-btn active" data-t="new" onclick="ldTab('new')">New Batch</button><button class="ld-tab-btn" data-t="rotation" onclick="ldTab('rotation')">Rotation</button><button class="ld-tab-btn" data-t="swap" onclick="ldTab('swap')">Swap Leads</button><button class="ld-tab-btn" data-t="totals" onclick="ldTab('totals')">Totals</button></div></div>
 
 <div class="ld-pane" id="ld-pane-new">
@@ -921,7 +921,8 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   <div class="lb-totals" id="ld-tot-cards"></div>
   <div class="table-section"><div class="table-header"><div class="table-title">Leads per agent</div><span style="font-size:0.65rem;color:var(--muted)" id="ld-tot-sub"></span></div>
     <div style="overflow-x:auto"><table><thead id="ld-tot-head"></thead><tbody id="ld-tot-body"><tr><td style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div>
-  <div class="table-section"><div class="table-header"><div class="table-title">Held leads — nobody can write these yet</div><span style="font-size:0.65rem;color:var(--muted)">The states worth getting licensed in</span></div>
+  <div class="table-section"><div class="table-header"><div class="table-title">Sold leads — pulled automatically</div><span style="font-size:0.65rem;color:var(--muted)" id="ld-sold-sub"></span></div><div style="overflow-x:auto"><table><thead><tr><th>Lead</th><th>Sold by</th><th>In the pack of</th><th>Sold</th></tr></thead><tbody id="ld-sold-body"></tbody></table></div></div>
+<div class="table-section"><div class="table-header"><div class="table-title">Held leads — nobody can write these yet</div><span style="font-size:0.65rem;color:var(--muted)">The states worth getting licensed in</span></div>
     <div class="ld-pad"><div class="lic-chips" id="ld-held-states"></div></div></div>
   <div class="table-section"><div class="table-header"><div class="table-title">Look up a lead</div></div>
     <div class="ag-toolbar"><div class="ag-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16" y2="16"/></svg><input id="ld-find" type="search" placeholder="Phone number…" autocomplete="off" onkeydown="if(event.key==='Enter')ldFind()"></div><button class="calc-btn" onclick="ldFind()">Find</button></div>
@@ -1719,9 +1720,9 @@ async function ldLoadFile(file){
     if(!p.leads.length)throw new Error('No leads found in this file.');
     ldMsg('ld-msg','Checking against every lead already handed out…');
     var phones=p.leads.map(function(l){return l.phone;}),existing={};
-    for(var i=0;i<phones.length;i+=300){var r=await sb.from('lead_pool').select('phone,agent_id,full_name').in('phone',phones.slice(i,i+300));if(r.error)throw r.error;(r.data||[]).forEach(function(x){existing[x.phone]=x;});}
+    for(var i=0;i<phones.length;i+=300){var r=await sb.from('lead_pool').select('phone,agent_id,full_name,sold_at').in('phone',phones.slice(i,i+300));if(r.error)throw r.error;(r.data||[]).forEach(function(x){existing[x.phone]=x;});}
     var fresh=[],already=[],heldAgain=[];
-    p.leads.forEach(function(l){var e=existing[l.phone];if(!e)fresh.push(l);else if(e.agent_id)already.push(Object.assign({},l,{_backfill:!e.full_name}));else heldAgain.push(l);});
+    p.leads.forEach(function(l){var e=existing[l.phone];if(!e)fresh.push(l);else if(e.agent_id||e.sold_at)already.push(Object.assign({},l,{_backfill:!e.full_name}));else heldAgain.push(l);});
     LD.parsed={file:file.name,details:p.details,dupes:p.dupes,noPhone:p.noPhone,fresh:fresh,already:already,heldAgain:heldAgain};
     LD.batchName=new Date().toLocaleDateString(undefined,{month:'short',day:'numeric'})+' export';
     ldEl('ld-file-stats').innerHTML=[['Leads in file',p.details],['Duplicates removed',p.dupes],['Already handed out',already.length],['New leads',fresh.length+heldAgain.length]].map(function(x,i){return '<div class="lb-tot"><div class="lb-tot-lbl">'+x[0]+'</div><div class="lb-tot-val'+(i===3?'':' plain')+'">'+x[1].toLocaleString()+'</div></div>';}).join('');
@@ -1733,7 +1734,7 @@ async function ldPreview(){
   if(!LD.parsed||LD.busy)return;var P=LD.parsed;
   try{
     var cands=P.fresh.concat(P.heldAgain);
-    if(ldEl('ld-held').checked){var inFile=new Set(cands.map(function(l){return l.phone;}));var held=await ldFetchAll('lead_pool','phone,full_name,email,city,state,zip',function(q){return q.is('agent_id',null);});held.forEach(function(h){if(!inFile.has(h.phone))cands.push(Object.assign({_held:true},h));});}
+    if(ldEl('ld-held').checked){var inFile=new Set(cands.map(function(l){return l.phone;}));var held=await ldFetchAll('lead_pool','phone,full_name,email,city,state,zip',function(q){return q.is('agent_id',null).is('sold_at',null);});held.forEach(function(h){if(!inFile.has(h.phone))cands.push(Object.assign({_held:true},h));});}
     var win=+ldEl('ld-window').value,recent={};
     var rq=await ldFetchAll('lead_pool','agent_id,assigned_at',function(q){q=q.not('agent_id','is',null);if(win>0)q=q.gte('assigned_at',new Date(Date.now()-win*864e5).toISOString());return q;});
     rq.forEach(function(x){recent[x.agent_id]=(recent[x.agent_id]||0)+1;});
@@ -1818,7 +1819,7 @@ async function ldSwapFile(file){
     if(!pc)throw new Error("Couldn't find a phone number column in this file.");
     var phones=[...new Set(res.data.map(function(r){return ldPhone10(r[pc]);}).filter(Boolean))],pool=[];
     for(var i=0;i<phones.length;i+=300){var r=await sb.from('lead_pool').select('*').in('phone',phones.slice(i,i+300));if(r.error)throw r.error;pool=pool.concat(r.data||[]);}
-    var mine=pool.filter(function(x){return x.agent_id===from;}),notMine=pool.length-mine.length,unknown=phones.length-pool.length;
+    var sold=pool.filter(function(x){return x.agent_id===from&&x.sold_at;}).length;var mine=pool.filter(function(x){return x.agent_id===from&&!x.sold_at;}),notMine=pool.filter(function(x){return x.agent_id!==from;}).length,unknown=phones.length-pool.length;
     var recent={};(await ldFetchAll('lead_pool','agent_id',function(q){return q.not('agent_id','is',null).gte('assigned_at',new Date(Date.now()-7*864e5).toISOString());})).forEach(function(x){recent[x.agent_id]=(recent[x.agent_id]||0)+1;});
     var ag=ldActiveAgents().filter(function(a){return a.id!==from;}).map(function(a){var r=ldRotOf(a.id);return {id:a.id,st:ldStatesOf(a.id),w:LD_W[r.priority]||1};});
     var c={};ag.forEach(function(a){c[a.id]=recent[a.id]||0;});
@@ -1827,7 +1828,7 @@ async function ldSwapFile(file){
     LD.swap={from:from,plan:plan};
     ldEl('ld-swap-body').innerHTML=Object.keys(plan).sort(function(a,b){return plan[b].length-plan[a].length;}).map(function(id){var bs={};plan[id].forEach(function(l){bs[l.state]=(bs[l.state]||0)+1;});return '<tr><td>'+escapeHtml(ldName(id))+'</td><td class="ld-num ld-new">'+plan[id].length+'</td><td class="ld-st">'+Object.keys(bs).map(function(k){return k+' '+bs[k];}).join(' · ')+'</td></tr>';}).join('')||'<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:1.5rem">Nobody else can take these leads.</td></tr>';
     var n=Object.keys(plan).reduce(function(s,k){return s+plan[k].length;},0);
-    ldMsg('ld-swap-msg',n+' of '+ldName(from)+"'s leads can move."+(stuck?' '+stuck+' stay (nobody else licensed in that state who hasn\'t had them).':'')+(notMine?' '+notMine+' in the file belong to someone else, skipped.':'')+(unknown?' '+unknown+" weren't found in the system.":''));
+    ldMsg('ld-swap-msg',n+' of '+ldName(from)+"'s leads can move."+(stuck?' '+stuck+' stay (nobody else licensed in that state who hasn\'t had them).':'')+(sold?' '+sold+' already sold, so they stay put.':'')+(notMine?' '+notMine+' in the file belong to someone else, skipped.':'')+(unknown?' '+unknown+" weren't found in the system.":''));
     ldEl('ld-swap-preview').hidden=!n;
   }catch(e){ldMsg('ld-swap-msg',e.message||String(e),'err');}
 }
@@ -1846,24 +1847,28 @@ async function ldSwapGo(){
 async function ldLoadTotals(){
   try{
     if(!LD.agents.length)await ldLoadBase();
-    var res=await Promise.all([ldFetchAll('lead_pool','agent_id,state,batch_id,assigned_at'),sb.from('lead_batches').select('id,name,created_at').order('created_at',{ascending:false})]);
+    var res=await Promise.all([ldFetchAll('lead_pool','phone,full_name,agent_id,state,batch_id,assigned_at,sold_at,sold_by'),sb.from('lead_batches').select('id,name,created_at').order('created_at',{ascending:false})]);
     var pool=res[0],batches=(res[1].data||[]).slice(0,4).reverse();
     var per={},held={},wk=Date.now()-7*864e5;
-    pool.forEach(function(x){if(!x.agent_id){held[x.state||'?']=(held[x.state||'?']||0)+1;return;}var p=per[x.agent_id]=per[x.agent_id]||{all:0,wk:0,b:{}};p.all++;if(x.assigned_at&&new Date(x.assigned_at).getTime()>=wk)p.wk++;p.b[x.batch_id]=(p.b[x.batch_id]||0)+1;});
-    var out=pool.filter(function(x){return x.agent_id;}).length,hn=pool.length-out;
-    ldEl('ld-tot-cards').innerHTML=[['Leads handed out',out],['Held (no one licensed)',hn],['Agents with leads',Object.keys(per).length],['Uploads',(res[1].data||[]).length]].map(function(x,i){return '<div class="lb-tot"><div class="lb-tot-lbl">'+x[0]+'</div><div class="lb-tot-val'+(i?' plain':'')+'">'+x[1].toLocaleString()+'</div></div>';}).join('');
+    var soldList=pool.filter(function(x){return x.sold_at;});pool.forEach(function(x){if(!x.agent_id&&!x.sold_at){held[x.state||'?']=(held[x.state||'?']||0)+1;return;}if(!x.agent_id)return;var p=per[x.agent_id]=per[x.agent_id]||{all:0,wk:0,b:{}};p.all++;if(x.assigned_at&&new Date(x.assigned_at).getTime()>=wk)p.wk++;p.b[x.batch_id]=(p.b[x.batch_id]||0)+1;});
+    var out=pool.filter(function(x){return x.agent_id;}).length,hn=pool.filter(function(x){return !x.agent_id&&!x.sold_at;}).length;
+    ldEl('ld-tot-cards').innerHTML=[['Leads handed out',out],['Held (no one licensed)',hn],['Sold (pulled)',soldList.length],['Uploads',(res[1].data||[]).length]].map(function(x,i){return '<div class="lb-tot"><div class="lb-tot-lbl">'+x[0]+'</div><div class="lb-tot-val'+(i?' plain':'')+'">'+x[1].toLocaleString()+'</div></div>';}).join('');
     ldEl('ld-tot-head').innerHTML='<tr><th>Agent</th>'+batches.map(function(b){return '<th>'+escapeHtml(b.name)+'</th>';}).join('')+'<th>Last 7 days</th><th>All time</th></tr>';
     var ids=Object.keys(per).sort(function(a,b){return per[b].all-per[a].all;});
     ldEl('ld-tot-body').innerHTML=ids.map(function(id){var p=per[id];return '<tr><td>'+escapeHtml(ldName(id))+'</td>'+batches.map(function(b){return '<td class="ld-num" style="color:var(--muted)">'+(p.b[b.id]||'—')+'</td>';}).join('')+'<td class="ld-num">'+p.wk+'</td><td class="ld-num ld-new">'+p.all+'</td></tr>';}).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:2rem">No leads handed out yet.</td></tr>';
     ldEl('ld-tot-sub').textContent='Most recent uploads on the left of the totals';
-    ldEl('ld-held-states').innerHTML=Object.keys(held).sort(function(a,b){return held[b]-held[a];}).map(function(k){return '<span class="lic-chip">'+k+' · '+held[k]+'</span>';}).join('')||'<span class="ld-msg">None. Every lead has someone who can write it.</span>';
+    ldRenderSold(soldList);ldEl('ld-held-states').innerHTML=Object.keys(held).sort(function(a,b){return held[b]-held[a];}).map(function(k){return '<span class="lic-chip">'+k+' · '+held[k]+'</span>';}).join('')||'<span class="ld-msg">None. Every lead has someone who can write it.</span>';
   }catch(e){ldEl('ld-tot-body').innerHTML='<tr><td style="color:var(--red);padding:1rem">'+escapeHtml(e.message||String(e))+'</td></tr>';}
 }
+function ldRenderSold(list){var el=ldEl('ld-sold-body');if(!el)return;var flag=list.filter(function(x){return x.agent_id&&x.sold_by&&x.agent_id!==x.sold_by;});
+  list=list.slice().sort(function(a,b){return new Date(b.sold_at)-new Date(a.sold_at);}).slice(0,100);
+  ldEl('ld-sold-sub').textContent=flag.length?flag.length+' sold lead'+(flag.length>1?'s are':' is')+' still in someone else\'s Mojo pack — remove '+(flag.length>1?'them':'it'):'Sold leads are never swapped or handed out again';
+  el.innerHTML=list.map(function(x){var other=x.agent_id&&x.sold_by&&x.agent_id!==x.sold_by;return '<tr'+(other?' style="background:rgba(230,126,34,0.08)"':'')+'><td>'+escapeHtml(x.full_name||'—')+'<div class="ld-st">'+ldFmtPhone(x.phone)+' · '+escapeHtml(x.state||'')+'</div></td><td>'+escapeHtml(ldName(x.sold_by))+'</td><td>'+(x.agent_id?escapeHtml(ldName(x.agent_id)):'—')+(other?' <span class="ld-hint">remove from their Mojo pack</span>':'')+'</td><td class="ld-num" style="color:var(--muted)">'+new Date(x.sold_at).toLocaleDateString()+'</td></tr>';}).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">No sold leads yet. They show up here the moment an agent logs a deal.</td></tr>';}
 async function ldFind(){var p=ldPhone10(ldEl('ld-find').value),o=ldEl('ld-find-out');if(!p){o.innerHTML='<span class="ld-msg err">Enter a 10-digit phone number.</span>';return;}
   if(!LD.agents.length)await ldLoadBase();
   var r=await sb.from('lead_pool').select('*').eq('phone',p).maybeSingle();if(r.error){o.innerHTML='<span class="ld-msg err">'+escapeHtml(r.error.message)+'</span>';return;}
   if(!r.data){o.innerHTML='<span class="ld-msg">Not in the system. This lead has never been uploaded.</span>';return;}
-  var x=r.data;o.innerHTML='<div class="dd-grid"><div class="dd-item"><div class="dd-lbl">Lead</div><div class="dd-val">'+escapeHtml(x.full_name||'(name not on file)')+'</div></div><div class="dd-item"><div class="dd-lbl">Phone</div><div class="dd-val">'+ldFmtPhone(x.phone)+'</div></div><div class="dd-item"><div class="dd-lbl">Location</div><div class="dd-val">'+escapeHtml([x.city,x.state,x.zip].filter(Boolean).join(', ')||'—')+'</div></div><div class="dd-item"><div class="dd-lbl">Has it now</div><div class="dd-val gold">'+(x.agent_id?escapeHtml(ldName(x.agent_id)):'Held, nobody yet')+'</div></div><div class="dd-item wide"><div class="dd-lbl">Everyone who has had it</div><div class="dd-val">'+((x.prev_agents||[]).map(function(id){return escapeHtml(ldName(id));}).join(' → ')||'—')+'</div></div></div>';}
+  var x=r.data;o.innerHTML='<div class="dd-grid"><div class="dd-item"><div class="dd-lbl">Lead</div><div class="dd-val">'+escapeHtml(x.full_name||'(name not on file)')+'</div></div><div class="dd-item"><div class="dd-lbl">Phone</div><div class="dd-val">'+ldFmtPhone(x.phone)+'</div></div><div class="dd-item"><div class="dd-lbl">Location</div><div class="dd-val">'+escapeHtml([x.city,x.state,x.zip].filter(Boolean).join(', ')||'—')+'</div></div><div class="dd-item"><div class="dd-lbl">Has it now</div><div class="dd-val gold">'+(x.agent_id?escapeHtml(ldName(x.agent_id)):'Held, nobody yet')+'</div></div>'+(x.sold_at?'<div class="dd-item wide"><div class="dd-lbl">Sold</div><div class="dd-val" style="color:var(--green)">'+escapeHtml(ldName(x.sold_by))+' · '+new Date(x.sold_at).toLocaleDateString()+' — pulled, nobody else gets it</div></div>':'')+'<div class="dd-item wide"><div class="dd-lbl">Everyone who has had it</div><div class="dd-val">'+((x.prev_agents||[]).map(function(id){return escapeHtml(ldName(id));}).join(' → ')||'—')+'</div></div></div>';}
 
 // ============ LICENSES ============
 var LIC_STATES=["AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
