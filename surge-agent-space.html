@@ -875,6 +875,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
       <label class="ld-drop" id="ld-drop" for="ld-file"><input type="file" id="ld-file" accept=".csv,text/csv" onchange="ldLoadFile(this.files[0])"><span id="ld-drop-text">Tap to choose the planetaltig CSV, or drop it here</span></label>
       <div class="ld-opts">
         <label class="ld-check"><input type="checkbox" id="ld-held" checked onchange="ldPreview()"> Also hand out held leads (leads from past uploads nobody could take yet)</label>
+        <label class="ld-inline">Agent files <select class="calc-select" id="ld-filemode"><option value="full" selected>Full pack (replace their list in Mojo)</option><option value="new">New leads only (add to their list)</option></select></label>
         <label class="ld-inline">Balance on leads from the last <select class="calc-select" id="ld-window" onchange="ldPreview()"><option value="3">3 days</option><option value="7" selected>7 days</option><option value="14">14 days</option><option value="30">30 days</option><option value="0">All time</option></select></label>
       </div>
       <div class="lb-totals" id="ld-file-stats" style="margin-top:1rem"></div>
@@ -886,7 +887,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     <div class="ld-pad" id="ld-unused"></div>
     <div class="ld-pad ld-actions"><button class="calc-btn" id="ld-go" onclick="ldDistribute()">Distribute &amp; Save</button><span id="ld-go-msg" class="ld-msg"></span></div>
   </div>
-  <div class="table-section" id="ld-done-card" hidden><div class="table-header"><div class="table-title">3 · Download for Mojo</div><span style="font-size:0.65rem;color:var(--muted)">One file per agent, new leads only</span></div>
+  <div class="table-section" id="ld-done-card" hidden><div class="table-header"><div class="table-title" id="ld-done-title">3 · Download for Mojo</div><span style="font-size:0.65rem;color:var(--muted)">One file per agent</span></div><div class="ld-pad ld-note" id="ld-done-note" style="padding-bottom:0;padding-top:1rem"></div>
     <div class="ld-pad"><div class="ld-actions" style="margin-bottom:0.8rem"><button class="calc-btn" onclick="ldDownloadZip()">Download all (.zip)</button></div><div class="ld-files" id="ld-files"></div></div>
   </div>
 </div>
@@ -913,11 +914,12 @@ tr:hover td { background: rgba(255,255,255,0.01); }
       <div class="ld-pad ld-actions"><button class="calc-btn" onclick="ldSwapGo()">Swap &amp; Save</button><span id="ld-swap-go-msg" class="ld-msg"></span></div>
     </div>
     <div class="ld-pad" id="ld-swap-files"></div>
-    <div class="ld-pad ld-note">After swapping, delete those leads from the first agent's Mojo pack and upload each new file into the matching agent's pack.</div>
+    <div class="ld-pad ld-note">After swapping you get a full pack for the agent who gave leads and for everyone who got them. In Mojo, delete each of their old lists and import the new file.</div>
   </div>
 </div>
 
 <div class="ld-pane" id="ld-pane-totals" hidden>
+  <div class="ld-actions" style="margin-bottom:1rem"><button class="calc-btn" id="ld-allpacks-btn" onclick="ldAllPacks()">Download every agent's full pack</button><span class="ld-msg" id="ld-allpacks-msg"></span></div>
   <div class="lb-totals" id="ld-tot-cards"></div>
   <div class="table-section"><div class="table-header"><div class="table-title">Leads per agent</div><span style="font-size:0.65rem;color:var(--muted)" id="ld-tot-sub"></span></div>
     <div style="overflow-x:auto"><table><thead id="ld-tot-head"></thead><tbody id="ld-tot-body"><tr><td style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table></div></div>
@@ -1779,14 +1781,20 @@ async function ldDistribute(){
     for(var i=0;i<rows.length;i+=500){var r=await sb.from('lead_pool').upsert(rows.slice(i,i+500),{onConflict:'phone'});if(r.error)throw r.error;ldMsg('ld-go-msg','Saving… '+Math.min(i+500,rows.length)+' / '+rows.length);}
     var bf=LD.parsed.already.filter(function(l){return l._backfill;}).map(function(l){return base(l);});
     for(var j=0;j<bf.length;j+=500){await sb.from('lead_pool').upsert(bf.slice(j,j+500),{onConflict:'phone'});}
-    LD.files={};LD.fileOrder=[];
-    Object.keys(P.by).sort(function(a,b){return ldName(a).localeCompare(ldName(b));}).forEach(function(id){var fn=ldName(id).replace(/[^A-Za-z0-9]+/g,'_')+'_Leads_'+LD.batchName.replace(/[^A-Za-z0-9]+/g,'_').replace(/_export$/,'')+'.csv';LD.files[fn]=ldCsv(P.by[id]);LD.fileOrder.push([fn,id,P.by[id].length]);});
-    ldEl('ld-files').innerHTML=LD.fileOrder.map(function(f){return '<button class="ld-file" onclick="ldDownload(\''+f[0]+'\')"><span>'+escapeHtml(ldName(f[1]))+'</span><b>'+f[2]+'</b></button>';}).join('');
+    LD.files={};LD.fileOrder=[];var full=ldEl('ld-filemode').value==='full',ids=Object.keys(P.by).sort(function(a,b){return ldName(a).localeCompare(ldName(b));});
+    var packs=full?await ldFullPacks(ids):null;
+    ids.forEach(function(id){var list=full?packs[id]:P.by[id];var fn=ldFileName(id,full?'Full_Pack':'New_Leads');LD.files[fn]=ldCsv(list);LD.fileOrder.push([fn,id,list.length,full?'+'+P.by[id].length+' new':null]);});
+    ldEl('ld-done-title').textContent=full?'3 · Download full packs for Mojo':'3 · Download new leads for Mojo';
+    ldEl('ld-done-note').textContent=full?'Each file is the agent\'s whole pack (everything they have, minus sold). In Mojo: delete their old list, then import this file.':'Each file has only the new leads. In Mojo: import it into their existing list.';
+    ldEl('ld-files').innerHTML=ldFileButtons(LD.fileOrder);
     ldEl('ld-done-card').hidden=false;ldMsg('ld-go-msg','Saved. '+assigned+' leads handed out in "'+LD.batchName+'".','ok');
     LD.plan=null;LD.parsed=null;ldEl('ld-done-card').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){ldMsg('ld-go-msg','Did not save: '+(e.message||e),'err');btn.disabled=false;}
   LD.busy=false;
 }
+async function ldFullPacks(ids){var out={};ids.forEach(function(id){out[id]=[];});for(var i=0;i<ids.length;i+=20){var part=ids.slice(i,i+20);var rows=await ldFetchAll('lead_pool','phone,full_name,email,city,state,zip,agent_id',function(q){return q.in('agent_id',part).is('sold_at',null);});rows.forEach(function(r){(out[r.agent_id]=out[r.agent_id]||[]).push(r);});}return out;}
+function ldFileName(id,tag){return ldName(id).replace(/[^A-Za-z0-9]+/g,'_')+'_'+tag+'_'+new Date().toLocaleDateString(undefined,{month:'short',day:'numeric'}).replace(/[^A-Za-z0-9]+/g,'_')+'.csv';}
+function ldFileButtons(list,src){return list.map(function(f){return '<button class="ld-file" onclick="ldDownload(\''+f[0]+'\')"><span>'+escapeHtml(ldName(f[1]))+(f[3]!=null?' <span class="ld-st">'+f[3]+'</span>':'')+'</span><b>'+f[2]+'</b></button>';}).join('');}
 function ldCsvCell(v){v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
 function ldCsv(list){return 'Full Name,Email,Phone,City,State,Zip\n'+list.slice().sort(function(a,b){return (a.state||'').localeCompare(b.state||'')||(a.city||'').localeCompare(b.city||'')||(a.full_name||'').localeCompare(b.full_name||'');}).map(function(l){return [l.full_name,l.email,ldFmtPhone(l.phone),l.city,l.state,l.zip].map(ldCsvCell).join(',');}).join('\n')+'\n';}
 function ldSave(name,text){var blob=new Blob([text],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);}
@@ -1835,9 +1843,11 @@ async function ldSwapFile(file){
 async function ldSwapGo(){
   if(!LD.swap||LD.busy)return;LD.busy=true;ldMsg('ld-swap-go-msg','Saving…');
   try{var now=new Date().toISOString(),rows=[];LD.swapFiles={};var stamp=new Date().toLocaleDateString(undefined,{month:'short',day:'numeric'}).replace(/[^A-Za-z0-9]+/g,'_');
-    Object.keys(LD.swap.plan).forEach(function(id){LD.swap.plan[id].forEach(function(x){rows.push({phone:x.phone,agent_id:id,assigned_at:now,prev_agents:(x.prev_agents||[]).concat([id])});});LD.swapFiles[ldName(id).replace(/[^A-Za-z0-9]+/g,'_')+'_Swap_'+stamp+'.csv']=ldCsv(LD.swap.plan[id]);});
+    Object.keys(LD.swap.plan).forEach(function(id){LD.swap.plan[id].forEach(function(x){rows.push({phone:x.phone,agent_id:id,assigned_at:now,prev_agents:(x.prev_agents||[]).concat([id])});});});
     for(var i=0;i<rows.length;i+=500){var r=await sb.from('lead_pool').upsert(rows.slice(i,i+500),{onConflict:'phone'});if(r.error)throw r.error;}
-    ldEl('ld-swap-files').innerHTML='<div class="ld-actions" style="margin-bottom:0.8rem"><button class="calc-btn" onclick="ldDownloadZip(LD.swapFiles)">Download all (.zip)</button></div><div class="ld-files">'+Object.keys(LD.swapFiles).map(function(n){return '<button class="ld-file" onclick="ldDownload(\''+n+'\')"><span>'+escapeHtml(n.replace(/_Swap_.*$/,'').replace(/_/g,' '))+'</span><b>'+(LD.swapFiles[n].split('\n').length-2)+'</b></button>';}).join('')+'</div>';
+    var ids=[LD.swap.from].concat(Object.keys(LD.swap.plan)),packs=await ldFullPacks(ids),list=[];
+    ids.forEach(function(id){var fn=ldFileName(id,'Full_Pack');LD.swapFiles[fn]=ldCsv(packs[id]||[]);list.push([fn,id,(packs[id]||[]).length,id===LD.swap.from?'−'+rows.length:'+'+LD.swap.plan[id].length]);});
+    ldEl('ld-swap-files').innerHTML='<div class="ld-note" style="padding:0 0 0.8rem">Full packs for everyone affected. In Mojo: delete each agent\'s old list, then import their file.</div><div class="ld-actions" style="margin-bottom:0.8rem"><button class="calc-btn" onclick="ldDownloadZip(LD.swapFiles)">Download all (.zip)</button></div><div class="ld-files">'+ldFileButtons(list)+'</div>';
     ldMsg('ld-swap-go-msg','Swapped '+rows.length+' leads.','ok');ldEl('ld-swap-preview').hidden=true;LD.swap=null;
   }catch(e){ldMsg('ld-swap-go-msg','Did not save: '+(e.message||e),'err');}
   LD.busy=false;
@@ -1864,6 +1874,7 @@ function ldRenderSold(list){var el=ldEl('ld-sold-body');if(!el)return;var flag=l
   list=list.slice().sort(function(a,b){return new Date(b.sold_at)-new Date(a.sold_at);}).slice(0,100);
   ldEl('ld-sold-sub').textContent=flag.length?flag.length+' sold lead'+(flag.length>1?'s are':' is')+' still in someone else\'s Mojo pack — remove '+(flag.length>1?'them':'it'):'Sold leads are never swapped or handed out again';
   el.innerHTML=list.map(function(x){var other=x.agent_id&&x.sold_by&&x.agent_id!==x.sold_by;return '<tr'+(other?' style="background:rgba(230,126,34,0.08)"':'')+'><td>'+escapeHtml(x.full_name||'—')+'<div class="ld-st">'+ldFmtPhone(x.phone)+' · '+escapeHtml(x.state||'')+'</div></td><td>'+escapeHtml(ldName(x.sold_by))+'</td><td>'+(x.agent_id?escapeHtml(ldName(x.agent_id)):'—')+(other?' <span class="ld-hint">remove from their Mojo pack</span>':'')+'</td><td class="ld-num" style="color:var(--muted)">'+new Date(x.sold_at).toLocaleDateString()+'</td></tr>';}).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">No sold leads yet. They show up here the moment an agent logs a deal.</td></tr>';}
+async function ldAllPacks(){var b=ldEl('ld-allpacks-btn');b.disabled=true;ldMsg('ld-allpacks-msg','Building packs…');try{if(!LD.agents.length)await ldLoadBase();var rows=await ldFetchAll('lead_pool','phone,full_name,email,city,state,zip,agent_id',function(q){return q.not('agent_id','is',null).is('sold_at',null);});var by={};rows.forEach(function(r){(by[r.agent_id]=by[r.agent_id]||[]).push(r);});var files={};Object.keys(by).forEach(function(id){files[ldFileName(id,'Full_Pack')]=ldCsv(by[id]);});var keepName=LD.batchName;LD.batchName='All packs';await ldDownloadZip(files);LD.batchName=keepName;ldMsg('ld-allpacks-msg',Object.keys(files).length+' packs, '+rows.length.toLocaleString()+' leads.','ok');}catch(e){ldMsg('ld-allpacks-msg','Failed: '+(e.message||e),'err');}b.disabled=false;}
 async function ldFind(){var p=ldPhone10(ldEl('ld-find').value),o=ldEl('ld-find-out');if(!p){o.innerHTML='<span class="ld-msg err">Enter a 10-digit phone number.</span>';return;}
   if(!LD.agents.length)await ldLoadBase();
   var r=await sb.from('lead_pool').select('*').eq('phone',p).maybeSingle();if(r.error){o.innerHTML='<span class="ld-msg err">'+escapeHtml(r.error.message)+'</span>';return;}
