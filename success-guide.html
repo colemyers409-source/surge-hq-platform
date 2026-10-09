@@ -172,11 +172,16 @@ html.locked #gate{display:flex}
 .gbox input:focus{outline:2px solid var(--g2);outline-offset:1px}
 .gbox button{width:100%;margin-top:12px;font:700 15px Montserrat,system-ui,sans-serif;letter-spacing:1px;color:#0A0A0A;background:linear-gradient(180deg,var(--g1),var(--g2));border:0;border-radius:10px;padding:14px;cursor:pointer}
 .gerr{color:#E07A6A;font-size:13px;min-height:20px;margin-top:10px}
+.gbox input+input{margin-top:10px}.gbox button:disabled{opacity:.6}
+.gmsg{color:var(--mu);font-size:14px}.gbox a{color:var(--g1)}
+#gform[data-st="checking"] .glog,#gform[data-st="blocked"] .glog{display:none}
+#gform:not([data-st="checking"]) .gchk{display:none}
 .gbox{overflow:hidden}.gbox .wm1,.gbox .wm2{font-size:44px}.gbox .wm1 i{font-size:52px}
 </style>
-<script>(function(){try{if(localStorage.getItem('sg-ok')==='8ac894483b7f4153d34c9b0d3a7f3aaf3ddec0e3b3299b3cc54d2ce8aa4034d2')return}catch(e){}document.documentElement.classList.add('locked')})();</script></head>
+<script>document.documentElement.classList.add('locked')</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script></head>
 <body>
-<div id="gate"><form class="gbox" id="gform" autocomplete="off"><div class="wm" aria-label="Surge Partners"><div class="wm1"><i>S</i>URGE</div><div class="wm2">PARTNERS</div></div><h1>Success <span class="g">Guide</span></h1><p>Enter your team access code to open the guide.</p><input id="gcode" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Access code" aria-label="Access code" required><button type="submit">ENTER</button><div class="gerr" id="gerr" role="alert"></div></form></div>
+<div id="gate"><form class="gbox" id="gform" data-st="checking"><div class="wm" aria-label="Surge Partners"><div class="wm1"><i>S</i>URGE</div><div class="wm2">PARTNERS</div></div><h1>Success <span class="g">Guide</span></h1><p class="gchk gmsg">Checking your access…</p><div class="glog"><p>Sign in with your Agent Space email and password.</p><input id="gemail" type="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Email" aria-label="Email" required><input id="gpass" type="password" autocomplete="current-password" placeholder="Password" aria-label="Password" required><button type="submit" id="gbtn">SIGN IN</button></div><div class="gerr" id="gerr" role="alert"></div></form></div>
 <header class="top"><a href="#top" class="mark" aria-label="Back to top"><i>S</i>URGE</a><nav id="nav"><a href="#ethos">Ethos</a><a href="#expectations">Expectations</a><a href="#schedule">Schedule</a><a href="#workshops">Workshops</a><a href="#training">10-Day</a><a href="#script">Scripts</a><a href="#rebuttals">Rebuttals</a><a href="#voicemails">Voicemails</a><a href="#books">Books</a><a href="#mindset">8 Steps</a><a href="#contacts">Contacts</a><a href="#discord">Discord</a></nav></header>
 <main id="top">
 <div class="hero"><div class="wm" aria-label="Surge Partners"><div class="wm1"><i>S</i>URGE</div><div class="wm2">PARTNERS</div><div class="wm3"><span></span><b>⚡</b><span></span></div></div><h1>Success <span class="g">Guide</span></h1>
@@ -297,10 +302,43 @@ html.locked #gate{display:flex}
 })();
 </script>
 <script>
-(function(){var H='8ac894483b7f4153d34c9b0d3a7f3aaf3ddec0e3b3299b3cc54d2ce8aa4034d2',f=document.getElementById('gform');
- function sha(t){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return('0'+x.toString(16)).slice(-2)}).join('')})}
- f.addEventListener('submit',function(e){e.preventDefault();var v=document.getElementById('gcode').value.trim().toLowerCase();
-  sha(v).then(function(h){if(h===H){try{localStorage.setItem('sg-ok',H)}catch(e){}document.documentElement.classList.remove('locked');scrollTo(0,0);dispatchEvent(new Event('resize'))}
-   else{document.getElementById('gerr').textContent='Wrong code. Ask Cole or Joey for the team code.';document.getElementById('gcode').select()}})});
+(function(){
+ var URL_='https://szdzbycppkavfwuzlljh.supabase.co',KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6ZHpieWNwcGthdmZ3dXpsbGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODIxNzgsImV4cCI6MjA5NTE1ODE3OH0.Jw21eHChMDHlskSs2PegmBXLYNIQkjl8GByOIApadhA';
+ var f=document.getElementById('gform'),err=document.getElementById('gerr'),btn=document.getElementById('gbtn'),sb=null;
+ function st(x,m){f.dataset.st=x;err.textContent=m||''}
+ function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){}}
+ function clear(){ls('surge_access_token',null);ls('surge_refresh_token',null);try{sb&&sb.auth.signOut()}catch(e){}}
+ function open_(){document.documentElement.classList.remove('locked');scrollTo(0,0);dispatchEvent(new Event('resize'))}
+ async function allowed(session){
+  ls('surge_access_token',session.access_token);ls('surge_refresh_token',session.refresh_token);
+  var r=await sb.from('profiles').select('approved,blocked').eq('id',session.user.id).maybeSingle();
+  if(r.error)throw r.error;
+  var p=r.data;
+  if(!p){clear();st('login','No Agent Space account found for this login.');return false}
+  if(p.blocked){clear();st('blocked','Your access to the Success Guide has been removed. Reach out to Cole if you think this is a mistake.');return false}
+  if(p.approved===false){clear();st('login','Your Agent Space account is still pending approval.');return false}
+  open_();return true;
+ }
+ async function boot(){
+  if(!window.supabase){st('login','Could not load sign-in. Check your connection and refresh.');return}
+  sb=window.supabase.createClient(URL_,KEY);
+  try{
+   var at=ls('surge_access_token'),rt=ls('surge_refresh_token');
+   if(at&&rt){try{await sb.auth.setSession({access_token:at,refresh_token:rt})}catch(e){}}
+   var s=(await sb.auth.getSession()).data.session;
+   if(s){await allowed(s);return}
+  }catch(e){}
+  st('login');
+ }
+ f.addEventListener('submit',async function(e){e.preventDefault();if(!sb)return;
+  var em=document.getElementById('gemail').value.trim(),pw=document.getElementById('gpass').value;
+  btn.disabled=true;btn.textContent='SIGNING IN…';err.textContent='';
+  try{var r=await sb.auth.signInWithPassword({email:em,password:pw});
+   if(r.error){st('login',/invalid/i.test(r.error.message)?'Wrong email or password.':r.error.message)}
+   else await allowed(r.data.session);
+  }catch(x){st('login','Something went wrong. Try again.')}
+  btn.disabled=false;btn.textContent='SIGN IN';
+ });
+ boot();
 })();
 </script></body></html>
