@@ -162,8 +162,21 @@ td:first-child{font-weight:700;white-space:nowrap} td:nth-child(2){color:var(--g
 footer{text-align:center;padding:56px 0 20px}
 
 footer p{font:400 20px Anton,Impact,sans-serif;letter-spacing:1px;margin:10px 0 0}
-</style></head>
+html.locked .top,html.locked main{display:none}
+#gate{display:none;min-height:100vh;min-height:100dvh;align-items:center;justify-content:center;padding:24px 0}
+html.locked #gate{display:flex}
+.gbox{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px 24px;text-align:center}
+.gbox h1{margin:18px 0 6px;font:400 30px Anton,Impact,sans-serif;letter-spacing:1px}
+.gbox p{color:var(--mu);font-size:14px;margin:0 0 20px}
+.gbox input{width:100%;font:600 16px Montserrat,system-ui,sans-serif;color:var(--tx);background:#0A0A0A;border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;letter-spacing:2px}
+.gbox input:focus{outline:2px solid var(--g2);outline-offset:1px}
+.gbox button{width:100%;margin-top:12px;font:700 15px Montserrat,system-ui,sans-serif;letter-spacing:1px;color:#0A0A0A;background:linear-gradient(180deg,var(--g1),var(--g2));border:0;border-radius:10px;padding:14px;cursor:pointer}
+.gerr{color:#E07A6A;font-size:13px;min-height:20px;margin-top:10px}
+.gbox{overflow:hidden}.gbox .wm1,.gbox .wm2{font-size:44px}.gbox .wm1 i{font-size:52px}
+</style>
+<script>(function(){try{if(localStorage.getItem('sg-ok')==='8ac894483b7f4153d34c9b0d3a7f3aaf3ddec0e3b3299b3cc54d2ce8aa4034d2')return}catch(e){}document.documentElement.classList.add('locked')})();</script></head>
 <body>
+<div id="gate"><form class="gbox" id="gform" autocomplete="off"><div class="wm" aria-label="Surge Partners"><div class="wm1"><i>S</i>URGE</div><div class="wm2">PARTNERS</div></div><h1>Success <span class="g">Guide</span></h1><p>Enter your team access code to open the guide.</p><input id="gcode" type="password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Access code" aria-label="Access code" required><button type="submit">ENTER</button><div class="gerr" id="gerr" role="alert"></div></form></div>
 <header class="top"><a href="#top" class="mark" aria-label="Back to top"><i>S</i>URGE</a><nav id="nav"><a href="#ethos">Ethos</a><a href="#expectations">Expectations</a><a href="#schedule">Schedule</a><a href="#workshops">Workshops</a><a href="#training">10-Day</a><a href="#script">Scripts</a><a href="#rebuttals">Rebuttals</a><a href="#voicemails">Voicemails</a><a href="#books">Books</a><a href="#mindset">8 Steps</a><a href="#contacts">Contacts</a><a href="#discord">Discord</a></nav></header>
 <main id="top">
 <div class="hero"><div class="wm" aria-label="Surge Partners"><div class="wm1"><i>S</i>URGE</div><div class="wm2">PARTNERS</div><div class="wm3"><span></span><b>⚡</b><span></span></div></div><h1>Success <span class="g">Guide</span></h1>
@@ -281,5 +294,13 @@ footer p{font:400 20px Anton,Impact,sans-serif;letter-spacing:1px;margin:10px 0 
  function hl(){tick=false;var y=scrollY+130,c=-1;for(var i=0;i<tops.length;i++){if(tops[i]<=y)c=i}setOn(c)}
  measure();addEventListener('resize',function(){measure();hl()});addEventListener('load',function(){measure();hl()});
  addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(hl)}},{passive:true});hl();
+})();
+</script>
+<script>
+(function(){var H='8ac894483b7f4153d34c9b0d3a7f3aaf3ddec0e3b3299b3cc54d2ce8aa4034d2',f=document.getElementById('gform');
+ function sha(t){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return('0'+x.toString(16)).slice(-2)}).join('')})}
+ f.addEventListener('submit',function(e){e.preventDefault();var v=document.getElementById('gcode').value.trim().toLowerCase();
+  sha(v).then(function(h){if(h===H){try{localStorage.setItem('sg-ok',H)}catch(e){}document.documentElement.classList.remove('locked');scrollTo(0,0);dispatchEvent(new Event('resize'))}
+   else{document.getElementById('gerr').textContent='Wrong code. Ask Cole or Joey for the team code.';document.getElementById('gcode').select()}})});
 })();
 </script></body></html>
