@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Surge Partners Apparel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="description" content="Surge Partners Tour Collection — polos, quarter-zips, hoodies and caps.">
+<link rel="icon" href="/shop/logos/Surge_SP_Monogram_gold.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;500;600;700;800&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script src="/shop/render.js"></script>
+<style>
+:root{--bg:#0A0A0A;--card:#141416;--card2:#1B1B1E;--line:rgba(197,176,113,.18);--line2:rgba(255,255,255,.08);--g1:#E4D39E;--g2:#C5B071;--g3:#967A46;--tx:#F2EFE6;--mu:#A39D8F;--ok:#7FBF7A;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 Montserrat,system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--g1)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header{position:sticky;top:0;z-index:20;background:rgba(10,10,10,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line2)}
+.hbar{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand img{height:38px;width:auto;display:block}
+.cartbtn{display:flex;align-items:center;gap:8px;background:none;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700;font-size:13px;letter-spacing:.08em}
+.cartbtn b{min-width:22px;height:22px;border-radius:11px;background:var(--g2);color:#0A0A0A;display:inline-grid;place-items:center;font-size:12px}
+.hero{padding:56px 0 28px;display:grid;gap:10px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.32em;color:var(--g2)}
+.hero h1{margin:0;font:400 clamp(48px,9vw,104px)/0.95 Anton,Impact,sans-serif;letter-spacing:.01em}
+.hero p{margin:6px 0 0;color:var(--mu);max-width:520px}
+.notice{margin:0 0 20px;padding:14px 16px;border-radius:10px;border:1px solid rgba(127,191,122,.4);background:rgba(127,191,122,.08);color:#CDE8CB;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px;padding-bottom:64px}
+.card{background:var(--card);border:1px solid var(--line2);border-radius:10px;overflow:hidden;text-align:left;padding:0;display:flex;flex-direction:column;transition:border-color .2s,transform .2s}
+.card:hover{border-color:var(--line);transform:translateY(-2px)}
+.card .img{aspect-ratio:1/1;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#202023,#141416 70%);position:relative}
+.card .img svg,.card .img img{width:80%;height:80%;object-fit:contain}
+.card .meta{padding:14px 16px 16px;display:grid;gap:4px}
+.card .nm{font:400 22px Anton,Impact,sans-serif;letter-spacing:.02em}
+.card .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.price{font-weight:700}
+.dots{display:flex;gap:5px}.dots i{width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.25);display:block}
+.tag{position:absolute;top:12px;left:12px;font-size:11px;font-weight:800;letter-spacing:.14em;padding:5px 9px;border-radius:4px;background:#2A1A1A;color:#E9A49A}
+.empty{padding:40px 0 80px;color:var(--mu)}
+footer{border-top:1px solid var(--line2);padding:28px 0 40px;color:var(--mu);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+/* sheets */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;z-index:50;background:var(--card);border:1px solid var(--line2);display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+#pd{left:50%;top:50%;width:min(980px,calc(100% - 32px));max-height:calc(100% - 48px);border-radius:14px;transform:translate(-50%,-46%) scale(.98);opacity:0;pointer-events:none;transition:transform .25s,opacity .2s}
+#pd.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}
+#cart{right:0;top:0;bottom:0;width:min(420px,100%);transform:translateX(100%);border-radius:0}
+#cart.on{transform:none}
+.x{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line2);background:var(--card2);font-size:20px;line-height:1;z-index:2}
+.pdg{display:grid;grid-template-columns:1.1fr 1fr;overflow:auto}
+.pv{background:radial-gradient(circle at 50% 40%,#232327,#141416 70%);padding:28px;display:grid;gap:14px;align-content:start}
+.pv .big{aspect-ratio:1/1;display:grid;place-items:center}
+.pv .big svg,.pv .big img{width:88%;height:88%;object-fit:contain}
+.thumbs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.thumbs button{width:58px;height:58px;border-radius:8px;border:1px solid var(--line2);background:#111;padding:4px;display:grid;place-items:center}
+.thumbs button.on{border-color:var(--g2)}
+.thumbs svg,.thumbs img{width:100%;height:100%;object-fit:contain}
+.pi{padding:32px 28px;display:grid;gap:18px;align-content:start}
+.pi h2{margin:0;font:400 40px/1 Anton,Impact,sans-serif;letter-spacing:.02em}
+.pi .desc{color:var(--mu);margin:0}
+.lbl{font-size:12px;font-weight:700;letter-spacing:.18em;color:var(--mu);margin-bottom:8px;display:flex;justify-content:space-between}
+.sw{display:flex;gap:10px;flex-wrap:wrap}
+.sw button{width:36px;height:36px;border-radius:50%;border:2px solid transparent;outline:1px solid rgba(255,255,255,.25);outline-offset:-1px}
+.sw button.on{border-color:var(--g2);outline:2px solid var(--bg);outline-offset:-4px}
+.sz{display:flex;gap:8px;flex-wrap:wrap}
+.sz button{min-width:52px;height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--line2);background:var(--card2);font-weight:700;font-size:14px}
+.sz button.on{border-color:var(--g2);background:rgba(197,176,113,.12);color:var(--g1)}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.qty button{width:44px;height:44px;background:var(--card2);border:0;font-size:18px}
+.qty span{min-width:44px;text-align:center;font-weight:700}
+.btn{height:52px;border:0;border-radius:10px;background:linear-gradient(180deg,var(--g1),var(--g2));color:#0A0A0A;font-weight:800;letter-spacing:.12em;font-size:14px;width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn2{height:44px;border:1px solid var(--line);border-radius:10px;background:none;font-weight:700;font-size:13px;letter-spacing:.08em;padding:0 16px}
+.err{color:#E9A49A;font-size:13px;min-height:18px}
+.ch{padding:22px 20px 14px;border-bottom:1px solid var(--line2);font:400 26px Anton,Impact,sans-serif;letter-spacing:.03em}
+.cl{flex:1;overflow:auto;padding:8px 20px}
+.ci{display:grid;grid-template-columns:72px 1fr auto;gap:12px;padding:14px 0;border-bottom:1px solid var(--line2);align-items:center}
+.ci .th{width:72px;height:72px;border-radius:8px;background:#111;display:grid;place-items:center}
+.ci .th svg,.ci .th img{width:90%;height:90%;object-fit:contain}
+.ci .n{font-weight:700}.ci .s{color:var(--mu);font-size:13px}
+.ci .r{display:grid;gap:6px;justify-items:end}
+.ci .qty button{width:32px;height:32px;font-size:15px}.ci .qty span{min-width:28px;font-size:13px}
+.rm{background:none;border:0;color:var(--mu);font-size:12px;text-decoration:underline;padding:0}
+.cf{padding:16px 20px calc(20px + env(safe-area-inset-bottom));border-top:1px solid var(--line2);display:grid;gap:10px}
+.tot{display:flex;justify-content:space-between;font-weight:700}
+.sub{color:var(--mu);font-size:13px}
+:focus-visible{outline:2px solid var(--g1);outline-offset:2px}
+@media (max-width:760px){
+ .hero{padding:36px 0 20px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .card .meta{padding:10px 12px 12px}.card .nm{font-size:18px}
+ #pd{left:0;top:auto;bottom:0;width:100%;max-height:92%;border-radius:16px 16px 0 0;transform:translateY(100%);opacity:1}
+ #pd.on{transform:none}
+ .pdg{grid-template-columns:1fr}
+ .pv{padding:18px 18px 8px}.pv .big{aspect-ratio:4/3}
+ .pi{padding:18px 18px calc(24px + env(safe-area-inset-bottom))}
+ .pi h2{font-size:32px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head>
+<body>
+<header><div class="wrap hbar"><a class="brand" href="/shop/" aria-label="Surge Partners Apparel home"><img src="/shop/logos/Surge_Flag_Wordmark_gold.png" alt="Surge Partners"></a>
+<button class="cartbtn" id="cartbtn" aria-label="Open cart">CART <b id="cartn">0</b></button></div></header>
+<main class="wrap">
+ <section class="hero"><div class="eyebrow">SURGE PARTNERS · APPAREL</div><h1>TOUR COLLECTION</h1><p>Course-ready polos, quarter-zips, hoodies and caps. Built for the team.</p></section>
+ <div id="note"></div>
+ <div class="grid" id="grid" aria-live="polite"></div>
+</main>
+<footer><div class="wrap"><span>© Surge Partners</span><span>Questions about an order? <a href="mailto:surgequality@surgelifegroup.com">surgequality@surgelifegroup.com</a></span></div></footer>
+
+<div class="scrim" id="scrim"></div>
+<section class="sheet" id="pd" role="dialog" aria-modal="true" aria-label="Product"><button class="x" data-close aria-label="Close">×</button><div class="pdg" id="pdg"></div></section>
+<section class="sheet" id="cart" role="dialog" aria-modal="true" aria-label="Cart"><button class="x" data-close aria-label="Close">×</button><div class="ch">YOUR CART</div><div class="cl" id="cl"></div><div class="cf" id="cf"></div></section>
+
+<script>
+(function(){
+var SUPA_URL='https://szdzbycppkavfwuzlljh.supabase.co',SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6ZHpieWNwcGthdmZ3dXpsbGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1ODIxNzgsImV4cCI6MjA5NTE1ODE3OH0.Jw21eHChMDHlskSs2PegmBXLYNIQkjl8GByOIApadhA';
+var R=window.SurgeRender,$=function(id){return document.getElementById(id)};
+var P=[],S={shipping_cents:0,free_ship_over_cents:0},cart=[],cur=null,sel={};
+function money(c){return '$'+(c/100).toFixed(c%100?2:0)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function big(sz){return /^(2|3|4|5)XL$/.test(sz)}
+function unit(p,sz){return p.price_cents+(big(sz)?(p.upcharge_cents||0):0)}
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+function save(){ls('surge-cart',JSON.stringify(cart));$('cartn').textContent=cart.reduce(function(a,i){return a+i.qty},0)}
+function color(p,name){var c=(p.colors||[]).find(function(x){return x.name===name});return c||(p.colors||[])[0]||{name:'Black',hex:'#141414'}}
+function img(p,col,view){var c=color(p,col);return R.render(p.blank,c.hex,view||'front',p.design)}
+
+function open(id){var el=$(id);$('scrim').classList.add('on');el.classList.add('on');document.body.style.overflow='hidden';var b=el.querySelector('.x');if(b)b.focus()}
+function closeAll(){['pd','cart'].forEach(function(i){$(i).classList.remove('on')});$('scrim').classList.remove('on');document.body.style.overflow=''}
+document.addEventListener('click',function(e){if(e.target.closest('[data-close]')||e.target.id==='scrim')closeAll()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAll()});
+
+function grid(){
+ if(!P.length){$('grid').innerHTML='<p class="empty">New drop coming soon.</p>';return}
+ $('grid').innerHTML=P.map(function(p,i){var c=(p.colors||[])[0]||{};
+  var pic=p.photos&&p.photos[0]?'<img src="'+esc(p.photos[0])+'" alt="" loading="lazy">':img(p,c.name);
+  return '<button class="card" data-i="'+i+'" aria-label="'+esc(p.name)+'"><div class="img">'+pic+(p.sold_out?'<span class="tag">SOLD OUT</span>':'')+'</div><div class="meta"><div class="nm">'+esc(p.name)+'</div><div class="row"><span class="price">'+money(p.price_cents)+'</span><span class="dots">'+(p.colors||[]).slice(0,6).map(function(c){return '<i style="background:'+esc(c.hex)+'" title="'+esc(c.name)+'"></i>'}).join('')+'</span></div></div></button>'}).join('');
+}
+$('grid').addEventListener('click',function(e){var b=e.target.closest('.card');if(b)showP(+b.dataset.i)});
+
+function showP(i){cur=P[i];sel={color:(cur.colors[0]||{}).name,size:cur.sizes.length===1?cur.sizes[0]:null,qty:1,view:'front',photo:-1};drawP();open('pd')}
+function drawP(){var p=cur,views=['front','back'].filter(function(v){return (R.BLANKS[p.blank]||{})[v]});
+ var main=sel.photo>=0?'<img src="'+esc(p.photos[sel.photo])+'" alt="">':img(p,sel.color,sel.view);
+ var th=views.map(function(v){return '<button data-v="'+v+'" class="'+(sel.photo<0&&sel.view===v?'on':'')+'" aria-label="'+v+' view">'+img(p,sel.color,v)+'</button>'}).join('')+(p.photos||[]).map(function(u,k){return '<button data-ph="'+k+'" class="'+(sel.photo===k?'on':'')+'" aria-label="Photo '+(k+1)+'"><img src="'+esc(u)+'" alt=""></button>'}).join('');
+ var price=sel.size?unit(p,sel.size):p.price_cents;
+ $('pdg').innerHTML='<div class="pv"><div class="big">'+main+'</div><div class="thumbs">'+th+'</div></div>'+
+ '<div class="pi"><div><div class="eyebrow">'+esc((R.BLANKS[p.blank]||{}).label||'')+'</div><h2>'+esc(p.name)+'</h2></div><div class="price" style="font-size:22px">'+money(price)+'</div>'+(p.description?'<p class="desc">'+esc(p.description)+'</p>':'')+
+ '<div><div class="lbl"><span>COLOR</span><span style="letter-spacing:.04em;color:var(--tx)">'+esc(sel.color||'')+'</span></div><div class="sw">'+p.colors.map(function(c){return '<button data-c="'+esc(c.name)+'" class="'+(c.name===sel.color?'on':'')+'" style="background:'+esc(c.hex)+'" aria-label="'+esc(c.name)+'"></button>'}).join('')+'</div></div>'+
+ '<div><div class="lbl"><span>SIZE</span>'+(p.upcharge_cents?'<span style="letter-spacing:.02em">2XL+ adds '+money(p.upcharge_cents)+'</span>':'')+'</div><div class="sz">'+p.sizes.map(function(s){return '<button data-s="'+esc(s)+'" class="'+(s===sel.size?'on':'')+'">'+esc(s)+'</button>'}).join('')+'</div></div>'+
+ '<div><div class="lbl"><span>QUANTITY</span></div><div class="qty"><button data-q="-1" aria-label="Less">−</button><span>'+sel.qty+'</span><button data-q="1" aria-label="More">+</button></div></div>'+
+ '<button class="btn" id="add" '+(p.sold_out?'disabled':'')+'>'+(p.sold_out?'SOLD OUT':'ADD TO CART')+'</button><div class="err" id="pderr"></div></div>';
+}
+$('pdg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ if(b.dataset.v){sel.view=b.dataset.v;sel.photo=-1}else if(b.dataset.ph!=null){sel.photo=+b.dataset.ph}
+ else if(b.dataset.c){sel.color=b.dataset.c;sel.photo=-1}else if(b.dataset.s){sel.size=b.dataset.s}
+ else if(b.dataset.q){sel.qty=Math.max(1,Math.min(20,sel.qty+(+b.dataset.q)))}
+ else if(b.id==='add'){if(!sel.size){$('pderr').textContent='Pick a size.';return}
+  var k=cur.id+'|'+sel.color+'|'+sel.size,ex=cart.find(function(x){return x.k===k});
+  if(ex)ex.qty=Math.min(20,ex.qty+sel.qty);else cart.push({k:k,id:cur.id,color:sel.color,size:sel.size,qty:sel.qty});
+  save();closeAll();drawCart();open('cart');return}
+ drawP()});
+
+function drawCart(){var items=cart.map(function(i){var p=P.find(function(x){return x.id===i.id});return p?{i:i,p:p}:null}).filter(Boolean);
+ cart=items.map(function(x){return x.i});save();
+ if(!items.length){$('cl').innerHTML='<p class="sub" style="padding:24px 0">Your cart is empty.</p>';$('cf').innerHTML='';return}
+ var sub=items.reduce(function(a,x){return a+unit(x.p,x.i.size)*x.i.qty},0);
+ var ship=S.free_ship_over_cents&&sub>=S.free_ship_over_cents?0:(S.shipping_cents||0);
+ $('cl').innerHTML=items.map(function(x,n){return '<div class="ci"><div class="th">'+img(x.p,x.i.color)+'</div><div><div class="n">'+esc(x.p.name)+'</div><div class="s">'+esc(x.i.color)+' · '+esc(x.i.size)+'</div><button class="rm" data-rm="'+n+'">Remove</button></div><div class="r"><span class="price">'+money(unit(x.p,x.i.size)*x.i.qty)+'</span><div class="qty"><button data-cq="'+n+'" data-d="-1" aria-label="Less">−</button><span>'+x.i.qty+'</span><button data-cq="'+n+'" data-d="1" aria-label="More">+</button></div></div></div>'}).join('');
+ $('cf').innerHTML='<div class="tot"><span>Subtotal</span><span>'+money(sub)+'</span></div><div class="tot sub"><span>Shipping</span><span>'+(ship?money(ship):'Free')+'</span></div>'+(S.free_ship_over_cents&&ship?'<div class="sub">Free shipping on orders over '+money(S.free_ship_over_cents)+'</div>':'')+'<button class="btn" id="checkout">CHECKOUT · '+money(sub+ship)+'</button><div class="err" id="coerr"></div>';
+}
+$('cl').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ if(b.dataset.rm!=null)cart.splice(+b.dataset.rm,1);else if(b.dataset.cq!=null){var it=cart[+b.dataset.cq];it.qty+=(+b.dataset.d);if(it.qty<1)cart.splice(+b.dataset.cq,1);else it.qty=Math.min(20,it.qty)}
+ save();drawCart()});
+$('cf').addEventListener('click',async function(e){if(e.target.id!=='checkout')return;var b=e.target;b.disabled=true;b.textContent='LOADING CHECKOUT…';$('coerr').textContent='';
+ try{var r=await fetch('/.netlify/functions/shop-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:cart.map(function(i){return{id:i.id,color:i.color,size:i.size,qty:i.qty}}),origin:location.origin})});
+  var j=await r.json();if(!r.ok||!j.url)throw new Error(j.error||'Checkout is not available right now.');location.href=j.url}
+ catch(x){$('coerr').textContent=x.message;b.disabled=false;drawCart()}});
+$('cartbtn').addEventListener('click',function(){drawCart();open('cart')});
+
+async function load(){
+ try{var c=JSON.parse(ls('surge-cart')||'[]');if(Array.isArray(c))cart=c}catch(e){}
+ var q=new URLSearchParams(location.search);
+ if(q.has('success')){cart=[];save();$('note').innerHTML='<div class="notice">Order received. Your confirmation is on its way to your email, and we\'ll send tracking when it ships.</div>';history.replaceState({},'',location.pathname)}
+ save();
+ if(!window.supabase){$('grid').innerHTML='<p class="empty">The store could not load. Refresh to try again.</p>';return}
+ var sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:false}});
+ var a=await Promise.all([sb.from('store_products').select('*').eq('active',true).order('sort').order('created_at',{ascending:false}),sb.from('store_settings').select('*').eq('id',1).maybeSingle()]);
+ if(a[0].error){$('grid').innerHTML='<p class="empty">The store could not load. Refresh to try again.</p>';return}
+ P=(a[0].data||[]).map(function(p){p.colors=p.colors&&p.colors.length?p.colors:[{name:'Black',hex:'#141414'}];p.sizes=p.sizes&&p.sizes.length?p.sizes:(R.BLANKS[p.blank]||R.BLANKS.tee).sizes;return p});
+ if(a[1].data)S=a[1].data;
+ grid();
+}
+load();
+})();
+</script>
+</body></html>
