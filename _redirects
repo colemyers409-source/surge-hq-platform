@@ -6,3 +6,5 @@ https://agent.surgelifegroup.com/*  https://hq.surgelifegroup.com/agent  301!
 /dialer  /surge-dialer.html       200
 /guide   /success-guide.html      200
 /guide/  /success-guide.html      200
+/shop/admin   /shop/admin.html  200
+/shop/admin/  /shop/admin.html  200
