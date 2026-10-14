@@ -1854,11 +1854,11 @@ async function ldSwapAll(){
     leads.forEach(function(x){before[x.agent_id]=(before[x.agent_id]||0)+1;});
     var cap=Math.max(0,parseInt(ldEl('ld-swap-cap').value,10)||0);var plan=ldAllocate(leads,{},function(l,lic){var prev=new Set(l.prev_agents||[]);var other=lic.filter(function(id){return id!==l.agent_id;});var fresh=other.filter(function(id){return !prev.has(id);});return fresh.length?fresh:(other.length?other:lic);},cap);
     var moves=[];(plan.over||[]).forEach(function(l){moves.push({lead:l,to:null});});var keep=0;Object.keys(plan.by).forEach(function(to){plan.by[to].forEach(function(l){if(l.agent_id===to)keep++;else moves.push({lead:l,to:to});});});
-    var stuck=plan.unused.length+keep;
+    var act={};plan.agents.forEach(function(id){act[id]=1;});var stuck=keep;plan.unused.forEach(function(l){if(act[l.agent_id])stuck++;else moves.push({lead:l,to:null});});
     if(!moves.length){ldMsg('ld-swapall-msg','Nothing can move. Nobody is in rotation with states.','err');return;}
     plan.agents.forEach(function(id){if(before[id]==null)before[id]=0;});
-    var ids=Object.keys(before);LD.swap={moves:moves,ids:ids,mode:'all'};ldSwapRender('Swap everyone · re-dealt by rotation',moves,before);
-    var toPool=(plan.over||[]).length;ldMsg('ld-swapall-msg',leads.length+' leads held. '+(moves.length-toPool)+' get re-dealt.'+(toPool?' '+toPool+' go back to the held pool (over the max).':'')+(stuck?' '+stuck+' stay (nobody else in rotation is licensed in that state).':''),'ok');
+    var ids=Object.keys(before).filter(function(id){return act[id]||moves.some(function(m){return m.lead.agent_id===id;});});var shown={};ids.forEach(function(id){shown[id]=before[id];});LD.swap={moves:moves,ids:ids,mode:'all'};before=shown;ldSwapRender('Swap everyone · re-dealt by rotation',moves,before);
+    var toPool=moves.filter(function(m){return !m.to;}).length;ldMsg('ld-swapall-msg',leads.length+' leads held. '+(moves.length-toPool)+' get re-dealt.'+(toPool?' '+toPool+' go back to the held pool (over the max, or held by someone off rotation).':'')+(stuck?' '+stuck+' stay (nobody else in rotation is licensed in that state).':''),'ok');
   }catch(e){ldMsg('ld-swapall-msg',e.message||String(e),'err');}
 }
 async function ldSwapGo(){
