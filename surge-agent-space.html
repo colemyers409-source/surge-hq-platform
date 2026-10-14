@@ -1756,10 +1756,10 @@ function ldAllocate(cands,recent,elOf,cap){cap=cap||0;
   var A={};ag.forEach(function(a){A[a.id]=a;});
   function key(id){return (c[id]-A[id].b)/A[id].w;}
   var seed=7;function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647;}
-  var L=cands.map(function(l){var lic=ag.filter(function(a){return a.st.has(l.state);}).map(function(a){return a.id;});return {l:l,el:elOf?elOf(l,lic):lic,to:null,r:rnd()};});
+  var L=cands.map(function(l){var lic=ag.filter(function(a){return a.st.has(l.state);}).map(function(a){return a.id;});var e=elOf?elOf(l,lic):lic;if(Array.isArray(e))e={el:e,fresh:null};return {l:l,el:e.el,fr:e.fresh,to:null,r:rnd()};});
   var unused=L.filter(function(x){return !x.el.length;}),use=L.filter(function(x){return x.el.length;});
   use.sort(function(a,b){return a.el.length-b.el.length||a.r-b.r;});
-  var over=[];use=use.filter(function(x){var best=null;x.el.forEach(function(id){if(cap&&c[id]>=cap)return;if(best===null||key(id)<key(best)-1e-9)best=id;});if(best===null){var cur=x.l.agent_id;if(cur&&A[cur]&&A[cur].st.has(x.l.state)&&!(cap&&c[cur]>=cap))best=cur;}if(best===null){over.push(x.l);return false;}x.to=best;c[best]++;return true;});
+  var over=[];use=use.filter(function(x){var best=null,bf=false;x.el.forEach(function(id){if(cap&&c[id]>=cap)return;var f=!x.fr||x.fr.has(id);if(best===null||(f&&!bf)||(f===bf&&key(id)<key(best)-1e-9)){best=id;bf=f;}});if(best===null){var cur=x.l.agent_id;if(cur&&A[cur]&&A[cur].st.has(x.l.state)&&!(cap&&c[cur]>=cap))best=cur;}if(best===null){over.push(x.l);return false;}x.to=best;c[best]++;return true;});
   for(var pass=0,moved=true;moved&&pass<300;pass++){moved=false;use.forEach(function(x){var o=x.to,ko=key(o);x.el.forEach(function(b){if(b===o)return;var nko=(c[o]-1-A[o].b)/A[o].w,nkb=(c[b]+1-A[b].b)/A[b].w;if(Math.max(nko,nkb)<ko-1e-9&&x.to===o&&!(cap&&c[b]>=cap)){c[o]--;c[b]++;x.to=b;moved=true;}});});}
   var by={};use.forEach(function(x){(by[x.to]=by[x.to]||[]).push(x.l);});
   return {by:by,unused:unused.map(function(x){return x.l;}),over:over,agents:ag.map(function(a){return a.id;})};
@@ -1849,10 +1849,10 @@ async function ldSwapAll(){
   try{if(!LD.agents.length)await ldLoadBase();
     // Full re-deal: every unsold lead anyone is holding goes back in the pile and is dealt out to the rotation
     // by priority/bonus, same as a normal distribution. Nobody gets a lead they already hold; agents who
-    // have dialed it before are next, keeping your own lead is the last resort before the held pool.
+    // have dialed it before get it only when that keeps the split fair; keeping your own lead is the last resort before the held pool.
     var leads=await ldFetchAll('lead_pool','phone,full_name,state,agent_id,prev_agents',function(q){return q.not('agent_id','is',null).is('sold_at',null);}),before={};
     leads.forEach(function(x){before[x.agent_id]=(before[x.agent_id]||0)+1;});
-    var cap=Math.max(0,parseInt(ldEl('ld-swap-cap').value,10)||0);var plan=ldAllocate(leads,{},function(l,lic){var prev=new Set(l.prev_agents||[]);var other=lic.filter(function(id){return id!==l.agent_id;});var fresh=other.filter(function(id){return !prev.has(id);});return fresh.length?fresh:(other.length?other:lic);},cap);
+    var cap=Math.max(0,parseInt(ldEl('ld-swap-cap').value,10)||0);var plan=ldAllocate(leads,{},function(l,lic){var prev=new Set(l.prev_agents||[]);var other=lic.filter(function(id){return id!==l.agent_id;});return {el:other.length?other:lic,fresh:new Set(other.filter(function(id){return !prev.has(id);}))};},cap);
     var moves=[];(plan.over||[]).forEach(function(l){moves.push({lead:l,to:null});});var keep=0;Object.keys(plan.by).forEach(function(to){plan.by[to].forEach(function(l){if(l.agent_id===to)keep++;else moves.push({lead:l,to:to});});});
     var act={};plan.agents.forEach(function(id){act[id]=1;});var stuck=keep;plan.unused.forEach(function(l){if(act[l.agent_id])stuck++;else moves.push({lead:l,to:null});});
     if(!moves.length){ldMsg('ld-swapall-msg','Nothing can move. Nobody is in rotation with states.','err');return;}
