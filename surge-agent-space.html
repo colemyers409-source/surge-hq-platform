@@ -917,7 +917,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   </div>
   <div id="ld-swap-preview" hidden>
     <div class="table-section" style="margin-top:1rem"><div class="table-header"><div class="table-title" id="ld-swap-title">Preview</div></div>
-    <div style="overflow-x:auto"><table><thead><tr><th>Agent</th><th>Before</th><th>Gives</th><th>Gets</th><th>After</th></tr></thead><tbody id="ld-swap-body"></tbody></table></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Agent</th><th>Before</th><th>Gives</th><th>Stay</th><th>Gets</th><th>After</th></tr></thead><tbody id="ld-swap-body"></tbody></table></div>
     <div class="ld-pad ld-actions"><button class="calc-btn" onclick="ldSwapGo()">Swap &amp; Save</button><button class="calc-btn" style="background:transparent;border:1px solid var(--border);color:var(--muted)" onclick="ldSwapCancel()">Cancel</button><span id="ld-swap-go-msg" class="ld-msg"></span></div></div>
   </div>
   <div class="ld-pad" id="ld-swap-files"></div>
@@ -1830,7 +1830,7 @@ function ldSwapRender(title,moves,before){
   var gives={},gets={};moves.forEach(function(m){gives[m.lead.agent_id]=(gives[m.lead.agent_id]||0)+1;gets[m.to]=(gets[m.to]||0)+1;});
   var ids=Object.keys(before).sort(function(a,b){return ldName(a).localeCompare(ldName(b));});
   ldEl('ld-swap-title').textContent=title;
-  ldEl('ld-swap-body').innerHTML=ids.map(function(id){var g=gives[id]||0,r=gets[id]||0;return '<tr><td>'+escapeHtml(ldName(id))+'</td><td class="ld-num" style="color:var(--muted)">'+before[id]+'</td><td class="ld-num" style="color:var(--red)">'+(g?'−'+g:'—')+'</td><td class="ld-num ld-new">'+(r?'+'+r:'—')+'</td><td class="ld-num">'+(before[id]-g+r)+'</td></tr>';}).join('');
+  ldEl('ld-swap-body').innerHTML=ids.map(function(id){var g=gives[id]||0,r=gets[id]||0;return '<tr><td>'+escapeHtml(ldName(id))+'</td><td class="ld-num" style="color:var(--muted)">'+before[id]+'</td><td class="ld-num" style="color:var(--red)">'+(g?'−'+g:'—')+'</td><td class="ld-num" style="color:var(--muted)">'+(before[id]-g)+'</td><td class="ld-num ld-new">'+(r?'+'+r:'—')+'</td><td class="ld-num">'+(before[id]-g+r)+'</td></tr>';}).join('');
   ldEl('ld-swap-preview').hidden=false;ldEl('ld-swap-files').innerHTML='';
 }
 async function ldSwapPair(){
@@ -1847,8 +1847,10 @@ async function ldSwapPair(){
 async function ldSwapAll(){
   ldEl('ld-swap-preview').hidden=true;ldMsg('ld-swapall-msg','Working out the shuffle…');
   try{if(!LD.agents.length)await ldLoadBase();
-    var ag=ldActiveAgents().map(function(a){return {id:a.id,st:ldStatesOf(a.id)};}),agIds=ag.map(function(a){return a.id;});
-    var leads=await ldMyLeads(agIds),before={};ag.forEach(function(a){before[a.id]=0;});leads.forEach(function(x){before[x.agent_id]++;});
+    // everyone who is holding unsold leads takes part, in rotation or not; each keeps the same count
+    var leads=await ldFetchAll('lead_pool','phone,full_name,state,agent_id,prev_agents',function(q){return q.not('agent_id','is',null).is('sold_at',null);}),before={};
+    leads.forEach(function(x){before[x.agent_id]=(before[x.agent_id]||0)+1;});
+    var agIds=Object.keys(before),ag=agIds.map(function(id){return {id:id,st:ldStatesOf(id)};});
     var target=Object.assign({},before),cnt={};agIds.forEach(function(id){cnt[id]=0;});
     // most constrained leads first
     var items=leads.map(function(x){var prev=new Set(x.prev_agents||[]);var fresh=ag.filter(function(a){return a.id!==x.agent_id&&a.st.has(x.state)&&!prev.has(a.id);});var any=ag.filter(function(a){return a.id!==x.agent_id&&a.st.has(x.state);});return {x:x,fresh:fresh,any:any};});
@@ -1858,7 +1860,7 @@ async function ldSwapAll(){
       el.sort(function(a,b){return ((cnt[a.id]>=target[a.id])-(cnt[b.id]>=target[b.id]))||((cnt[a.id]/(target[a.id]||1))-(cnt[b.id]/(target[b.id]||1)));});var to=el[0].id;cnt[to]++;moves.push({lead:it.x,to:to});});
     if(!moves.length){ldMsg('ld-swapall-msg','Nothing can move.','err');return;}
     LD.swap={moves:moves,ids:agIds,mode:'all'};ldSwapRender('Swap everyone',moves,before);
-    ldMsg('ld-swapall-msg',moves.length+' leads move to someone new.'+(stuck?' '+stuck+' stay (nobody else licensed in that state).':''),'ok');
+    ldMsg('ld-swapall-msg',leads.length+' leads held. '+moves.length+' move to someone new.'+(stuck?' '+stuck+' stay (nobody else licensed in that state).':''),'ok');
   }catch(e){ldMsg('ld-swapall-msg',e.message||String(e),'err');}
 }
 async function ldSwapGo(){
