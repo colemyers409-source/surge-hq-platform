@@ -912,7 +912,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
       <div id="ld-swap-msg" class="ld-msg"></div>
     </div>
   </div>
-  <div class="table-section" style="margin-top:1rem"><div class="table-header"><div class="table-title">Swap everyone</div><span style="font-size:0.65rem;color:var(--muted)">Every agent keeps the same number of leads but gets ones they haven't dialed yet</span></div>
+  <div class="table-section" style="margin-top:1rem"><div class="table-header"><div class="table-title">Swap everyone</div><span style="font-size:0.65rem;color:var(--muted)">Every lead anyone is holding gets re-dealt to the rotation by priority, like a fresh distribution. Nobody gets a lead they already have.</span></div>
     <div class="ld-pad ld-actions"><button class="calc-btn" onclick="ldSwapAll()">Preview swap for everyone</button><span id="ld-swapall-msg" class="ld-msg"></span></div>
   </div>
   <div id="ld-swap-preview" hidden>
@@ -1750,13 +1750,13 @@ async function ldPreview(){
   }catch(e){ldMsg('ld-msg','Preview failed: '+(e.message||e),'err');}
 }
 
-function ldAllocate(cands,recent){
+function ldAllocate(cands,recent,elOf){
   var ag=ldActiveAgents().map(function(a){var r=ldRotOf(a.id);return {id:a.id,st:ldStatesOf(a.id),w:LD_W[r.priority]||1,b:r.bonus||0};});
   var c={};ag.forEach(function(a){c[a.id]=recent[a.id]||0;});
   var A={};ag.forEach(function(a){A[a.id]=a;});
   function key(id){return (c[id]-A[id].b)/A[id].w;}
   var seed=7;function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647;}
-  var L=cands.map(function(l){return {l:l,el:ag.filter(function(a){return a.st.has(l.state);}).map(function(a){return a.id;}),to:null,r:rnd()};});
+  var L=cands.map(function(l){var lic=ag.filter(function(a){return a.st.has(l.state);}).map(function(a){return a.id;});return {l:l,el:elOf?elOf(l,lic):lic,to:null,r:rnd()};});
   var unused=L.filter(function(x){return !x.el.length;}),use=L.filter(function(x){return x.el.length;});
   use.sort(function(a,b){return a.el.length-b.el.length||a.r-b.r;});
   use.forEach(function(x){var best=null;x.el.forEach(function(id){if(best===null||key(id)<key(best)-1e-9)best=id;});x.to=best;c[best]++;});
@@ -1847,20 +1847,18 @@ async function ldSwapPair(){
 async function ldSwapAll(){
   ldEl('ld-swap-preview').hidden=true;ldMsg('ld-swapall-msg','Working out the shuffle…');
   try{if(!LD.agents.length)await ldLoadBase();
-    // everyone who is holding unsold leads takes part, in rotation or not; each keeps the same count
+    // Full re-deal: every unsold lead anyone is holding goes back in the pile and is dealt out to the rotation
+    // by priority/bonus, same as a normal distribution. Nobody gets a lead they already hold; agents who
+    // have dialed it before are last choice. Leads nobody else is licensed for stay where they are.
     var leads=await ldFetchAll('lead_pool','phone,full_name,state,agent_id,prev_agents',function(q){return q.not('agent_id','is',null).is('sold_at',null);}),before={};
     leads.forEach(function(x){before[x.agent_id]=(before[x.agent_id]||0)+1;});
-    var agIds=Object.keys(before),ag=agIds.map(function(id){return {id:id,st:ldStatesOf(id)};});
-    var target=Object.assign({},before),cnt={};agIds.forEach(function(id){cnt[id]=0;});
-    // most constrained leads first
-    var items=leads.map(function(x){var prev=new Set(x.prev_agents||[]);var fresh=ag.filter(function(a){return a.id!==x.agent_id&&a.st.has(x.state)&&!prev.has(a.id);});var any=ag.filter(function(a){return a.id!==x.agent_id&&a.st.has(x.state);});return {x:x,fresh:fresh,any:any};});
-    items.sort(function(p,q){return (p.fresh.length||p.any.length)-(q.fresh.length||q.any.length);});
-    var moves=[],stuck=0;
-    items.forEach(function(it){var el=it.fresh.length?it.fresh:it.any;if(!el.length){stuck++;cnt[it.x.agent_id]++;return;}
-      el.sort(function(a,b){return ((cnt[a.id]>=target[a.id])-(cnt[b.id]>=target[b.id]))||((cnt[a.id]/(target[a.id]||1))-(cnt[b.id]/(target[b.id]||1)));});var to=el[0].id;cnt[to]++;moves.push({lead:it.x,to:to});});
-    if(!moves.length){ldMsg('ld-swapall-msg','Nothing can move.','err');return;}
-    LD.swap={moves:moves,ids:agIds,mode:'all'};ldSwapRender('Swap everyone',moves,before);
-    ldMsg('ld-swapall-msg',leads.length+' leads held. '+moves.length+' move to someone new.'+(stuck?' '+stuck+' stay (nobody else licensed in that state).':''),'ok');
+    var plan=ldAllocate(leads,{},function(l,lic){var prev=new Set(l.prev_agents||[]);var other=lic.filter(function(id){return id!==l.agent_id;});var fresh=other.filter(function(id){return !prev.has(id);});return fresh.length?fresh:other;});
+    var moves=[];Object.keys(plan.by).forEach(function(to){plan.by[to].forEach(function(l){moves.push({lead:l,to:to});});});
+    var stuck=plan.unused.length;
+    if(!moves.length){ldMsg('ld-swapall-msg','Nothing can move. Nobody is in rotation with states.','err');return;}
+    plan.agents.forEach(function(id){if(before[id]==null)before[id]=0;});
+    var ids=Object.keys(before);LD.swap={moves:moves,ids:ids,mode:'all'};ldSwapRender('Swap everyone · re-dealt by rotation',moves,before);
+    ldMsg('ld-swapall-msg',leads.length+' leads held. '+moves.length+' get re-dealt.'+(stuck?' '+stuck+' stay (nobody else in rotation is licensed in that state).':''),'ok');
   }catch(e){ldMsg('ld-swapall-msg',e.message||String(e),'err');}
 }
 async function ldSwapGo(){
