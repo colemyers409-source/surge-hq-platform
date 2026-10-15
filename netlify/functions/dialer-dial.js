@@ -13,7 +13,9 @@ exports.handler = async (event) => {
   const { data: sess } = await db.from('dialer_sessions').select('*').eq('id', sessionId).eq('agent_id', me.id).maybeSingle();
   if (!sess || sess.status === 'ended') return L.json(409, { error: 'No active session' });
   if (sess.active_call_sid) return L.json(409, { error: 'Already on a call' });
-  const lines = Math.max(1, Math.min(Number(body.lines || sess.lines || 2), cfg.max_lines || 3));
+  const ent = await L.entitled(db, me);
+  if (!ent.ok) return L.json(402, { error: 'No active Surge Dialer subscription', paywall: true });
+  const lines = Math.max(1, Math.min(Number(body.lines || sess.lines || 2), cfg.max_lines || 3, ent.lines || 1));
   const identity = L.identityFor(me.id);
 
   // Only dial while the agent is actually parked in their room (TSR: no dialing without a live rep).
@@ -53,7 +55,7 @@ exports.handler = async (event) => {
         statusCallback: base + '/.netlify/functions/dialer-status' + q, statusCallbackMethod: 'POST',
         statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed']
       };
-      if (cfg.amd_enabled !== false) { params.machineDetection = 'Enable'; params.asyncAmd = 'true'; params.asyncAmdStatusCallback = base + '/.netlify/functions/dialer-amd' + q; params.asyncAmdStatusCallbackMethod = 'POST'; params.machineDetectionTimeout = 6; }
+      if (cfg.amd_enabled !== false) { params.machineDetection = 'Enable'; params.machineDetectionTimeout = 5; params.machineDetectionSpeechThreshold = 2000; params.machineDetectionSpeechEndThreshold = 1000; params.machineDetectionSilenceTimeout = 3000; }
       const call = await client.calls.create(params);
       await db.from('dialer_calls').insert({ session_id: sessionId, agent_id: me.id, call_sid: call.sid, phone, lead_name: lead.name || lp.full_name || null, lead_state: state || null, from_number: from, status: 'queued' });
       await db.from('lead_pool').upsert({ phone, agent_id: lp.agent_id || me.id, full_name: lp.full_name || lead.name || null, state: lp.state || state || null, attempts: (lp.attempts || 0) + 1, last_attempt_at: new Date().toISOString(), tz: L.tzFor(phone, state) }, { onConflict: 'phone' });
