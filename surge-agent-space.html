@@ -2032,7 +2032,9 @@ async function dlPollCalls(){
     if(c.status==='bridged'&&!DL.live){DL.live={sid:c.call_sid,phone:c.phone,lead:f.lead,name:f.name,state:f.state,started:c.bridged_at?new Date(c.bridged_at).getTime():now};DL.stats.contacts++;dlShowLive();}
     if(c.ended_at||['completed','no-answer','busy','failed','canceled','voicemail','abandoned'].indexOf(c.status)>=0){
       delete DL.inflight[c.call_sid];
-      if(DL.live&&DL.live.sid===c.call_sid){var talk=c.talk_sec||Math.round((now-DL.live.started)/1000);DL.stats.talk+=talk;DL.awaiting={sid:c.call_sid,phone:c.phone,lead:f.lead,name:f.name,state:f.state,talk:talk,recording_sid:c.recording_sid};DL.live=null;dlStopTimer();dlShowDispo();}
+      if(DL.live&&DL.live.sid===c.call_sid){var talk=c.talk_sec||Math.round((now-DL.live.started)/1000);DL.live=null;dlStopTimer();
+        if(c.status==='voicemail'||c.status==='abandoned'||(c.answered_by&&/machine|fax/.test(c.answered_by))||talk<3){DL.stats.contacts=Math.max(0,DL.stats.contacts-1);dlEl('dl-card').classList.remove('live');dlEl('dl-card-body').innerHTML='<div style="color:var(--muted);font-size:0.78rem;padding:1.5rem 0;text-align:center">'+(c.status==='voicemail'?'Voicemail — skipped.':'Dropped — moving on.')+'</div>';dlAutoDispo(c,f);}
+        else{DL.stats.talk+=talk;DL.awaiting={sid:c.call_sid,phone:c.phone,lead:f.lead,name:f.name,state:f.state,talk:talk,recording_sid:c.recording_sid};dlShowDispo();}}
       else dlAutoDispo(c,f);
     }
   });
