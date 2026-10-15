@@ -2061,8 +2061,8 @@ async function dlDialBatch(){
 }
 async function dlPollCalls(){
   if(!DL.session)return;var sids=Object.keys(DL.inflight);if(!sids.length&&!DL.live)return;
-  // Watchdog: a leg that never left dialing/ringing after 50s is stuck at Twilio — kill it and requeue the lead
-  var nowT=Date.now(),stuck=sids.filter(function(k){var f=DL.inflight[k];return (f.status==='queued'||f.status==='ringing')&&f.placedAt&&nowT-f.placedAt>50000;});
+  // Watchdog: a leg that never left dialing/ringing after 35s is stuck at Twilio — kill it and requeue the lead
+  var nowT=Date.now(),stuck=sids.filter(function(k){var f=DL.inflight[k];return (f.status==='queued'||f.status==='ringing')&&f.placedAt&&nowT-f.placedAt>35000;});
   if(stuck.length){stuck.forEach(function(k){var f=DL.inflight[k];delete DL.inflight[k];var lead=Object.assign({},f.lead||{},{phone:f.phone,full_name:f.name||(f.lead&&f.lead.full_name),state:f.state});if(!DL.queue.some(function(x){return x.phone===f.phone;}))DL.queue.unshift(lead);});dlRenderQueue();dlToast(stuck.length+' stuck line'+(stuck.length===1?'':'s')+' reset');
     try{for(var si=0;si<stuck.length;si++){await dlApi('dialer-hangup',{sessionId:DL.session.id,callSid:stuck[si]});}await sb.from('dialer_calls').update({status:'failed',ended_at:new Date().toISOString()}).in('call_sid',stuck).is('ended_at',null);}catch(e){}
     sids=Object.keys(DL.inflight);}
