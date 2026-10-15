@@ -19,11 +19,28 @@ exports.handler = async (event) => {
   if (!verify(raw, sig, process.env.STRIPE_WEBHOOK_SECRET)) return { statusCode: 400, body: 'bad signature' };
 
   const evt = JSON.parse(raw);
+  const sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
+
+  // ---- Surge Dialer subscriptions ----
+  if (/^customer\.subscription\.(created|updated|deleted|paused|resumed)$/.test(evt.type)) {
+    const sub = evt.data.object;
+    if (sub.metadata && sub.metadata.kind === 'dialer' && sub.metadata.user_id) { const L = require('../lib/dialer'); await L.applySubscription(sb, sub.metadata.user_id, sub); return { statusCode: 200, body: 'dialer sub ' + sub.status }; }
+    return { statusCode: 200, body: 'ignored' };
+  }
+  if (evt.type === 'invoice.payment_failed' || evt.type === 'invoice.paid') {
+    const inv = evt.data.object; const subId = typeof inv.subscription === 'string' ? inv.subscription : (inv.subscription && inv.subscription.id);
+    if (subId && process.env.STRIPE_SECRET_KEY) { try { const L = require('../lib/dialer'); const sub = await L.stripe('GET', '/subscriptions/' + subId); if (sub.metadata && sub.metadata.kind === 'dialer' && sub.metadata.user_id) await L.applySubscription(sb, sub.metadata.user_id, sub); } catch (e) { } }
+    return { statusCode: 200, body: 'ok' };
+  }
+
   if (!['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(evt.type)) return { statusCode: 200, body: 'ignored' };
   const s = evt.data.object;
+  if (s.mode === 'subscription' && s.metadata && s.metadata.kind === 'dialer') {
+    const L = require('../lib/dialer'); const userId = s.metadata.user_id || s.client_reference_id;
+    if (userId && s.subscription) { try { const sub = await L.stripe('GET', '/subscriptions/' + (typeof s.subscription === 'string' ? s.subscription : s.subscription.id)); await L.applySubscription(sb, userId, sub); } catch (e) { return { statusCode: 500, body: e.message }; } }
+    return { statusCode: 200, body: 'dialer checkout' };
+  }
   if (s.payment_status !== 'paid') return { statusCode: 200, body: 'not paid yet' };
-
-  const sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
   const lines = Object.keys(s.metadata || {}).filter(k => /^i\d+$/.test(k)).sort((a, b) => a.slice(1) - b.slice(1))
     .map(k => { const [id, color, size, qty, unit] = s.metadata[k].split('|'); return { id, color, size, qty: +qty, price_cents: +unit }; });
   const ids = [...new Set(lines.map(l => l.id))];
