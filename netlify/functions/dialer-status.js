@@ -38,7 +38,9 @@ exports.handler = async (event) => {
   // kind === 'call'
   const callSid = p.get('CallSid'), st = p.get('CallStatus');
   if (!callSid) return L.json(200, {});
-  const { data: c } = await db.from('dialer_calls').select('id,status,bridged_at,answered_by,session_id,phone').eq('call_sid', callSid).maybeSingle();
+  // Twilio can report an instant failure (e.g. concurrency limit) before our insert lands — retry the lookup briefly.
+  let c = null;
+  for (let tries = 0; tries < 4 && !c; tries++) { const r = await db.from('dialer_calls').select('id,status,bridged_at,answered_by,session_id,phone').eq('call_sid', callSid).maybeSingle(); c = r.data; if (!c) await new Promise(res => setTimeout(res, 1200)); }
   if (!c) return L.json(200, {});
   const upd = {};
   if (st === 'ringing' && c.status === 'queued') upd.status = 'ringing';
