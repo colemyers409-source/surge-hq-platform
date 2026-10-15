@@ -27,7 +27,7 @@ exports.handler = async (event) => {
   ]);
   const dncSet = new Set((dnc || []).map(x => x.phone)); const poolBy = {}; (pool || []).forEach(x => { poolBy[x.phone] = x; });
   const dayAgo = Date.now() - 24 * 3600 * 1000;
-  const { data: recent } = await db.from('dialer_calls').select('phone,started_at').in('phone', phones).gte('started_at', new Date(dayAgo).toISOString());
+  const { data: recent } = await db.from('dialer_calls').select('phone,started_at').in('phone', phones).gte('started_at', new Date(dayAgo).toISOString()).neq('status', 'canceled');
   const attemptsToday = {}; (recent || []).forEach(c => { attemptsToday[c.phone] = (attemptsToday[c.phone] || 0) + 1; });
 
   for (const lead of leads) {
@@ -58,7 +58,7 @@ exports.handler = async (event) => {
       if (cfg.amd_enabled !== false) { params.machineDetection = 'Enable'; params.machineDetectionTimeout = 5; params.machineDetectionSpeechThreshold = 2000; params.machineDetectionSpeechEndThreshold = 1000; params.machineDetectionSilenceTimeout = 3000; }
       const call = await client.calls.create(params);
       await db.from('dialer_calls').insert({ session_id: sessionId, agent_id: me.id, call_sid: call.sid, phone, lead_name: lead.name || lp.full_name || null, lead_state: state || null, from_number: from, status: 'queued' });
-      await db.from('lead_pool').upsert({ phone, agent_id: lp.agent_id || me.id, full_name: lp.full_name || lead.name || null, state: lp.state || state || null, attempts: (lp.attempts || 0) + 1, last_attempt_at: new Date().toISOString(), tz: L.tzFor(phone, state) }, { onConflict: 'phone' });
+      await db.from('lead_pool').upsert({ phone, agent_id: lp.agent_id || me.id, full_name: lp.full_name || lead.name || null, state: lp.state || state || null, tz: L.tzFor(phone, state) }, { onConflict: 'phone' });
       placed.push({ phone, callSid: call.sid, name: lead.name || lp.full_name || null, state, from });
     } catch (e) { skipped.push({ phone, reason: 'twilio: ' + e.message }); }
   }
