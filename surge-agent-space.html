@@ -954,13 +954,13 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 <div class="table-section"><div class="table-header"><div class="table-title">All Deals</div><span style="font-size:0.65rem;color:var(--muted)" id="ag-deals-count"></span></div><div class="ag-toolbar"><div class="ag-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16" y2="16"/></svg><input id="ag-search" type="search" placeholder="Search by client name, phone, or email…" autocomplete="off" oninput="AG_PAGE=1;renderAgDeals()"></div><select class="calc-select" id="ag-status" style="width:auto;padding:0.45rem 0.6rem;font-size:0.75rem" onchange="AG_PAGE=1;renderAgDeals()"><option value="">All statuses</option><option>Pending</option><option>Active</option><option>Declined</option><option>Cancelled</option></select><select class="calc-select" id="ag-per" style="width:auto;padding:0.45rem 0.6rem;font-size:0.75rem" onchange="AG_PER=+this.value;AG_PAGE=1;renderAgDeals()"><option value="10">Show 10</option><option value="25">Show 25</option><option value="50">Show 50</option><option value="100">Show 100</option></select><span style="font-size:0.65rem;color:var(--muted)">Click a deal to view details</span></div><table><thead><tr><th>Date</th><th>Agent</th><th>Client</th><th>Product</th><th>Premium</th><th>Status</th></tr></thead><tbody id="ag-deals-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr></tbody></table><div class="ag-pager" id="ag-pager"></div></div>
 </div></div>
 <div class="page" id="page-leads"><div class="comm-wrap">
-<div class="page-header"><div class="page-title">Lead <em>Distribution</em></div><div class="page-sub">Upload the planetaltig export, preview the split, and download one Mojo-ready CSV per agent. States come from My Licenses. No lead is ever given out twice, and a lead is pulled the moment an agent logs a deal on it. Owner only.</div></div>
+<div class="page-header"><div class="page-title">Lead <em>Distribution</em></div><div class="page-sub">Upload a lead CSV (planetaltig export or any vendor file with a phone column), preview the split, and download one Mojo-ready CSV per agent. States come from My Licenses. No lead is ever given out twice, and a lead is pulled the moment an agent logs a deal on it. Owner only.</div></div>
 <div class="lb-controls"><div class="lb-seg"><button class="ld-tab-btn active" data-t="new" onclick="ldTab('new')">New Batch</button><button class="ld-tab-btn" data-t="rotation" onclick="ldTab('rotation')">Rotation</button><button class="ld-tab-btn" data-t="swap" onclick="ldTab('swap')">Swap Leads</button><button class="ld-tab-btn" data-t="totals" onclick="ldTab('totals')">Totals</button></div></div>
 
 <div class="ld-pane" id="ld-pane-new">
-  <div class="table-section"><div class="table-header"><div class="table-title">1 · Upload the export</div><span style="font-size:0.65rem;color:var(--muted)">The CSV you download from planetaltig</span></div>
+  <div class="table-section"><div class="table-header"><div class="table-title">1 · Upload the export</div><span style="font-size:0.65rem;color:var(--muted)">planetaltig export, or any CSV with a phone column</span></div>
     <div class="ld-pad">
-      <label class="ld-drop" id="ld-drop" for="ld-file"><input type="file" id="ld-file" accept=".csv,text/csv" onchange="ldLoadFile(this.files[0])"><span id="ld-drop-text">Tap to choose the planetaltig CSV, or drop it here</span></label>
+      <label class="ld-drop" id="ld-drop" for="ld-file"><input type="file" id="ld-file" accept=".csv,text/csv" onchange="ldLoadFile(this.files[0])"><span id="ld-drop-text">Tap to choose a CSV (planetaltig, NextWave, GOAT, any vendor), or drop it here</span></label>
       <div class="ld-opts">
         <label class="ld-check"><input type="checkbox" id="ld-held" checked onchange="ldPreview()"> Also hand out held leads (leads from past uploads nobody could take yet)</label>
         <label class="ld-inline">Agent files <select class="calc-select" id="ld-filemode"><option value="full" selected>Full pack (replace their list in Mojo)</option><option value="new">New leads only (add to their list)</option></select></label>
@@ -2265,10 +2265,34 @@ function ldStatesOf(id){var s=new Set(LD.lic[id]||[]);var r=ldRotOf(id);if(r.use
 function ldActiveAgents(){return LD.agents.filter(function(a){var r=ldRotOf(a.id);return r.in_rotation&&ldStatesOf(a.id).size>0;});}
 
 // ---------- parse planetaltig export ----------
+
+// Any CSV with a phone column: NextWave, GOAT, FEX vendors, Mojo exports, a hand-made sheet.
+function ldParseGeneric(res){
+  var rows=res.data,fields=(res.meta&&res.meta.fields)||[];
+  var hdr=fields.map(function(f){return String(f||'').toLowerCase().trim();});
+  var find=function(names){for(var i=0;i<names.length;i++){var k=hdr.indexOf(names[i]);if(k>=0)return fields[k];}for(var i=0;i<names.length;i++){var k=hdr.findIndex(function(h){return h.indexOf(names[i])>=0;});if(k>=0)return fields[k];}return null;};
+  var phoneCols=fields.filter(function(f,i){return /phone|mobile|cell|telephone/.test(hdr[i])&&!/combo/.test(hdr[i]);}).sort(function(a,b){var r=function(h){h=h.toLowerCase();return /cell|mobile/.test(h)?0:(/recent/.test(h)?2:1);};return r(a)-r(b);});
+  if(!phoneCols.length)phoneCols=fields.filter(function(f,i){return /phone|mobile|cell|number/.test(hdr[i]);});
+  var cPhone=phoneCols[0];
+  if(!cPhone)throw new Error("Couldn't find a phone column. The CSV needs a header like Phone, Mobile or Cell (plus Name/First/Last, State, City, Zip, Email if you have them).");
+  var cName=find(['full name','full_name','name','contact','lead name']),cFirst=find(['first name','first_name','firstname','first','fname']),cLast=find(['last name','last_name','lastname','last','lname']);
+  var cState=find(['state','st','province','region']),cCity=find(['city','town']),cZip=find(['zip','zip code','zipcode','postal','postal code']),cEmail=find(['email','e-mail','email address']);
+  var out=[],seen=new Set(),dupes=0,details=0,noPhone=0;
+  for(var i=0;i<rows.length;i++){var r=rows[i];details++;
+    var phone='';for(var pc=0;pc<phoneCols.length&&!phone;pc++)phone=ldPhone10(r[phoneCols[pc]]);if(!phone){noPhone++;continue;}
+    if(seen.has(phone)){dupes++;continue;}seen.add(phone);
+    var nm=cFirst&&r[cFirst]?[r[cFirst],cLast?r[cLast]:''].filter(Boolean).join(' '):(cName?r[cName]:'');nm=String(nm||'').trim();if(nm.indexOf(',')>-1&&!cFirst){var parts=nm.split(',');nm=parts.slice(1).join(' ')+' '+parts[0];}
+    var st=String(cState?r[cState]||'':'').trim();if(st.length>2)st=LD_STATE_CODES[st.toLowerCase()]||'';st=st.toUpperCase();if(!LD_CODES.has(st))st='';
+    var zip=String(cZip?r[cZip]||'':'').trim().match(/\d{5}/);zip=zip?zip[0]:'';
+    var em=String(cEmail?r[cEmail]||'':'').trim();if(em.indexOf('@')<0)em='';
+    out.push({phone:phone,full_name:ldTitle(nm),email:em,city:ldTitle(String(cCity?r[cCity]||'':'').trim()),state:st,zip:zip});
+  }
+  return {leads:out,details:details,dupes:dupes,noPhone:noPhone,generic:true};
+}
 function ldParseExport(res){
   var rows=res.data,fields=(res.meta&&res.meta.fields)||[];
   var cols=fields.filter(function(f){return /^row-fluid( \d+)?$/.test(f)||f==='cursor-pointer';});
-  if(!cols.length||!fields.includes('row-fluid'))throw new Error("This doesn't look like a planetaltig lead export. Download it again from the lead inbox and try that file.");
+  if(!cols.length||!fields.includes('row-fluid'))return ldParseGeneric(res);
   var labels=new Set(['Name:','Phone no:','Group:','DOB :','Email:','Preferred Language:','Address:','Pre-Call Letter:','New Address:','Appointment Status:','Current Time:']);
   var out=[],seen=new Set(),dupes=0,details=0,noPhone=0;
   for(var i=0;i<rows.length;i++){var r=rows[i];if(r['row-fluid']!=='Name:')continue;details++;
