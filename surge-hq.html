@@ -78,7 +78,7 @@ nav {
 .platform-title { font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; font-weight: 300; text-align: center; margin-bottom: 0.5rem; }
 .platform-title em { font-style: italic; color: var(--gold); }
 .platform-sub { font-size: 0.78rem; color: var(--muted); text-align: center; max-width: 480px; margin: 0 auto 3rem; line-height: 1.8; font-weight: 300; }
-.platform-grid { display: grid; grid-template-columns: minmax(300px, 460px); justify-content: center; gap: 1.5rem; }
+.platform-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 460px)); justify-content: center; gap: 1.5rem; }
 .platform-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 2rem; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; text-decoration: none; display: block; }
 .platform-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gold); transform: scaleX(0); transition: transform 0.3s; }
 .platform-card:hover { border-color: var(--gold-b); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
@@ -97,6 +97,20 @@ nav {
 .platform-card .card-title { color: var(--text); }
 .platform-card .card-desc { color: var(--muted); }
 .platform-card .card-feature { color: var(--muted); }
+
+.price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 320px)); justify-content: center; gap: 1.5rem; }
+.price-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 2.2rem 1.8rem 1.8rem; position: relative; text-align: center; transition: all .3s; }
+.price-card:hover { border-color: var(--gold-b); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+.price-card.hot { border-color: var(--gold); box-shadow: 0 0 40px rgba(168,152,80,0.12); }
+.price-tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--gold); color: #000; font-size: 0.52rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; padding: 0.3rem 0.8rem; border-radius: 100px; }
+.price-lines { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.6rem; }
+.price-amt { font-family: 'Cormorant Garamond', serif; font-size: 3.2rem; font-weight: 400; line-height: 1; color: var(--text); }
+.price-amt small { font-family: 'Montserrat', sans-serif; font-size: 0.7rem; color: var(--muted); font-weight: 500; }
+.price-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.7; font-weight: 300; margin: 0.9rem 0 1.2rem; }
+.price-list { list-style: none; padding: 1rem 0 0; margin: 0 0 1.4rem; border-top: 1px solid var(--border); text-align: left; }
+.price-list li { font-size: 0.65rem; color: var(--muted); padding: 0.2rem 0; display: flex; align-items: center; gap: 0.5rem; }
+.price-list li::before { content: '—'; color: var(--gold); font-size: 0.7rem; }
+.price-btn { display: inline-block; width: 100%; padding: 0.85rem 1rem; }
 a { color: inherit; text-decoration: none; }
 a:visited { color: inherit; }
 .card-arrow { position: absolute; bottom: 1.5rem; right: 1.5rem; font-size: 0.65rem; color: var(--gold); opacity: 0; transition: opacity 0.2s; }
@@ -262,6 +276,7 @@ nav.scrolled { padding:.6rem 3rem; background:rgba(5,5,5,0.97); border-bottom-co
   </div>
   <div class="platform-links">
     <a class="platform-link-pill" href="#" onclick="goToAgentSpace();return false;">🏠 Agent Space</a>
+    <a class="platform-link-pill" href="#" onclick="goToDialer();return false;">📞 Surge Dialer</a>
 
   </div>
 </div>
@@ -291,6 +306,29 @@ nav.scrolled { padding:.6rem 3rem; background:rgba(5,5,5,0.97); border-bottom-co
       </div>
       <div class="card-arrow">→</div>
     </a>
+    <a class="platform-card" href="#" onclick="goToDialer();return false;">
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/><path d="M15 3a6 6 0 0 1 6 6"/><path d="M15 7a2 2 0 0 1 2 2"/></svg></div>
+      <div class="card-tag">Surge Dialer</div>
+      <div class="card-title">Multi-Line <em>Power Dialer</em></div>
+      <div class="card-desc">Dial up to 5 leads at once from your browser. First person to pick up is bridged straight to you. No app, no extra login — it lives inside Agent Space.</div>
+      <div class="card-features">
+        <div class="card-feature">1, 3 or 5 lines — from $80/mo</div>
+        <div class="card-feature">Your lead pack is the call list</div>
+        <div class="card-feature">Recording, callbacks, one-tap dispo</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+  </div>
+</div>
+
+<div class="platform-section" id="dialer-pricing">
+  <div class="platform-label">Surge Dialer Pricing</div>
+  <h2 class="platform-title">Pick Your <em>Speed</em></h2>
+  <p class="platform-sub">Billed monthly, cancel anytime. Every plan includes call recording, callbacks, one-tap dispositions, and the live team board. Subscribe inside Agent Space → Power Dialer.</p>
+  <div class="price-grid">
+    <div class="price-card"><div class="price-lines">1 Line</div><div class="price-amt">$80<small>/mo</small></div><div class="price-desc">One call at a time. Built for working callbacks, appointments, and warm leads.</div><ul class="price-list"><li>Click-to-dial from your pack</li><li>Recording &amp; notes</li><li>Callbacks → Appointments</li></ul><a class="btn-primary price-btn" href="#" onclick="goToDialer();return false;">Start Dialing</a></div>
+    <div class="price-card hot"><span class="price-tag">Most Popular</span><div class="price-lines">3 Lines</div><div class="price-amt">$120<small>/mo</small></div><div class="price-desc">Three numbers ring at once, first pickup wins. Roughly triple the conversations per hour.</div><ul class="price-list"><li>Everything in 1 Line</li><li>3 simultaneous lines</li><li>Voicemail skip</li></ul><a class="btn-primary price-btn" href="#" onclick="goToDialer();return false;">Start Dialing</a></div>
+    <div class="price-card"><div class="price-lines">5 Lines</div><div class="price-amt">$150<small>/mo</small></div><div class="price-desc">Maximum speed for cold packs and big drops. For agents who live on the phone.</div><ul class="price-list"><li>Everything in 3 Lines</li><li>5 simultaneous lines</li><li>Priority on the live board</li></ul><a class="btn-primary price-btn" href="#" onclick="goToDialer();return false;">Start Dialing</a></div>
   </div>
 </div>
 
@@ -298,6 +336,7 @@ nav.scrolled { padding:.6rem 3rem; background:rgba(5,5,5,0.97); border-bottom-co
   <div class="footer-logo"><span class="wordmark"><span class="s">S</span>urge Partners</span></div>
   <div class="footer-links">
     <a class="footer-link" href="/agent">Agent Space</a>
+    <a class="footer-link" href="#dialer-pricing">Surge Dialer</a>
   </div>
   <div class="footer-copy">© 2026 Surge Partners · Fayetteville, AR</div>
 </footer>
@@ -457,6 +496,11 @@ function storeSession(session) {
   }
 }
 
+function goToDialer() {
+  const access = localStorage.getItem('surge_access_token'), refresh = localStorage.getItem('surge_refresh_token');
+  if (access && refresh) { window.location.href = '/agent?page=dialer'; return; }
+  const b = document.getElementById('hero-login-btn'); if (b) b.click(); else window.location.href = '/';
+}
 function goToAgentSpace() {
   const access = localStorage.getItem('surge_access_token');
   const refresh = localStorage.getItem('surge_refresh_token');

@@ -565,6 +565,21 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 .dl-mic{font-size:0.66rem;color:var(--muted);margin-left:0.25rem}
 .dl-help{font-size:0.7rem;color:var(--muted);line-height:1.55;padding:0.9rem 1rem}
 .dl-help b{color:var(--text)}
+.dl-pay{background:var(--bg2);border:1px solid var(--gold-b);border-radius:8px;padding:1.6rem 1.5rem;margin-bottom:1.25rem;text-align:center}
+.dl-pay h3{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:600;color:var(--text);margin:0 0 0.3rem}
+.dl-pay p{font-size:0.78rem;color:var(--muted);max-width:560px;margin:0 auto 1.2rem;line-height:1.5}
+.dl-plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:0.9rem;max-width:720px;margin:0 auto}
+.dl-plan{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1.2rem 1rem;position:relative}
+.dl-plan.hot{border-color:var(--gold)}
+.dl-plan .tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;font-size:0.52rem;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;padding:3px 9px;border-radius:999px}
+.dl-plan .ln{font-size:0.58rem;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--faint)}
+.dl-plan .pr{font-size:2rem;font-weight:800;color:var(--gold);line-height:1.1;margin:0.35rem 0}.dl-plan .pr small{font-size:0.7rem;color:var(--muted);font-weight:600}
+.dl-plan ul{list-style:none;padding:0;margin:0.6rem 0 0.9rem;font-size:0.7rem;color:var(--muted);line-height:1.7}
+.dl-plan .calc-btn{width:100%}
+.dl-sub-pill{display:inline-flex;align-items:center;gap:6px;font-size:0.62rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+.dl-sub-pill.on{color:var(--green);border-color:rgba(39,174,96,0.4)}
+.dl-sw{position:relative;display:inline-block;width:34px;height:18px;vertical-align:middle}.dl-sw input{opacity:0;width:0;height:0}.dl-sw i{position:absolute;inset:0;background:var(--bg3);border:1px solid var(--border);border-radius:999px;cursor:pointer;transition:.2s}.dl-sw i:before{content:"";position:absolute;width:12px;height:12px;left:2px;top:2px;background:var(--muted);border-radius:50%;transition:.2s}.dl-sw input:checked+i{background:rgba(168,152,80,0.25);border-color:var(--gold)}.dl-sw input:checked+i:before{transform:translateX(16px);background:var(--gold)}
+
 
 </style>
 </head>
@@ -1074,10 +1089,12 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 
 <!-- ========== DIAL ========== -->
 <div class="dl-pane active" id="dl-pane-dial">
+  <div id="dl-paywall" style="display:none"></div>
+  <div id="dl-dial-body">
   <div class="dl-bar">
     <span class="dl-pill" id="dl-pill"><i></i><span id="dl-pill-txt">Offline</span></span>
     <span style="font-size:0.62rem;color:var(--muted);font-weight:700;letter-spacing:0.1em">LINES</span>
-    <div class="dl-lines-seg" id="dl-lines-seg"><button data-n="1" onclick="dlSetLines(1)">1</button><button data-n="2" class="active" onclick="dlSetLines(2)">2</button><button data-n="3" onclick="dlSetLines(3)">3</button></div>
+    <div class="dl-lines-seg" id="dl-lines-seg"><button data-n="1" onclick="dlSetLines(1)">1</button><button data-n="2" class="active" onclick="dlSetLines(2)">2</button><button data-n="3" onclick="dlSetLines(3)">3</button><button data-n="4" onclick="dlSetLines(4)">4</button><button data-n="5" onclick="dlSetLines(5)">5</button></div><span class="dl-sub-pill" id="dl-plan-pill" style="display:none"></span>
     <span class="dl-mic" id="dl-mic"></span>
     <button class="dl-go" id="dl-go" onclick="dlGo()">Start Dialing</button>
   </div>
@@ -1092,7 +1109,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
           <div class="dl-dispo" id="dl-dispo"></div>
           <textarea class="dl-notes" id="dl-notes" placeholder="Notes for this lead (saved to the lead, visible next time anyone pulls it up)"></textarea>
           <div id="dl-cb-row" style="display:none;margin-top:0.6rem;display:none;gap:0.5rem;align-items:center;flex-wrap:wrap"><span style="font-size:0.66rem;color:var(--muted)">Call back at</span><input type="datetime-local" class="calc-input" id="dl-cb-at" style="width:auto"></div>
-          <div style="display:flex;gap:0.6rem;margin-top:0.8rem;align-items:center;flex-wrap:wrap"><button class="dl-btn gold" id="dl-save-dispo" onclick="dlSaveDispo()">Save &amp; Next</button><span id="dl-dispo-msg" class="ld-msg"></span></div>
+          <div style="display:flex;gap:0.6rem;margin-top:0.8rem;align-items:center;flex-wrap:wrap"><button class="dl-btn gold" id="dl-save-dispo" onclick="dlSaveDispo()">Save &amp; Next</button><button class="dl-btn" onclick="dlRedial()">↻ Redial</button><span id="dl-dispo-msg" class="ld-msg"></span></div>
         </div>
       </div>
 
@@ -1126,7 +1143,11 @@ tr:hover td { background: rgba(255,255,255,0.01); }
       <div class="table-section" id="dl-upload-card"><div class="table-header"><div class="table-title">Upload a List</div><span style="font-size:0.65rem;color:var(--muted)">CSV with name + phone</span></div>
         <div style="padding:0.9rem 1rem;display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap"><input type="file" id="dl-csv" accept=".csv,text/csv" style="font-size:0.72rem;color:var(--muted)"><button class="dl-btn" onclick="dlUploadCsv()">Add to my pack</button><span class="ld-msg" id="dl-csv-msg"></span></div>
       </div>
+      <div class="table-section" id="dl-billing-card" style="display:none"><div class="table-header"><div class="table-title">My Subscription</div><span class="dl-sub-pill on" id="dl-billing-pill"></span></div>
+        <div style="padding:0.9rem 1rem;display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap"><span style="font-size:0.72rem;color:var(--muted)" id="dl-billing-sub"></span><button class="dl-btn" onclick="dlPortal()">Manage / change plan</button></div>
+      </div>
     </div>
+  </div>
   </div>
 </div>
 
@@ -1155,6 +1176,10 @@ tr:hover td { background: rgba(255,255,255,0.01); }
   <div class="table-section"><div class="table-header"><div class="table-title">Recent Calls</div></div>
     <table><thead><tr><th>When</th><th>Agent</th><th>Lead</th><th>Phone</th><th>Result</th><th>Talk</th><th>Dispo</th><th>Rec</th></tr></thead><tbody id="dl-board-calls"></tbody></table>
   </div>
+  <div class="table-section"><div class="table-header"><div class="table-title">Subscriptions</div><div style="display:flex;gap:0.6rem;align-items:center"><span style="font-size:0.65rem;color:var(--muted)" id="dl-subs-sum"></span><button class="calc-btn" onclick="dlLoadSubs()">Refresh</button></div></div>
+    <div class="dl-help">Agents pay monthly by card inside Agent Space and are locked out of the dialer until they do. <b>Comp</b> gives someone free access (you, trainers, a trial week) — flip it off to lock them again. If a payment shows in Stripe but an agent is still locked, hit <b>sync</b>.</div>
+    <table><thead><tr><th>Agent</th><th>Plan</th><th>Status</th><th>Renews</th><th>Comp</th><th></th></tr></thead><tbody id="dl-subs-body"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Loading…</td></tr></tbody></table>
+  </div>
 </div>
 
 <!-- ========== NUMBERS (owner) ========== -->
@@ -1179,12 +1204,15 @@ tr:hover td { background: rgba(255,255,255,0.01); }
     <div class="dl-cfg">
       <div class="calc-field"><label class="calc-label">Business name (caller ID / messages)</label><input class="calc-input" id="dc-business_name"></div>
       <div class="calc-field"><label class="calc-label">Callback number</label><input class="calc-input" id="dc-callback_number" placeholder="+1479…"></div>
-      <div class="calc-field"><label class="calc-label">Max lines per agent</label><select class="calc-select" id="dc-max_lines"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+      <div class="calc-field"><label class="calc-label">Max lines per agent</label><select class="calc-select" id="dc-max_lines"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
       <div class="calc-field"><label class="calc-label">Calling hours (lead's local time)</label><div style="display:flex;gap:6px;align-items:center"><select class="calc-select" id="dc-hours_start"></select><span style="color:var(--muted);font-size:0.7rem">to</span><select class="calc-select" id="dc-hours_end"></select></div></div>
       <div class="calc-field"><label class="calc-label">Max attempts per lead / 24h</label><select class="calc-select" id="dc-max_attempts_day"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
       <div class="calc-field"><label class="calc-label">Calls per number per day</label><input class="calc-input" type="number" id="dc-calls_per_number_day" min="10" max="500"></div>
       <div class="calc-field"><label class="calc-label">Record calls</label><select class="calc-select" id="dc-record_calls"><option value="true">Yes (dual channel)</option><option value="false">No</option></select></div>
-      <div class="calc-field"><label class="calc-label">Answering machine detection</label><select class="calc-select" id="dc-amd_enabled"><option value="true">On</option><option value="false">Off</option></select></div>
+      <div class="calc-field"><label class="calc-label">Answering machine detection</label><select class="calc-select" id="dc-amd_enabled"><option value="true">On (soft — voicemails wait 3s so humans win)</option><option value="false">Off</option></select></div>
+      <div class="calc-field"><label class="calc-label">Plan price — 1 line ($/mo)</label><input class="calc-input" type="number" id="dc-plan_1_price" min="0" step="1"></div>
+      <div class="calc-field"><label class="calc-label">Plan price — 3 lines ($/mo)</label><input class="calc-input" type="number" id="dc-plan_3_price" min="0" step="1"></div>
+      <div class="calc-field"><label class="calc-label">Plan price — 5 lines ($/mo)</label><input class="calc-input" type="number" id="dc-plan_5_price" min="0" step="1"></div>
       <div class="calc-field wide"><label class="calc-label">Abandoned-call message (played when two people answer at once)</label><input class="calc-input" id="dc-abandon_message"></div>
       <div class="calc-field wide"><div style="display:flex;gap:0.6rem;align-items:center"><button class="calc-btn" onclick="dlSaveConfig()">Save Rules</button><span class="ld-msg" id="dc-msg"></span></div></div>
     </div>
@@ -1915,18 +1943,23 @@ function dlFmtDur(s){s=Math.max(0,Math.round(s||0));var m=Math.floor(s/60);retur
 function dlFmtClock(s){s=Math.max(0,Math.round(s||0));return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
 function dlAgo(ts){var s=(Date.now()-new Date(ts).getTime())/1000;if(s<60)return Math.round(s)+'s';if(s<3600)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return new Date(ts).toLocaleDateString();}
 function dlWhen(ts){var d=new Date(ts);return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
-async function dlApi(name,body,method){var sess=await sb.auth.getSession();var tok=sess&&sess.data&&sess.data.session?sess.data.session.access_token:'';var r=await fetch('/.netlify/functions/'+name,{method:method||'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},body:method==='GET'?undefined:JSON.stringify(body||{})});var j=null;try{j=await r.json();}catch(e){}if(!r.ok)throw new Error((j&&j.error)||('HTTP '+r.status));return j;}
+async function dlApi(name,body,method){var sess=await sb.auth.getSession();var tok=sess&&sess.data&&sess.data.session?sess.data.session.access_token:'';var r=await fetch('/.netlify/functions/'+name,{method:method||'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},body:method==='GET'?undefined:JSON.stringify(body||{})});var j=null;try{j=await r.json();}catch(e){}if(r.status===402&&j&&j.paywall){DL.ent=Object.assign(DL.ent||{},{entitled:false,status:j.status||null});dlRenderPaywall();}if(!r.ok)throw new Error((j&&j.error)||('HTTP '+r.status));return j;}
 function dlToast(m){ctToast(m);}
 function dlPill(cls,txt){var p=dlEl('dl-pill');p.className='dl-pill '+(cls||'');dlEl('dl-pill-txt').textContent=txt;}
 function dlTab(t){DL.tab=t;document.querySelectorAll('#dl-tabs button').forEach(function(b){b.classList.toggle('active',b.dataset.t===t);});document.querySelectorAll('.dl-pane').forEach(function(p){p.classList.toggle('active',p.id==='dl-pane-'+t);});
-  if(t==='log')dlLoadLog();if(t==='board')dlBoard(true);else dlBoardStop();if(t==='numbers')dlLoadNumbers();if(t==='compliance')dlLoadCompliance();}
+  if(t==='log')dlLoadLog();if(t==='board'){dlBoard(true);dlLoadSubs();}else dlBoardStop();if(t==='numbers')dlLoadNumbers();if(t==='compliance')dlLoadCompliance();}
 function dlBoardStop(){if(DL.boardTimer){clearInterval(DL.boardTimer);DL.boardTimer=null;}}
 
 async function loadDialer(){
   if(!sb||!currentUserId)return;
   if(isOwner())document.querySelectorAll('#dl-tabs button').forEach(function(b){b.style.display='';});
   try{var c=await sb.from('dialer_config').select('*').eq('id',1).maybeSingle();DL.cfg=c.data||{};}catch(e){DL.cfg={};}
-  var max=Math.max(1,Math.min(4,DL.cfg.max_lines||3));document.querySelectorAll('#dl-lines-seg button').forEach(function(b){b.style.display=Number(b.dataset.n)<=max?'':'none';});if(DL.lines>max)dlSetLines(max);
+  try{var st=await dlApi('dialer-subscribe',{action:'status'});DL.ent=st;}catch(e){DL.ent={entitled:isOwner(),lines:isOwner()?5:0,prices:{1:80,3:120,5:150},err:e.message};}
+  var q=new URLSearchParams(location.search);if(q.get('sub')==='ok'&&!DL.ent.entitled){dlToast('Payment received — unlocking…');for(var i=0;i<6&&!DL.ent.entitled;i++){await new Promise(function(r){setTimeout(r,2500);});try{DL.ent=await dlApi('dialer-subscribe',{action:'status'});}catch(e){}}}
+  if(q.get('sub'))history.replaceState({},'',location.pathname+'?page=dialer');
+  dlRenderPaywall();
+  var max=Math.max(1,Math.min(5,DL.cfg.max_lines||3,DL.ent.lines||5));document.querySelectorAll('#dl-lines-seg button').forEach(function(b){b.style.display=Number(b.dataset.n)<=max?'':'none';});if(DL.lines>max)dlSetLines(max);
+  var pp=dlEl('dl-plan-pill');if(pp){pp.style.display='';pp.textContent=isOwner()?'Owner · 5 lines':(DL.ent.plan==='comp'?'Comp · '+DL.ent.lines+' lines':(DL.ent.lines||0)+' line'+(DL.ent.lines===1?'':'s')+' plan');}
   if(navigator.permissions&&navigator.permissions.query){try{var st=await navigator.permissions.query({name:'microphone'});dlEl('dl-mic').textContent=st.state==='granted'?'🎙 mic ready':(st.state==='denied'?'🎙 mic blocked — allow it in site settings':'');}catch(e){}}
   if(!DL.session)dlPill(DL.ready?'ready':'','Offline');
   dlLoadQueue();dlTodayStats();
@@ -1980,6 +2013,7 @@ async function dlEnsureDevice(){
 async function dlGo(){
   var b=dlEl('dl-go');
   if(!DL.session){ // start
+    if(DL.ent&&!DL.ent.entitled&&!isOwner()){dlRenderPaywall();return;}
     if(!DL.queue.length){dlToast('Nothing in your call list');return;}
     b.disabled=true;b.textContent='Connecting…';
     try{
@@ -2012,11 +2046,11 @@ function dlStartPolling(){if(DL.poll)clearInterval(DL.poll);DL.poll=setInterval(
 async function dlDialBatch(){
   if(!DL.session||DL.paused||DL.ending||DL.live||DL.awaiting||Object.keys(DL.inflight).length)return;
   if(!DL.queue.length){dlToast('Call list finished');dlEl('dl-lines-sub').textContent='List finished — load more or End Session';DL.paused=true;var b=dlEl('dl-go');b.textContent='Resume';b.className='dl-go';dlPill('paused','Done');if(!dlEl('dl-end-btn')){var e=document.createElement('button');e.id='dl-end-btn';e.className='dl-go stop';e.style.marginLeft='0.5rem';e.textContent='End Session';e.onclick=dlEnd;b.after(e);}return;}
-  var take=DL.queue.splice(0,DL.lines);dlRenderQueue();DL.batch++;
+  var n=DL.redialOnce?1:DL.lines;DL.redialOnce=false;var take=DL.queue.splice(0,n);dlRenderQueue();DL.batch++;
   dlEl('dl-lines-sub').textContent='Dialing '+take.length+' line'+(take.length===1?'':'s')+'…';
   dlEl('dl-card-body').innerHTML='<div style="color:var(--muted);font-size:0.78rem;padding:1.5rem 0;text-align:center">Dialing… the first person who answers lands here.</div>';
   try{
-    var r=await dlApi('dialer-dial',{sessionId:DL.session.id,lines:DL.lines,leads:take.map(function(l){return {phone:l.phone,name:l.full_name,state:l.state};})});
+    var r=await dlApi('dialer-dial',{sessionId:DL.session.id,lines:take.length,leads:take.map(function(l){return {phone:l.phone,name:l.full_name,state:l.state};})});
     (r.placed||[]).forEach(function(p){var lead=take.find(function(l){return l.phone===p.phone;})||{};DL.inflight[p.callSid]={phone:p.phone,name:p.name||lead.full_name,state:p.state,lead:lead,status:'queued',from:p.from};DL.stats.dials++;});
     (r.skipped||[]).forEach(function(s){if(!/no caller ID/.test(s.reason))dlToast('Skipped '+dlFmtPhone(s.phone)+': '+s.reason);else{dlToast(s.reason);DL.paused=true;}});
     dlRenderStats();dlRenderLines();
@@ -2033,7 +2067,7 @@ async function dlPollCalls(){
     if(c.ended_at||['completed','no-answer','busy','failed','canceled','voicemail','abandoned'].indexOf(c.status)>=0){
       delete DL.inflight[c.call_sid];
       if(DL.live&&DL.live.sid===c.call_sid){var talk=c.talk_sec||Math.round((now-DL.live.started)/1000);DL.live=null;dlStopTimer();
-        if(c.status==='voicemail'||c.status==='abandoned'||(c.answered_by&&/machine|fax/.test(c.answered_by))||talk<3){DL.stats.contacts=Math.max(0,DL.stats.contacts-1);dlEl('dl-card').classList.remove('live');dlEl('dl-card-body').innerHTML='<div style="color:var(--muted);font-size:0.78rem;padding:1.5rem 0;text-align:center">'+(c.status==='voicemail'?'Voicemail — skipped.':'Dropped — moving on.')+'</div>';dlAutoDispo(c,f);}
+        if(c.status==='voicemail'||c.status==='abandoned'||talk<3){DL.stats.contacts=Math.max(0,DL.stats.contacts-1);dlEl('dl-card').classList.remove('live');dlEl('dl-card-body').innerHTML='<div style="color:var(--muted);font-size:0.78rem;padding:1.5rem 0;text-align:center">'+(c.status==='voicemail'?'Voicemail — skipped.':'Dropped — moving on.')+'</div>';dlAutoDispo(c,f);}
         else{DL.stats.talk+=talk;DL.awaiting={sid:c.call_sid,phone:c.phone,lead:f.lead,name:f.name,state:f.state,talk:talk,recording_sid:c.recording_sid};dlShowDispo();}}
       else dlAutoDispo(c,f);
     }
@@ -2084,6 +2118,14 @@ async function dlSaveDispo(){
   }catch(e){dlEl('dl-dispo-msg').textContent=e.message;}
   btn.disabled=false;
 }
+
+async function dlRedial(){var A=DL.awaiting;if(!A||!DL.session)return;var notes=dlEl('dl-notes').value.trim();
+  try{await Promise.all([sb.from('dialer_calls').update({dispo:'Redial',notes:notes||null}).eq('call_sid',A.sid),sb.from('lead_pool').update({last_dispo:'Redial',notes:notes||undefined}).eq('phone',A.phone)]);}catch(e){}
+  var lead=Object.assign({},A.lead||{},{phone:A.phone,full_name:A.name||(A.lead&&A.lead.full_name),state:A.state});
+  DL.queue=DL.queue.filter(function(x){return x.phone!==A.phone;});DL.queue.unshift(lead);DL.redialOnce=true;dlRenderQueue();
+  DL.awaiting=null;DL.dispo=null;dlEl('dl-dispo-wrap').style.display='none';dlEl('dl-card-body').innerHTML='<div style="color:var(--muted);font-size:0.78rem;padding:1.5rem 0;text-align:center">Redialing '+escapeHtml(dlFmtPhone(A.phone))+'…</div>';
+  if(DL.paused){DL.paused=false;var b=dlEl('dl-go');b.textContent='Pause';b.className='dl-go pause';var eb=dlEl('dl-end-btn');if(eb)eb.remove();}
+  dlDialBatch();}
 function dlLogDealFor(A){try{openDealModal();var l=A.lead||{};setTimeout(function(){var f=function(id,v){var el=document.getElementById(id);if(el&&v)el.value=v;};f('d-client',A.name||l.full_name);f('d-phone',dlFmtPhone(A.phone));f('d-email',l.email);f('d-state',A.state||l.state);},50);}catch(e){}}
 function dlLogDealFromCall(){if(DL.live)dlLogDealFor(DL.live);}
 function dlOpenAppt(){if(!DL.live)return;try{openApptModal();var A=DL.live,l=A.lead||{};setTimeout(function(){var n=document.getElementById('ap-f-name'),p=document.getElementById('ap-f-phone');if(n&&!n.value)n.value=A.name||l.full_name||'';if(p&&!p.value)p.value=dlFmtPhone(A.phone);},50);}catch(e){}}
@@ -2119,6 +2161,25 @@ async function dlUploadCsv(){var f=dlEl('dl-csv').files[0],msg=dlEl('dl-csv-msg'
     msg.className='ld-msg ok';msg.textContent=mine.length+' added to your pack'+(taken?', '+taken+' belong to another agent':'')+(sold?', '+sold+' already sold':'');dlEl('dl-csv').value='';dlLoadQueue();
   }catch(e){msg.className='ld-msg err';msg.textContent=e.message;}}
 
+
+function dlRenderPaywall(){var pw=dlEl('dl-paywall'),body=dlEl('dl-dial-body'),ent=DL.ent||{},pr=ent.prices||{1:80,3:120,5:150};
+  var bc=dlEl('dl-billing-card');if(bc){bc.style.display=(ent.hasSub&&!isOwner())?'':'none';if(ent.hasSub){dlEl('dl-billing-pill').textContent=(ent.status||'active').replace('_',' ');dlEl('dl-billing-pill').className='dl-sub-pill '+(ent.entitled?'on':'');dlEl('dl-billing-sub').textContent=(ent.lines||1)+' line'+(ent.lines===1?'':'s')+' · $'+(pr[String(ent.plan)]||'—')+'/mo'+(ent.periodEnd?' · renews '+new Date(ent.periodEnd).toLocaleDateString():'');}}
+  if(ent.entitled){pw.style.display='none';body.style.display='';return;}
+  body.style.display='none';pw.style.display='';
+  var why=ent.status==='past_due'?'Your last payment didn’t go through. Update your card to keep dialing.':(ent.status==='canceled'?'Your subscription ended. Pick a plan to turn the dialer back on.':'Pick how many lines you want to dial at once. Billed monthly, cancel anytime.');
+  function plan(n,hot){return '<div class="dl-plan'+(hot?' hot':'')+'">'+(hot?'<span class="tag">Most popular</span>':'')+'<div class="ln">'+n+' line'+(n===1?'':'s')+'</div><div class="pr">$'+pr[n]+'<small>/mo</small></div><ul><li>'+(n===1?'One call at a time':n+' numbers dial at once')+'</li><li>'+(n===1?'Good for callbacks &amp; appts':n===3?'~3× the contacts per hour':'Max speed on cold packs')+'</li><li>Recording, dispo, callbacks</li></ul><button class="calc-btn" onclick="dlSubscribe('+n+')">'+(ent.hasSub?'Switch to this':'Start')+'</button></div>';}
+  pw.innerHTML='<div class="dl-pay"><h3>Surge <em style="color:var(--gold)">Dialer</em></h3><p>'+why+'</p><div class="dl-plans">'+plan(1)+plan(3,true)+plan(5)+'</div>'+(ent.hasSub?'<div style="margin-top:1rem"><button class="dl-btn" onclick="dlPortal()">Update card / manage billing</button></div>':'')+(ent.err?'<div class="ld-msg err" style="margin-top:0.8rem">'+escapeHtml(ent.err)+'</div>':'')+'</div>';}
+async function dlSubscribe(n){try{dlToast('Opening checkout…');var r=await dlApi('dialer-subscribe',{action:'checkout',plan:String(n)});if(r.url)location.href=r.url;}catch(e){dlToast(e.message);}}
+async function dlPortal(){try{var r=await dlApi('dialer-subscribe',{action:'portal'});if(r.url)location.href=r.url;}catch(e){dlToast(e.message);}}
+async function dlLoadSubs(){var el=dlEl('dl-subs-body');if(!el||!isOwner())return;try{var r=await dlApi('dialer-subscribe',{action:'roster'});var rows=r.rows||[],paid=0,comp=0;
+  el.innerHTML=rows.map(function(p){var nm=((p.first_name||'')+' '+(p.last_name||'')).trim()||p.email;var own=p.role==='owner'||p.role==='admin';var isComp=p.dialer_plan==='comp'&&p.dialer_active;if(isComp)comp++;else if(p.dialer_active)paid++;
+    var plan=own?'Owner':(isComp?'Comp · '+(p.dialer_lines||5)+' lines':(p.dialer_plan?p.dialer_plan+' line'+(p.dialer_plan==='1'?'':'s'):'—'));
+    var st=own?'<span class="dl-sub-pill on">always on</span>':(p.dialer_active?'<span class="dl-sub-pill on">'+(p.dialer_status||'active').replace('_',' ')+'</span>':'<span class="dl-sub-pill">'+(p.dialer_status||'locked').replace('_',' ')+'</span>');
+    return '<tr><td style="font-weight:600">'+escapeHtml(nm)+'<div style="font-size:0.62rem;color:var(--muted)">'+escapeHtml(p.email||'')+'</div></td><td>'+plan+'</td><td>'+st+'</td><td>'+(p.dialer_period_end&&!isComp?new Date(p.dialer_period_end).toLocaleDateString():'')+'</td><td>'+(own?'':'<label class="dl-sw"><input type="checkbox" '+(isComp?'checked':'')+' onchange="dlComp(\''+p.id+'\',this.checked)"><i></i></label>')+'</td><td style="text-align:right">'+(own?'':'<button class="dl-skip" onclick="dlSyncSub(\''+p.id+'\')">sync</button>')+'</td></tr>';}).join('');
+  dlEl('dl-subs-sum').textContent=paid+' paying · '+comp+' comp';}catch(e){el.innerHTML='<tr><td colspan="6" style="color:var(--red)">'+escapeHtml(e.message)+'</td></tr>';}}
+async function dlComp(id,on){try{await dlApi('dialer-subscribe',{action:'comp',userId:id,on:on,lines:5});dlToast(on?'Comped':'Comp removed');}catch(e){dlToast(e.message);}dlLoadSubs();}
+async function dlSyncSub(id){try{var r=await dlApi('dialer-subscribe',{action:'sync',userId:id});dlToast('Synced: '+r.status);}catch(e){dlToast(e.message);}dlLoadSubs();}
+
 // ======== OWNER: live board ========
 async function dlBoard(start){if(start){dlBoardStop();DL.boardTimer=setInterval(dlBoard,5000);}
   try{var day=new Date(new Date().setHours(0,0,0,0)).toISOString();
@@ -2149,14 +2210,14 @@ async function dlFcrExport(){var r=await sb.from('dialer_numbers').select('phone
 // ======== OWNER: compliance ========
 async function dlLoadCompliance(){
   var hs=dlEl('dc-hours_start'),he=dlEl('dc-hours_end');if(!hs.options.length){for(var h=6;h<=22;h++){var l=(h%12||12)+(h<12?'am':'pm');hs.add(new Option(l,h));he.add(new Option(l,h));}}
-  try{var c=await sb.from('dialer_config').select('*').eq('id',1).maybeSingle();var cfg=c.data||{};DL.cfg=cfg;['business_name','callback_number','max_lines','hours_start','hours_end','max_attempts_day','calls_per_number_day','record_calls','amd_enabled','abandon_message'].forEach(function(k){var el=dlEl('dc-'+k);if(el&&cfg[k]!=null)el.value=String(cfg[k]);});}catch(e){}
+  try{var c=await sb.from('dialer_config').select('*').eq('id',1).maybeSingle();var cfg=c.data||{};DL.cfg=cfg;['business_name','callback_number','max_lines','hours_start','hours_end','max_attempts_day','calls_per_number_day','record_calls','amd_enabled','abandon_message','plan_1_price','plan_3_price','plan_5_price'].forEach(function(k){var el=dlEl('dc-'+k);if(el&&cfg[k]!=null)el.value=String(cfg[k]);});}catch(e){}
   try{var res=await Promise.all([sb.from('dnc_list').select('*').order('added_at',{ascending:false}).limit(200),sb.from('dnc_list').select('phone',{count:'exact',head:true}),sb.from('dialer_compliance_log').select('*').order('created_at',{ascending:false}).limit(200)]);
     dlEl('dl-dnc-count').textContent=(res[1].count||0)+' numbers';
     dlEl('dl-dnc-body').innerHTML=(res[0].data||[]).map(function(d){return '<tr><td>'+dlFmtPhone(d.phone)+'</td><td>'+escapeHtml(d.source)+'</td><td style="color:var(--muted)">'+escapeHtml(d.note||'')+'</td><td>'+dlWhen(d.added_at)+'</td><td style="text-align:right"><button class="dl-skip" onclick="dlDncRemove(\''+d.phone+'\')">remove</button></td></tr>';}).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem">Empty.</td></tr>';
     var kinds={dnc_request:'DNC request',opt_out_sms:'STOP text',abandoned:'Abandoned call',blocked_hours:'Blocked: hours',blocked_attempts:'Blocked: attempts',blocked_dnc:'Blocked: DNC'};
     dlEl('dl-comp-body').innerHTML=(res[2].data||[]).map(function(x){return '<tr><td>'+dlWhen(x.created_at)+'</td><td>'+escapeHtml(kinds[x.kind]||x.kind)+'</td><td>'+escapeHtml(x.phone?dlFmtPhone(x.phone):'')+'</td><td style="color:var(--muted)">'+escapeHtml(x.detail||'')+'</td></tr>';}).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">Nothing logged.</td></tr>';
   }catch(e){}}
-async function dlSaveConfig(){var m=dlEl('dc-msg');m.className='ld-msg';m.textContent='Saving…';var row={};['business_name','callback_number','abandon_message'].forEach(function(k){row[k]=dlEl('dc-'+k).value.trim()||null;});['max_lines','hours_start','hours_end','max_attempts_day','calls_per_number_day'].forEach(function(k){row[k]=Number(dlEl('dc-'+k).value);});row.record_calls=dlEl('dc-record_calls').value==='true';row.amd_enabled=dlEl('dc-amd_enabled').value==='true';row.updated_at=new Date().toISOString();if(!row.business_name)row.business_name='Surge Partners';if(!row.abandon_message)delete row.abandon_message;
+async function dlSaveConfig(){var m=dlEl('dc-msg');m.className='ld-msg';m.textContent='Saving…';var row={};['business_name','callback_number','abandon_message'].forEach(function(k){row[k]=dlEl('dc-'+k).value.trim()||null;});['max_lines','hours_start','hours_end','max_attempts_day','calls_per_number_day','plan_1_price','plan_3_price','plan_5_price'].forEach(function(k){row[k]=Number(dlEl('dc-'+k).value);});row.record_calls=dlEl('dc-record_calls').value==='true';row.amd_enabled=dlEl('dc-amd_enabled').value==='true';row.updated_at=new Date().toISOString();if(!row.business_name)row.business_name='Surge Partners';if(!row.abandon_message)delete row.abandon_message;
   var r=await sb.from('dialer_config').update(row).eq('id',1);if(r.error){m.className='ld-msg err';m.textContent=r.error.message;return;}m.className='ld-msg ok';m.textContent='Saved';DL.cfg=Object.assign(DL.cfg||{},row);}
 async function dlDncAdd(){var d=dlEl('dl-dnc-phone').value.replace(/\D/g,'');if(d.length===11&&d[0]==='1')d=d.slice(1);if(d.length!==10){dlEl('dl-dnc-msg').textContent='10 digits';return;}var p='+1'+d;await sb.from('dnc_list').upsert({phone:p,source:'agent',added_by:currentUserId});await sb.from('lead_pool').update({dnc:true}).eq('phone',p);dlEl('dl-dnc-phone').value='';dlLoadCompliance();}
 async function dlDncRemove(p){if(!window.confirm('Remove '+dlFmtPhone(p)+' from DNC?'))return;await sb.from('dnc_list').delete().eq('phone',p);await sb.from('lead_pool').update({dnc:false}).eq('phone',p);dlLoadCompliance();}
