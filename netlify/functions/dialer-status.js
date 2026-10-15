@@ -38,7 +38,7 @@ exports.handler = async (event) => {
   // kind === 'call'
   const callSid = p.get('CallSid'), st = p.get('CallStatus');
   if (!callSid) return L.json(200, {});
-  const { data: c } = await db.from('dialer_calls').select('id,status,bridged_at,answered_by,session_id').eq('call_sid', callSid).maybeSingle();
+  const { data: c } = await db.from('dialer_calls').select('id,status,bridged_at,answered_by,session_id,phone').eq('call_sid', callSid).maybeSingle();
   if (!c) return L.json(200, {});
   const upd = {};
   if (st === 'ringing' && c.status === 'queued') upd.status = 'ringing';
@@ -47,6 +47,8 @@ exports.handler = async (event) => {
     upd.ended_at = now; upd.duration_sec = Number(p.get('CallDuration') || 0) || null;
     if (st === 'completed') { upd.status = (c.status === 'abandoned' || c.status === 'voicemail') ? c.status : (c.bridged_at ? 'completed' : 'completed'); if (c.bridged_at) upd.talk_sec = Math.max(0, Math.round((Date.now() - new Date(c.bridged_at).getTime()) / 1000)); }
     else upd.status = st === 'no-answer' ? 'no-answer' : st;
+    // A real attempt only if the leg wasn't dropped because another line answered first
+    if (upd.status !== 'canceled' && c.status !== 'canceled') { try { const { data: lp } = await db.from('lead_pool').select('attempts').eq('phone', c.phone).maybeSingle(); if (lp) await db.from('lead_pool').update({ attempts: (lp.attempts || 0) + 1, last_attempt_at: now }).eq('phone', c.phone); } catch (e) { } }
     // free the agent if this was the active leg
     const sid = sessionId || c.session_id;
     if (sid) { const { data: s } = await db.from('dialer_sessions').select('active_call_sid,talk_sec').eq('id', sid).maybeSingle(); if (s && s.active_call_sid === callSid) await db.from('dialer_sessions').update({ active_call_sid: null, active_phone: null, status: 'dialing', talk_sec: (s.talk_sec || 0) + (upd.talk_sec || 0), last_seen_at: now }).eq('id', sid); }
