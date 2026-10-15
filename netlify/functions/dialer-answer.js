@@ -12,15 +12,26 @@ exports.handler = async (event) => {
   const now = new Date().toISOString();
 
   if (!sessionId || !callSid) { vr.hangup(); return L.xml(vr.toString()); }
-  // Sync AMD verdict (if present) — machine → bail out immediately
-  if (answeredBy && /machine|fax/.test(answeredBy)) {
-    await db.from('dialer_calls').update({ status: 'voicemail', answered_by: answeredBy, answered_at: now }).eq('call_sid', callSid);
-    vr.hangup(); return L.xml(vr.toString());
+  const late = qs.late === '1';
+  // Sync AMD verdict: a machine/screener gets a 3-second penalty before it may claim the agent, so a
+  // real human answering on another line wins the race. (Soft mode: we never hang up on a verdict —
+  // call screeners sound exactly like voicemail.)
+  if (!late && answeredBy && /machine|fax/.test(answeredBy)) {
+    await db.from('dialer_calls').update({ answered_by: answeredBy, answered_at: now, status: 'answered' }).eq('call_sid', callSid);
+    if (answeredBy === 'fax') { vr.hangup(); return L.xml(vr.toString()); }
+    vr.pause({ length: 3 });
+    vr.redirect({ method: 'POST' }, base + '/.netlify/functions/dialer-answer?session=' + sessionId + '&late=1');
+    return L.xml(vr.toString());
   }
 
   // Atomic claim of the agent's line
   const { data: claimed } = await db.from('dialer_sessions').update({ active_call_sid: callSid, status: 'connected', last_seen_at: now })
     .eq('id', sessionId).is('active_call_sid', null).neq('status', 'ended').select('id,agent_id,identity,contacts');
+  if ((!claimed || !claimed.length) && late) {
+    // A machine/screener lost the race to a human — drop it quietly, no abandonment (nobody was there).
+    await db.from('dialer_calls').update({ status: 'voicemail', ended_at: now }).eq('call_sid', callSid);
+    vr.hangup(); return L.xml(vr.toString());
+  }
   if (!claimed || !claimed.length) {
     // Agent already talking → abandoned call. Play the required message and release.
     await db.from('dialer_calls').update({ status: 'abandoned', answered_at: now, ended_at: now }).eq('call_sid', callSid);
@@ -31,7 +42,7 @@ exports.handler = async (event) => {
     vr.hangup(); return L.xml(vr.toString());
   }
   const sess = claimed[0];
-  await db.from('dialer_calls').update({ status: 'bridged', answered_by: answeredBy || 'human', answered_at: now, bridged_at: now }).eq('call_sid', callSid);
+  await db.from('dialer_calls').update({ status: 'bridged', answered_by: answeredBy || (late ? 'machine' : 'human'), answered_at: now, bridged_at: now }).eq('call_sid', callSid);
   await db.from('dialer_sessions').update({ active_phone: (await phoneOf(db, callSid)), contacts: (sess.contacts || 0) + 1 }).eq('id', sessionId);
 
   // Per-call recording on the lead leg (dual channel: agent / lead)
