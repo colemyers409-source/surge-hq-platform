@@ -2053,7 +2053,7 @@ async function dlDialBatch(){
   dlEl('dl-card-body').innerHTML='<div style="color:var(--muted);font-size:0.78rem;padding:1.5rem 0;text-align:center">Dialing… the first person who answers lands here.</div>';
   try{
     var r=await dlApi('dialer-dial',{sessionId:DL.session.id,lines:take.length,leads:take.map(function(l){return {phone:l.phone,name:l.full_name,state:l.state};})});
-    (r.placed||[]).forEach(function(p){var lead=take.find(function(l){return l.phone===p.phone;})||{};DL.inflight[p.callSid]={phone:p.phone,name:p.name||lead.full_name,state:p.state,lead:lead,status:'queued',from:p.from};DL.stats.dials++;});
+    (r.placed||[]).forEach(function(p){var lead=take.find(function(l){return l.phone===p.phone;})||{};DL.inflight[p.callSid]={phone:p.phone,name:p.name||lead.full_name,state:p.state,lead:lead,status:'queued',from:p.from,placedAt:Date.now()};DL.stats.dials++;});
     (r.skipped||[]).forEach(function(s){if(!/no caller ID/.test(s.reason))dlToast('Skipped '+dlFmtPhone(s.phone)+': '+s.reason);else{dlToast(s.reason);DL.paused=true;}});
     dlRenderStats();dlRenderLines();
     if(!(r.placed||[]).length){if(r.skipped&&r.skipped.some(function(s){return /no caller ID/.test(s.reason);})){DL.paused=true;dlPill('err','No numbers');return;}setTimeout(dlDialBatch,400);}
@@ -2061,6 +2061,11 @@ async function dlDialBatch(){
 }
 async function dlPollCalls(){
   if(!DL.session)return;var sids=Object.keys(DL.inflight);if(!sids.length&&!DL.live)return;
+  // Watchdog: a leg that never left dialing/ringing after 50s is stuck at Twilio — kill it and requeue the lead
+  var nowT=Date.now(),stuck=sids.filter(function(k){var f=DL.inflight[k];return (f.status==='queued'||f.status==='ringing')&&f.placedAt&&nowT-f.placedAt>50000;});
+  if(stuck.length){stuck.forEach(function(k){var f=DL.inflight[k];delete DL.inflight[k];var lead=Object.assign({},f.lead||{},{phone:f.phone,full_name:f.name||(f.lead&&f.lead.full_name),state:f.state});if(!DL.queue.some(function(x){return x.phone===f.phone;}))DL.queue.unshift(lead);});dlRenderQueue();dlToast(stuck.length+' stuck line'+(stuck.length===1?'':'s')+' reset');
+    try{for(var si=0;si<stuck.length;si++){await dlApi('dialer-hangup',{sessionId:DL.session.id,callSid:stuck[si]});}await sb.from('dialer_calls').update({status:'failed',ended_at:new Date().toISOString()}).in('call_sid',stuck).is('ended_at',null);}catch(e){}
+    sids=Object.keys(DL.inflight);}
   var r=await sb.from('dialer_calls').select('call_sid,status,answered_by,bridged_at,ended_at,talk_sec,phone,recording_sid').eq('session_id',DL.session.id).in('call_sid',sids.length?sids:[DL.live&&DL.live.sid||'x']);
   if(r.error||!r.data)return;
   var now=Date.now();
@@ -2071,6 +2076,7 @@ async function dlPollCalls(){
       if(DL.live&&DL.live.sid===c.call_sid){var talk=c.talk_sec||Math.round((now-DL.live.started)/1000);DL.live=null;dlStopTimer();
         if(c.status==='voicemail'||c.status==='abandoned'||talk<3){DL.stats.contacts=Math.max(0,DL.stats.contacts-1);dlEl('dl-card').classList.remove('live');dlEl('dl-card-body').innerHTML='<div style="color:var(--muted);font-size:0.78rem;padding:1.5rem 0;text-align:center">'+(c.status==='voicemail'?'Voicemail — skipped.':'Dropped — moving on.')+'</div>';dlAutoDispo(c,f);}
         else{DL.stats.talk+=talk;DL.awaiting={sid:c.call_sid,phone:c.phone,lead:f.lead,name:f.name,state:f.state,talk:talk,recording_sid:c.recording_sid};dlShowDispo();}}
+      else if(c.status==='canceled'){var lead=Object.assign({},f.lead||{},{phone:f.phone,full_name:f.name||(f.lead&&f.lead.full_name),state:f.state});if(!DL.queue.some(function(x){return x.phone===f.phone;}))DL.queue.unshift(lead);DL.stats.dials=Math.max(0,DL.stats.dials-1);dlRenderQueue();}
       else dlAutoDispo(c,f);
     }
   });
