@@ -11,7 +11,14 @@ exports.handler = async (event) => {
   try {
     if (action === 'status') {
       const ent = await L.entitled(db, me); const cfg = await L.config(db);
-      return L.json(200, { entitled: ent.ok, lines: ent.lines, plan: ent.plan, status: ent.status || (me.dialer && me.dialer.status) || null, periodEnd: me.dialer && me.dialer.periodEnd, prices: { 1: Number(cfg.plan_1_price || 80), 3: Number(cfg.plan_3_price || 120), 5: Number(cfg.plan_5_price || 150) }, hasSub: !!(me.dialer && me.dialer.sub) });
+      return L.json(200, { entitled: ent.ok, lines: ent.lines, plan: ent.plan, status: ent.status || (me.dialer && me.dialer.status) || null, periodEnd: me.dialer && me.dialer.periodEnd, prices: { 1: Number(cfg.plan_1_price || 80), 3: Number(cfg.plan_3_price || 120), 5: Number(cfg.plan_5_price || 150) }, hasSub: !!(me.dialer && me.dialer.sub), codeEnabled: !!(cfg.access_code && String(cfg.access_code).trim()) });
+    }
+    if (action === 'code') {
+      const cfg = await L.config(db); const want = String(cfg.access_code || '').trim();
+      if (!want) return L.json(400, { error: 'Access codes are turned off' });
+      if (String(body.code || '').trim() !== want) return L.json(403, { error: 'Wrong code' });
+      await db.from('profiles').update({ dialer_active: true, dialer_plan: 'comp', dialer_lines: Number(cfg.access_code_lines || 5), dialer_status: 'comp', dialer_period_end: null }).eq('id', me.id);
+      return L.json(200, { ok: true, lines: Number(cfg.access_code_lines || 5) });
     }
     if (!process.env.STRIPE_SECRET_KEY) return L.json(503, { error: 'Billing is not switched on yet (STRIPE_SECRET_KEY missing).' });
 
