@@ -23,9 +23,10 @@ async function auth(event) {
   const db = sb();
   const { data, error } = await db.auth.getUser(token);
   if (error || !data || !data.user) return null;
-  const { data: p } = await db.from('profiles').select('id,first_name,last_name,email,role,blocked,twilio_number').eq('id', data.user.id).maybeSingle();
+  const { data: p } = await db.from('profiles').select('id,first_name,last_name,email,role,blocked,twilio_number,dialer_active,dialer_plan,dialer_lines,dialer_customer_id,dialer_sub_id,dialer_period_end,dialer_status').eq('id', data.user.id).maybeSingle();
   if (!p || p.blocked) return null;
-  return { id: data.user.id, email: data.user.email, name: ((p.first_name || '') + ' ' + (p.last_name || '')).trim() || data.user.email, role: p.role || 'agent', twilio_number: p.twilio_number, isOwner: p.role === 'owner' || p.role === 'admin' };
+  return { id: data.user.id, email: data.user.email, name: ((p.first_name || '') + ' ' + (p.last_name || '')).trim() || data.user.email, role: p.role || 'agent', twilio_number: p.twilio_number, isOwner: p.role === 'owner' || p.role === 'admin',
+    dialer: { active: !!p.dialer_active, plan: p.dialer_plan, lines: p.dialer_lines, customer: p.dialer_customer_id, sub: p.dialer_sub_id, periodEnd: p.dialer_period_end, status: p.dialer_status } };
 }
 
 async function settings(db) {
@@ -86,4 +87,36 @@ async function pickFrom(db, cfg, agentId, leadPhone) {
   return pick.phone;
 }
 
-module.exports = { CORS, json, xml, sb, tw, baseUrl, auth, settings, setSetting, config, e164, identityFor, userFromIdentity, tzFor, canCallNow, pickFrom, localHour };
+
+// ---- Stripe helpers (form-encoded REST, no SDK) ----
+function stripeForm(obj, prefix, out = []) {
+  for (const [k, v] of Object.entries(obj)) { if (v === undefined || v === null) continue; const key = prefix ? `${prefix}[${k}]` : k; if (typeof v === 'object') stripeForm(v, key, out); else out.push(encodeURIComponent(key) + '=' + encodeURIComponent(String(v))); }
+  return out.join('&');
+}
+async function stripe(method, path, params) {
+  const r = await fetch('https://api.stripe.com/v1' + path, { method, headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: method === 'GET' ? undefined : stripeForm(params || {}) });
+  const j = await r.json(); if (!r.ok) throw new Error((j.error && j.error.message) || ('Stripe ' + r.status)); return j;
+}
+const PLAN_LINES = { '1': 1, '3': 3, '5': 5, comp: 5 };
+// Apply a Stripe subscription object to the agent's profile.
+async function applySubscription(db, userId, sub) {
+  const active = ['active', 'trialing', 'past_due'].includes(sub.status);
+  const plan = (sub.metadata && sub.metadata.plan) || null;
+  await db.from('profiles').update({ dialer_active: active, dialer_status: sub.status, dialer_sub_id: sub.id, dialer_customer_id: typeof sub.customer === 'string' ? sub.customer : (sub.customer && sub.customer.id), dialer_plan: plan, dialer_lines: PLAN_LINES[plan] || 1, dialer_period_end: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null }).eq('id', userId);
+  return active;
+}
+// Is this agent allowed to dial right now? Owners/admins and comps always; subscribers while Stripe says so.
+// If the stored period has lapsed, re-check Stripe once (covers missed webhooks).
+async function entitled(db, me) {
+  if (me.isOwner) return { ok: true, lines: 5, plan: 'owner' };
+  const d = me.dialer || {};
+  if (d.plan === 'comp' && d.active) return { ok: true, lines: d.lines || 5, plan: 'comp' };
+  const lapsed = !d.periodEnd || new Date(d.periodEnd).getTime() < Date.now() - 36 * 3600 * 1000;
+  if (d.sub && (lapsed || !d.active) && process.env.STRIPE_SECRET_KEY) {
+    try { const sub = await stripe('GET', '/subscriptions/' + d.sub); const ok = await applySubscription(db, me.id, sub); return { ok, lines: PLAN_LINES[sub.metadata && sub.metadata.plan] || 1, plan: sub.metadata && sub.metadata.plan, status: sub.status }; } catch (e) { }
+  }
+  if (d.active && !lapsed) return { ok: true, lines: d.lines || 1, plan: d.plan, status: d.status };
+  return { ok: false, lines: 0, plan: d.plan, status: d.status };
+}
+
+module.exports = { stripe, stripeForm, applySubscription, entitled, PLAN_LINES, CORS, json, xml, sb, tw, baseUrl, auth, settings, setSetting, config, e164, identityFor, userFromIdentity, tzFor, canCallNow, pickFrom, localHour };
