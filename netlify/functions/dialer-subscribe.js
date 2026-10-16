@@ -11,7 +11,12 @@ exports.handler = async (event) => {
   try {
     if (action === 'status') {
       const ent = await L.entitled(db, me); const cfg = await L.config(db);
-      return L.json(200, { entitled: ent.ok, lines: ent.lines, plan: ent.plan, status: ent.status || (me.dialer && me.dialer.status) || null, periodEnd: me.dialer && me.dialer.periodEnd, prices: { 1: Number(cfg.plan_1_price || 80), 3: Number(cfg.plan_3_price || 120), 5: Number(cfg.plan_5_price || 150) }, hasSub: !!(me.dialer && me.dialer.sub), codeEnabled: !!(cfg.access_code && String(cfg.access_code).trim()) });
+      return L.json(200, { entitled: ent.ok, lines: ent.lines, plan: ent.plan, status: ent.status || (me.dialer && me.dialer.status) || null, periodEnd: me.dialer && me.dialer.periodEnd, prices: { 1: Number(cfg.plan_1_price || 80), 3: Number(cfg.plan_3_price || 120), 5: Number(cfg.plan_5_price || 150) }, hasSub: !!(me.dialer && me.dialer.sub), abandonMessage: me.dialer && me.dialer.abandonMessage || null, defaultMessage: cfg.abandon_message || null, codeEnabled: !!(cfg.access_code && String(cfg.access_code).trim()) });
+    }
+    if (action === 'message') {
+      const msg = String(body.message || '').replace(/\s+/g, ' ').trim().slice(0, 300);
+      await db.from('profiles').update({ dialer_abandon_message: msg || null }).eq('id', me.id);
+      return L.json(200, { ok: true, message: msg });
     }
     if (action === 'code') {
       const cfg = await L.config(db); const want = String(cfg.access_code || '').trim();
