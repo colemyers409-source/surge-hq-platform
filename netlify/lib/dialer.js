@@ -23,10 +23,10 @@ async function auth(event) {
   const db = sb();
   const { data, error } = await db.auth.getUser(token);
   if (error || !data || !data.user) return null;
-  const { data: p } = await db.from('profiles').select('id,first_name,last_name,email,role,blocked,twilio_number,dialer_active,dialer_plan,dialer_lines,dialer_customer_id,dialer_sub_id,dialer_period_end,dialer_status').eq('id', data.user.id).maybeSingle();
+  const { data: p } = await db.from('profiles').select('id,first_name,last_name,email,role,blocked,twilio_number,dialer_active,dialer_plan,dialer_lines,dialer_customer_id,dialer_sub_id,dialer_period_end,dialer_status,dialer_abandon_message').eq('id', data.user.id).maybeSingle();
   if (!p || p.blocked) return null;
   return { id: data.user.id, email: data.user.email, name: ((p.first_name || '') + ' ' + (p.last_name || '')).trim() || data.user.email, role: p.role || 'agent', twilio_number: p.twilio_number, isOwner: p.role === 'owner' || p.role === 'admin',
-    dialer: { active: !!p.dialer_active, plan: p.dialer_plan, lines: p.dialer_lines, customer: p.dialer_customer_id, sub: p.dialer_sub_id, periodEnd: p.dialer_period_end, status: p.dialer_status } };
+    dialer: { active: !!p.dialer_active, plan: p.dialer_plan, lines: p.dialer_lines, customer: p.dialer_customer_id, sub: p.dialer_sub_id, periodEnd: p.dialer_period_end, status: p.dialer_status, abandonMessage: p.dialer_abandon_message } };
 }
 
 async function settings(db) {
