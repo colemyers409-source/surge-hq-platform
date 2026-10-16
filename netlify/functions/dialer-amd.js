@@ -16,7 +16,7 @@ exports.handler = async (event) => {
       const { data: s } = await db.from('dialer_sessions').select('active_call_sid,contacts').eq('id', sessionId).maybeSingle();
       if (s && s.active_call_sid === callSid) await db.from('dialer_sessions').update({ active_call_sid: null, active_phone: null, status: 'dialing', contacts: Math.max(0, (s.contacts || 1) - 1), last_seen_at: now }).eq('id', sessionId);
     }
-    { try { await L.tw().calls(callSid).update({ status: 'completed' }); } catch (e) { } }
+    try { await L.tw().calls(callSid).update({ status: 'completed' }); } catch (e) { }
   } else {
     await db.from('dialer_calls').update({ answered_by: answeredBy }).eq('call_sid', callSid);
   }
