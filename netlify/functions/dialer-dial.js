@@ -55,7 +55,7 @@ exports.handler = async (event) => {
         statusCallback: base + '/.netlify/functions/dialer-status' + q, statusCallbackMethod: 'POST',
         statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed']
       };
-      if (cfg.amd_enabled !== false) { params.machineDetection = 'Enable'; params.machineDetectionTimeout = 5; params.machineDetectionSpeechThreshold = 2000; params.machineDetectionSpeechEndThreshold = 1000; params.machineDetectionSilenceTimeout = 3000; }
+      if (cfg.amd_enabled !== false) { params.machineDetection = 'Enable'; params.asyncAmd = 'true'; params.asyncAmdStatusCallback = base + '/.netlify/functions/dialer-amd' + q; params.asyncAmdStatusCallbackMethod = 'POST'; params.machineDetectionTimeout = 8; }
       const call = await client.calls.create(params);
       await db.from('dialer_calls').insert({ session_id: sessionId, agent_id: me.id, call_sid: call.sid, phone, lead_name: lead.name || lp.full_name || null, lead_state: state || null, from_number: from, status: 'queued' });
       await db.from('lead_pool').upsert({ phone, agent_id: lp.agent_id || me.id, full_name: lp.full_name || lead.name || null, state: lp.state || state || null, tz: L.tzFor(phone, state) }, { onConflict: 'phone' });
