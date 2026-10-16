@@ -1116,6 +1116,13 @@ tr:hover td { background: rgba(255,255,255,0.01); }
       <div class="table-section"><div class="table-header"><div class="table-title">Lines</div><span style="font-size:0.65rem;color:var(--muted)" id="dl-lines-sub">Idle</span></div>
         <div style="padding:0.75rem 1rem"><div class="dl-lines" id="dl-lines"><div style="color:var(--muted);font-size:0.72rem">No calls in flight.</div></div></div>
       </div>
+      <div class="table-section"><div class="table-header"><div class="table-title">My Callback Message</div><span style="font-size:0.65rem;color:var(--muted)">Played to anyone who answers while you're on another line</span></div>
+        <div style="padding:0.9rem 1rem">
+          <textarea class="dl-notes" id="dl-abandon-msg" style="margin-top:0;min-height:72px" placeholder="Hi, this is Cole with Surge Partners returning your request for life insurance information. Sorry I missed you — call me back directly at 479-555-0123."></textarea>
+          <div style="display:flex;gap:0.6rem;align-items:center;margin-top:0.6rem;flex-wrap:wrap"><button class="dl-btn gold" onclick="dlSaveMsg()">Save message</button><button class="dl-btn" onclick="dlPreviewMsg()">Hear it</button><span class="ld-msg" id="dl-abandon-status"></span></div>
+          <div style="font-size:0.66rem;color:var(--muted);margin-top:0.5rem">Say who you are, the company, and the number to call back. Keep it short — no pitch (that's the rule for these messages).</div>
+        </div>
+      </div>
     </div>
 
     <div>
@@ -1967,6 +1974,7 @@ async function loadDialer(){
   var q=new URLSearchParams(location.search);if(q.get('sub')==='ok'&&!DL.ent.entitled){dlToast('Payment received — unlocking…');for(var i=0;i<6&&!DL.ent.entitled;i++){await new Promise(function(r){setTimeout(r,2500);});try{DL.ent=await dlApi('dialer-subscribe',{action:'status'});}catch(e){}}}
   if(q.get('sub'))history.replaceState({},'',location.pathname+'?page=dialer');
   dlRenderPaywall();
+  var am=dlEl('dl-abandon-msg');if(am&&!am.value){am.value=DL.ent.abandonMessage||'';if(!DL.ent.abandonMessage&&DL.ent.defaultMessage)am.placeholder=DL.ent.defaultMessage;}
   var max=Math.max(1,Math.min(5,DL.cfg.max_lines||3,DL.ent.lines||5));document.querySelectorAll('#dl-lines-seg button').forEach(function(b){b.style.display=Number(b.dataset.n)<=max?'':'none';});if(DL.lines>max)dlSetLines(max);
   var pp=dlEl('dl-plan-pill');if(pp){pp.style.display='';pp.textContent=isOwner()?'Owner · 5 lines':(DL.ent.plan==='comp'?'Comp · '+DL.ent.lines+' lines':(DL.ent.lines||0)+' line'+(DL.ent.lines===1?'':'s')+' plan');}
   if(navigator.permissions&&navigator.permissions.query){try{var st=await navigator.permissions.query({name:'microphone'});dlEl('dl-mic').textContent=st.state==='granted'?'🎙 mic ready':(st.state==='denied'?'🎙 mic blocked — allow it in site settings':'');}catch(e){}}
@@ -2107,7 +2115,7 @@ async function dlPollCalls(){
   if(!Object.keys(DL.inflight).length&&!DL.live&&!DL.awaiting)dlDialBatch();
 }
 function dlRenderLines(){var el=dlEl('dl-lines');var keys=Object.keys(DL.inflight);if(!keys.length){el.innerHTML='<div style="color:var(--muted);font-size:0.72rem">'+(DL.live?'On a call.':'No calls in flight.')+'</div>';return;}
-  var lbl={queued:'Dialing',ringing:'Ringing',answered:'Answered',bridged:'Connected',voicemail:'Voicemail','no-answer':'No answer',busy:'Busy',failed:'Failed',canceled:'Dropped',abandoned:'Abandoned',completed:'Done'};
+  var lbl={queued:'Dialing',ringing:'Ringing',answered:'Connecting\u2026',bridged:'Connected',voicemail:'Voicemail','no-answer':'No answer',busy:'Busy',failed:'Failed',canceled:'Dropped',abandoned:'Abandoned',completed:'Done'};
   el.innerHTML=keys.map(function(k){var f=DL.inflight[k];return '<div class="dl-line '+f.status+'"><span class="nm">'+escapeHtml(f.name||'—')+'</span><span class="ph">'+escapeHtml(dlFmtPhone(f.phone))+(f.state?' · '+escapeHtml(f.state):'')+'</span><span class="st">'+(lbl[f.status]||f.status)+'</span></div>';}).join('');
   if(!DL.live)dlEl('dl-lines-sub').textContent=keys.length+' line'+(keys.length===1?'':'s')+' in flight';}
 function dlRenderStats(){var s=DL.stats;dlEl('dl-s-dials').textContent=s.dials;dlEl('dl-s-contacts').textContent=s.contacts;dlEl('dl-s-rate').textContent=(s.dials?Math.round(s.contacts/s.dials*100):0)+'%';dlEl('dl-s-talk').textContent=dlFmtDur(s.talk);dlEl('dl-s-appts').textContent=s.appts;dlEl('dl-s-sold').textContent=s.sold;}
@@ -2203,6 +2211,9 @@ function dlRenderPaywall(){var pw=dlEl('dl-paywall'),body=dlEl('dl-dial-body'),e
   var codeBox=ent.codeEnabled?'<div style="max-width:360px;margin:0 auto 1.4rem;display:flex;gap:0.5rem;align-items:center"><input class="calc-input" id="dl-code" placeholder="Access code" inputmode="numeric" autocomplete="off" style="flex:1;text-align:center;letter-spacing:0.3em;font-size:1rem" onkeydown="if(event.key===\'Enter\')dlUseCode()"><button class="calc-btn" onclick="dlUseCode()">Unlock</button></div><div id="dl-code-msg" class="ld-msg" style="margin:-0.8rem 0 1rem"></div>':'';
   pw.innerHTML='<div class="dl-pay"><h3>Surge <em style="color:var(--gold)">Dialer</em></h3><p>'+(ent.codeEnabled?'Have an access code from Cole? Enter it below. Otherwise pick a plan.':why)+'</p>'+codeBox+'<div class="dl-plans">'+plan(1)+plan(3,true)+plan(5)+'</div>'+(ent.hasSub?'<div style="margin-top:1rem"><button class="dl-btn" onclick="dlPortal()">Update card / manage billing</button></div>':'')+(ent.err?'<div class="ld-msg err" style="margin-top:0.8rem">'+escapeHtml(ent.err)+'</div>':'')+'</div>';}
 async function dlUseCode(){var m=dlEl('dl-code-msg'),v=(dlEl('dl-code')||{}).value||'';if(!v.trim()){m.textContent='Enter the code';return;}m.className='ld-msg';m.textContent='Checking\u2026';try{await dlApi('dialer-subscribe',{action:'code',code:v.trim()});dlToast('Unlocked \ud83d\udd13');DL.ent=await dlApi('dialer-subscribe',{action:'status'});dlRenderPaywall();var max=Math.max(1,Math.min(5,(DL.cfg&&DL.cfg.max_lines)||5,DL.ent.lines||5));document.querySelectorAll('#dl-lines-seg button').forEach(function(b){b.style.display=Number(b.dataset.n)<=max?'':'none';});var pp=dlEl('dl-plan-pill');if(pp){pp.style.display='';pp.textContent='Comp \u00b7 '+DL.ent.lines+' lines';}}catch(e){m.className='ld-msg err';m.textContent=e.message;}}
+
+async function dlSaveMsg(){var el=dlEl('dl-abandon-msg'),st=dlEl('dl-abandon-status');st.className='ld-msg';st.textContent='Saving\u2026';try{var r=await dlApi('dialer-subscribe',{action:'message',message:el.value});DL.ent=Object.assign(DL.ent||{},{abandonMessage:r.message||null});st.className='ld-msg ok';st.textContent=r.message?'Saved':'Cleared \u2014 using the agency default';}catch(e){st.className='ld-msg err';st.textContent=e.message;}}
+function dlPreviewMsg(){var t=(dlEl('dl-abandon-msg').value||'').trim()||(DL.ent&&DL.ent.defaultMessage)||'';if(!t){dlToast('Nothing to play');return;}try{window.speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.rate=0.95;window.speechSynthesis.speak(u);}catch(e){dlToast('Preview not supported here');}}
 async function dlSubscribe(n){try{dlToast('Opening checkout…');var r=await dlApi('dialer-subscribe',{action:'checkout',plan:String(n)});if(r.url)location.href=r.url;}catch(e){dlToast(e.message);}}
 async function dlPortal(){try{var r=await dlApi('dialer-subscribe',{action:'portal'});if(r.url)location.href=r.url;}catch(e){dlToast(e.message);}}
 async function dlLoadSubs(){var el=dlEl('dl-subs-body');if(!el||!isOwner())return;try{var r=await dlApi('dialer-subscribe',{action:'roster'});var rows=r.rows||[],paid=0,comp=0;
